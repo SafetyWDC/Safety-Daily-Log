@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Safety Checklist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- PDF Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .tab-active {
+            border-bottom-color: #3b82f6;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        .form-input, .form-select, .form-textarea {
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        .btn-secondary {
+            background-color: #10b981;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #059669;
+        }
+        .btn-gray {
+            background-color: #6b7280;
+            color: white;
+        }
+        .btn-gray:hover {
+            background-color: #4b5563;
+        }
+        .btn-purple {
+            background-color: #8b5cf6;
+            color: white;
+        }
+        .btn-purple:hover {
+            background-color: #7c3aed;
+        }
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            padding: 0.5rem 1rem;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        .headcount-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        .task-item {
+            display: grid;
+            grid-template-columns: 1fr;
+            md:grid-template-columns: 2fr 1fr 2fr;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+         @media (min-width: 768px) {
+            .task-item {
+                grid-template-columns: 2fr 1fr 2fr;
+            }
+        }
+        .observation-item {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .toggle-dot {
+            transition: transform .2s ease-in-out;
+        }
+        .equipment-toggle:checked ~ .toggle-bg {
+            background-color: #3b82f6;
+        }
+        .equipment-toggle:checked ~ .toggle-dot {
+            transform: translateX(100%);
+        }
+        .image-preview {
+            max-width: 100px;
+            max-height: 100px;
+            margin-top: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Smart Safety Checklist</h1>
+            <p class="text-md text-gray-500">CSO Daily Log for Whistler Projects</p>
+        </header>
+
+        <!-- General Information Card -->
+        <div class="card">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="checklistDate" class="block text-sm font-medium text-gray-700 mb-1">Checklist Date:</label>
+                    <input type="date" id="checklistDate" name="checklistDate" class="form-input">
+                </div>
+                <div>
+                    <label for="csoName" class="block text-sm font-medium text-gray-700 mb-1">CSO Name:</label>
+                    <input type="text" id="csoName" name="csoName" class="form-input" placeholder="Enter your name">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="mb-6 border-b border-gray-200">
+            <nav class="flex -mb-px space-x-6">
+                <button id="tab-morning" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none tab-active">Morning Checklist</button>
+                <button id="tab-afternoon" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none">Afternoon Checklist</button>
+            </nav>
+        </div>
+
+        <!-- Morning Checklist Content -->
+        <div id="content-morning">
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Site Conditions</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="waterUse" class="block text-sm font-medium text-gray-700 mb-1">Water Use</label>
+                        <select id="waterUse" name="waterUse" class="form-select">
+                            <option>L1</option>
+                            <option>L2</option>
+                            <option>L3</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="fireDanger" class="block text-sm font-medium text-gray-700 mb-1">Fire Danger</label>
+                        <select id="fireDanger" name="fireDanger" class="form-select">
+                            <option>Low</option>
+                            <option>Moderate</option>
+                            <option>High</option>
+                            <option>Extreme</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4 p-4 rounded-lg bg-gray-50">
+                    <p id="hotwork-status" class="text-lg font-semibold text-center"></p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Site Headcount: 1475 Mount Fee Road</h2>
+                <div class="headcount-grid" id="headcount-1475">
+                    <!-- Headcount inputs will be dynamically generated here -->
+                </div>
+                <div class="text-right mt-4 font-bold text-lg text-gray-800">1475 Total Headcount: <span id="total-1475">0</span></div>
+            </div>
+
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Site Headcount: 1600 Mount Fee Road</h2>
+                <div class="headcount-grid" id="headcount-1600">
+                     <!-- Headcount inputs will be dynamically generated here -->
+                </div>
+                <div class="text-right mt-4 font-bold text-lg text-gray-800">1600 Total Headcount: <span id="total-1600">0</span></div>
+            </div>
+        </div>
+
+        <!-- Afternoon Checklist Content -->
+        <div id="content-afternoon" class="hidden">
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Afternoon Tasks & Observations</h2>
+                <div id="afternoon-tasks" class="space-y-4">
+                    <!-- Afternoon tasks will be generated here -->
+                </div>
+                <div class="mt-6 border-t pt-4">
+                    <label class="block text-lg font-semibold text-gray-700 mb-2">Additional Observations</label>
+                    <div id="additional-observations-container">
+                        <!-- Dynamic observations will be added here -->
+                    </div>
+                    <button id="add-observation-btn" type="button" class="btn btn-primary mt-2">Add Observation</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-8">
+             <button id="generateFullReport" class="btn btn-purple w-full">Generate Full Report</button>
+        </div>
+
+        <!-- Report Output -->
+        <div id="report-output" class="card mt-8 hidden">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Generated Report</h2>
+            <div id="report-content" class="bg-gray-50 p-4 rounded-lg whitespace-pre-wrap text-sm text-gray-700"></div>
+            <div class="flex flex-col md:flex-row gap-4 mt-4">
+                <button id="exportPdf" class="btn btn-primary flex-1">Exportar a PDF</button>
+                <button id="copyReport" class="btn btn-gray flex-1">Copiar Reporte</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- DATA DEFINITIONS ---
+            const headcountTrades1475 = [
+                'WDC', 'Labour', 'Siding', 'Plumber', 'Electricians', 'Roofers', 
+                'Drywall', 'Fire Protection', 'Windows', 'HVAC', 
+                'Masonry', 'Painters', 'Finishers', 'Insulation', 'Flooring', 'Exterior Painting', 'Railing', 
+                'Landscaping', 'Elevators', 'Other'
+            ];
+
+            const headcountTrades1600 = [
+                'Excavation', 'Reinforcing', 'Forming', 'Plumber', 'Masonry', 'Framers', 'Electrician', 'Other'
+            ];
+
+            const afternoonTasks = [
+                { group: 'Crane', tasks: [
+                    { name: 'Crane Daily Inspection', type: 'inspector', inspectors: ['Noah C.', 'Eric J.', 'Miguel M.'] }, 
+                    { name: 'Rigging Daily Inspection', type: 'inspector', inspectors: ['Noah C.', 'Eric J.', 'Miguel M.'] },
+                    { name: 'Overlapping Procedure', type: 'multiselect', options: ['Jensen Construction', 'Corona Excavations', 'Blacktail Reinforcing', 'Astra Concrete', 'Cardinal Concrete', 'Corridor Concrete'] }
+                ]},
+                { group: 'Mobile Equipment (1475 & 1600)', tasks: [
+                    { name: 'Lemyre Boom Lift (Green) Daily Inspection', type: 'inspector', inspectors: ['Daniel-alexandre A', 'Serhii D', 'Austin W', 'Terrence', 'Shayne L.', 'Dave Santerre'] },
+                    { name: 'Lemyre Boom Lift (Blue) Daily Inspection', type: 'inspector', inspectors: ['Daniel-alexandre A', 'Serhii D', 'Austin W', 'Terrence', 'Shayne L.', 'Dave Santerre'] },
+                    { name: 'Lemyre Boom Lift (Orange) Daily Inspection', type: 'inspector', inspectors: ['Daniel-alexandre A', 'Serhii D', 'Austin W', 'Terrence', 'Shayne L.', 'Dave Santerre'] },
+                    { name: 'WDC Telehandler Daily Inspection', type: 'inspector', inspectors: ['Dan M.', 'Daniel-A. A.', 'Austin W.', 'Jordan W.', 'Dylan', 'Dan E.', 'Shayne L.'] },
+                    { name: 'JENSEN Telehandler Daily Inspection', type: 'inspector', inspectors: ['Noah C.', 'Eric J.', 'Miguel M.'] },
+                    { name: 'JENSEN Magni Rotatic telehandler Daily inspection', type: 'inspector', inspectors: ['Noah C.', 'Eric J.', 'Miguel M.'] },
+                    { name: 'Painter Boomlift Blue Daily Inspection', type: 'inspector', inspectors: ['Mathieu L.', 'Daniel-alexandre A', 'Serhii D', 'Austin W', 'Terrence', 'Shayne L.', 'Dave Santerre'] }
+                ]},
+                { group: 'Site Inspections', tasks: [
+                    { name: 'Safety Walk 1475', type: 'single_checkbox_walk' },
+                    { name: 'Safety Walk 1600', type: 'single_checkbox_walk' },
+                    { name: 'Weekly Safety Site Inspection 1475', type: 'single_checkbox_walk' },
+                    { name: 'Weekly Safety Site Inspection 1600', type: 'single_checkbox_walk' }
+                ]},
+                { group: 'Safety Meetings', tasks: ['Weekly Safety Meeting (Tuesdays)'] },
+                { group: 'Work Permits', tasks: ['Silica Dust Exposure Plan', 'Hot Work Permit', 'Fall Protection Plan', 'Critical Lift Plan', 'Confined Space Entry Permit'], default: 'N/A' },
+                { group: 'Site Incidents', tasks: ['First Aid', 'Near Miss', 'Incident Investigation Reports', 'Claim Management'], default: 'N/A' },
+                { group: 'Orientations', tasks: ['Young Worker Orientation', 'New Worker Orientation'], default: 'N/A' },
+                { group: 'Weekend Work', tasks: ['Working on Weekend'], default: 'N/A' }
+            ];
+
+            // --- UI ELEMENT REFERENCES ---
+            const checklistDate = document.getElementById('checklistDate');
+            const csoName = document.getElementById('csoName');
+            const waterUse = document.getElementById('waterUse');
+            const fireDanger = document.getElementById('fireDanger');
+            const hotworkStatus = document.getElementById('hotwork-status');
+            const tabMorning = document.getElementById('tab-morning');
+            const tabAfternoon = document.getElementById('tab-afternoon');
+            const contentMorning = document.getElementById('content-morning');
+            const contentAfternoon = document.getElementById('content-afternoon');
+            const headcountContainer1475 = document.getElementById('headcount-1475');
+            const headcountContainer1600 = document.getElementById('headcount-1600');
+            const total1475 = document.getElementById('total-1475');
+            const total1600 = document.getElementById('total-1600');
+            const afternoonTasksContainer = document.getElementById('afternoon-tasks');
+            const generateFullReportBtn = document.getElementById('generateFullReport');
+            const reportOutput = document.getElementById('report-output');
+            const reportContent = document.getElementById('report-content');
+            const copyBtn = document.getElementById('copyReport');
+            const exportPdfBtn = document.getElementById('exportPdf');
+            const addObservationBtn = document.getElementById('add-observation-btn');
+            const observationsContainer = document.getElementById('additional-observations-container');
+
+            // --- DYNAMIC UI GENERATION ---
+
+            function createInput(trade, site) {
+                const id = `hc-${site}-${trade.toLowerCase().replace(/ /g, '-')}`;
+                if (trade === 'Other') {
+                    return `
+                        <div class="col-span-1 md:col-span-2">
+                            <label for="${id}-count" class="block text-sm font-medium text-gray-700 mb-1">Other</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="${id}-count" class="form-input headcount-input w-24 flex-shrink-0" data-site="${site}" min="0" value="0">
+                                <input type="text" id="${id}-name" class="form-input" placeholder="Specify name (e.g., Visitors)">
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div>
+                            <label for="${id}" class="block text-sm font-medium text-gray-700 mb-1">${trade}</label>
+                            <input type="number" id="${id}" name="${id}" class="form-input headcount-input" data-site="${site}" min="0" value="0">
+                        </div>
+                    `;
+                }
+            }
+
+            headcountTrades1475.forEach(trade => headcountContainer1475.innerHTML += createInput(trade, '1475'));
+            headcountTrades1600.forEach(trade => headcountContainer1600.innerHTML += createInput(trade, '1600'));
+
+            afternoonTasks.forEach(group => {
+                let groupHtml = `<fieldset class="border-t pt-4"><legend class="text-lg font-semibold text-gray-700 px-2">${group.group}</legend><div class="space-y-3 mt-2">`;
+                group.tasks.forEach(task => {
+                    const taskName = (typeof task === 'object') ? task.name : task;
+                    const taskId = taskName.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+                     if (typeof task === 'object' && task.type === 'single_checkbox_walk') {
+                        groupHtml += `
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-semibold text-gray-800">${task.name}</span>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="${taskId}-completed" class="h-5 w-5 rounded text-blue-600 mr-2">
+                                        Completed
+                                    </label>
+                                </div>
+                            </div>
+                         `;
+                    } else if (typeof task === 'object' && task.type === 'inspector') {
+                        let optionsHtml = '';
+                        if (task.inspectors) {
+                            task.inspectors.forEach(inspector => {
+                                optionsHtml += `<option>${inspector}</option>`;
+                            });
+                        }
+                        optionsHtml += `<option>Other</option>`;
+
+                        groupHtml += `
+                            <div class="p-4 bg-gray-50 rounded-lg space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-semibold text-gray-800">${task.name}</span>
+                                    <label for="toggle-${taskId}" class="flex items-center cursor-pointer">
+                                        <span class="mr-3 text-gray-700">Done</span>
+                                        <div class="relative">
+                                            <input type="checkbox" id="toggle-${taskId}" class="sr-only equipment-toggle" data-details-id="details-${taskId}">
+                                            <div class="toggle-bg block bg-gray-200 w-14 h-8 rounded-full"></div>
+                                            <div class="toggle-dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform"></div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div id="details-${taskId}" class="hidden pl-4 border-l-2 border-gray-200">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Inspected by:</label>
+                                    <div class="flex flex-col sm:flex-row gap-2">
+                                        <select id="select-${taskId}" class="form-select inspector-select" data-other-id="other-${taskId}">
+                                            ${optionsHtml}
+                                        </select>
+                                        <input type="text" id="other-${taskId}" class="form-input hidden" placeholder="Other inspector...">
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (typeof task === 'object' && task.type === 'multiselect') {
+                        let checkboxesHtml = '<div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">';
+                        task.options.forEach(option => {
+                            const optionId = `${taskId}-${option.toLowerCase().replace(/ /g, '-')}`;
+                            checkboxesHtml += `
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="${optionId}" name="${taskId}" value="${option}" class="h-4 w-4 rounded text-blue-600">
+                                    <span class="ml-2 text-sm">${option}</span>
+                                </label>
+                            `;
+                        });
+                        checkboxesHtml += '</div>';
+
+                        groupHtml += `
+                            <div class="p-4 bg-gray-50 rounded-lg space-y-2">
+                                <span class="font-semibold text-gray-800">${task.name}</span>
+                                ${checkboxesHtml}
+                                <div class="mt-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="${taskId}-other-check" class="h-4 w-4 rounded text-blue-600 other-checkbox">
+                                        <span class="ml-2 text-sm">Other:</span>
+                                    </label>
+                                    <input type="text" id="${taskId}-other-text" class="form-input mt-1 hidden" placeholder="Specify other company...">
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        const isDefaultNA = group.default === 'N/A';
+                        groupHtml += `
+                            <div class="task-item">
+                                <span class="text-sm text-gray-800">${taskName}</span>
+                                <select id="select-${taskId}" class="form-select afternoon-input">
+                                    <option ${isDefaultNA ? 'selected' : ''}>N/A</option>
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                </select>
+                                <input type="text" id="comment-${taskId}" class="form-input afternoon-input" placeholder="Comments...">
+                            </div>
+                        `;
+                    }
+                });
+                groupHtml += '</div></fieldset>';
+                afternoonTasksContainer.innerHTML += groupHtml;
+            });
+
+            // --- EVENT LISTENERS & LOGIC ---
+            document.querySelectorAll('.inspector-select').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const otherInput = document.getElementById(e.target.dataset.otherId);
+                    if (e.target.value === 'Other') {
+                        otherInput.classList.remove('hidden');
+                    } else {
+                        otherInput.classList.add('hidden');
+                    }
+                });
+            });
+
+             document.querySelectorAll('.other-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    const textField = document.getElementById(e.target.id.replace('-check', '-text'));
+                    if (e.target.checked) {
+                        textField.classList.remove('hidden');
+                    } else {
+                        textField.classList.add('hidden');
+                    }
+                });
+            });
+
+            document.querySelectorAll('.equipment-toggle').forEach(toggle => {
+                toggle.addEventListener('change', (e) => {
+                    const detailsDiv = document.getElementById(e.target.dataset.detailsId);
+                    if (e.target.checked) {
+                        detailsDiv.classList.remove('hidden');
+                    } else {
+                        detailsDiv.classList.add('hidden');
+                    }
+                });
+            });
+
+
+            checklistDate.valueAsDate = new Date();
+
+            function switchTab(activeTab, inactiveTab, activeContent, inactiveContent) {
+                activeTab.classList.add('tab-active');
+                inactiveTab.classList.remove('tab-active');
+                activeContent.classList.remove('hidden');
+                inactiveContent.classList.add('hidden');
+            }
+
+            tabMorning.addEventListener('click', () => switchTab(tabMorning, tabAfternoon, contentMorning, contentAfternoon));
+            tabAfternoon.addEventListener('click', () => switchTab(tabAfternoon, tabMorning, contentAfternoon, contentMorning));
+
+            function updateHeadcounts() {
+                let sum1475 = 0, sum1600 = 0;
+                document.querySelectorAll('.headcount-input').forEach(input => {
+                    const value = parseInt(input.value) || 0;
+                    if (input.dataset.site === '1475') sum1475 += value;
+                    else if (input.dataset.site === '1600') sum1600 += value;
+                });
+                total1475.textContent = sum1475;
+                total1600.textContent = sum1600;
+            }
+
+            function checkHotworkStatus() {
+                const isRestricted = waterUse.value === 'L3' || fireDanger.value === 'Extreme';
+                hotworkStatus.textContent = isRestricted ? 'Hot work is not permitted within 10m of the forest interface.' : 'Hot work is safe to do.';
+                hotworkStatus.className = `text-lg font-bold text-center ${isRestricted ? 'text-red-600' : 'text-green-600'}`;
+            }
+
+            function saveData() {
+                const data = {};
+                document.querySelectorAll('input:not([type="radio"]), select, textarea').forEach(el => {
+                    if (el.id) {
+                        if (el.type === 'checkbox') {
+                            data[el.id] = el.checked;
+                        } else {
+                            data[el.id] = el.value;
+                        }
+                    }
+                });
+
+                const observations = [];
+                observationsContainer.querySelectorAll('.observation-item').forEach(item => {
+                    const site = item.querySelector('input[name^="observationSite-"]:checked').value;
+                    const text = item.querySelector('textarea').value;
+                    observations.push({ site, text });
+                });
+                data.additionalObservations = JSON.stringify(observations);
+
+                localStorage.setItem('csoChecklistData', JSON.stringify(data));
+            }
+
+             function addObservationItem(obs = { site: 'Both', text: '' }) {
+                const uniqueId = `obs-${Date.now()}`;
+                const newItem = document.createElement('div');
+                newItem.className = 'observation-item relative';
+                newItem.innerHTML = `
+                    <div class="flex items-center gap-4 mb-2">
+                        <span class="text-sm font-medium text-gray-700">Site:</span>
+                        <label class="flex items-center"><input type="radio" name="observationSite-${uniqueId}" value="1475" class="h-4 w-4 text-blue-600" ${obs.site === '1475' ? 'checked' : ''}> <span class="ml-2">1475</span></label>
+                        <label class="flex items-center"><input type="radio" name="observationSite-${uniqueId}" value="1600" class="h-4 w-4 text-blue-600" ${obs.site === '1600' ? 'checked' : ''}> <span class="ml-2">1600</span></label>
+                        <label class="flex items-center"><input type="radio" name="observationSite-${uniqueId}" value="Both" class="h-4 w-4 text-blue-600" ${obs.site === 'Both' ? 'checked' : ''}> <span class="ml-2">Both/General</span></label>
+                    </div>
+                    <textarea class="form-textarea" rows="3" placeholder="Enter observation...">${obs.text}</textarea>
+                    <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-observation-btn">X</button>
+                `;
+                observationsContainer.appendChild(newItem);
+
+                newItem.querySelectorAll('input, textarea').forEach(el => el.addEventListener('input', saveData));
+                newItem.querySelector('.remove-observation-btn').addEventListener('click', () => {
+                    newItem.remove();
+                    saveData();
+                });
+            }
+
+            addObservationBtn.addEventListener('click', () => addObservationItem());
+            
+            function loadData() {
+                const data = JSON.parse(localStorage.getItem('csoChecklistData'));
+                const today = checklistDate.value;
+
+                if (data) {
+                    const savedDate = data.checklistDate;
+                    const isSameDay = (savedDate === today);
+
+                    if (data.csoName) {
+                        csoName.value = data.csoName;
+                    }
+
+                    if (isSameDay) {
+                        document.querySelectorAll('input:not([type="radio"]), select, textarea').forEach(el => {
+                            if (el.id && data[el.id] !== undefined) {
+                                if (el.type === 'checkbox') {
+                                    el.checked = data[el.id];
+                                } else {
+                                    el.value = data[el.id];
+                                }
+                            }
+                        });
+
+                        if (data.additionalObservations) {
+                            observationsContainer.innerHTML = ''; // Clear before loading
+                            const observations = JSON.parse(data.additionalObservations);
+                            observations.forEach(obs => addObservationItem(obs));
+                        }
+
+                        document.querySelectorAll('.equipment-toggle').forEach(toggle => {
+                            const detailsDiv = document.getElementById(toggle.dataset.detailsId);
+                            if (toggle.checked) {
+                                detailsDiv.classList.remove('hidden');
+                            } else {
+                                detailsDiv.classList.add('hidden');
+                            }
+                        });
+
+                        document.querySelectorAll('.inspector-select, .other-checkbox').forEach(el => {
+                           if (el.matches('.inspector-select')) {
+                                const otherInput = document.getElementById(el.dataset.otherId);
+                                if (el.value === 'Other') otherInput.classList.remove('hidden');
+                                else otherInput.classList.add('hidden');
+                           } else if (el.matches('.other-checkbox')) {
+                                const textField = document.getElementById(el.id.replace('-check', '-text'));
+                                if (el.checked) textField.classList.remove('hidden');
+                                else textField.classList.add('hidden');
+                           }
+                        });
+                    }
+                }
+                
+                updateHeadcounts();
+                checkHotworkStatus();
+            }
+
+            document.querySelectorAll('input, select, textarea').forEach(el => el.addEventListener('input', saveData));
+            
+            document.querySelectorAll('.headcount-input').forEach(input => {
+                input.addEventListener('input', updateHeadcounts);
+            });
+
+            waterUse.addEventListener('input', checkHotworkStatus);
+            fireDanger.addEventListener('input', checkHotworkStatus);
+            
+            function getMorningReportRawContent() {
+                let report = ``;
+                report += `SITE CONDITIONS\n-----------------------------------\n`;
+                report += `Water Use: <b>${waterUse.value}</b>\nFire Danger: <b>${fireDanger.value}</b>\n\n`;
+                report += `HOT WORK STATUS\n-----------------------------------\n<b>${hotworkStatus.textContent}</b>\n\n`;
+                
+                report += `SITE 1475 HEADCOUNT (<b>${total1475.textContent}</b> Total)\n-----------------------------------\n`;
+                headcountTrades1475.forEach(trade => {
+                    const idBase = `hc-1475-${trade.toLowerCase().replace(/ /g, '-')}`;
+                    if (trade === 'Other') {
+                        const countInput = document.getElementById(`${idBase}-count`);
+                        const nameInput = document.getElementById(`${idBase}-name`);
+                        const count = parseInt(countInput.value) || 0;
+                        if (count > 0) {
+                            const name = nameInput.value ? ` (${nameInput.value})` : '';
+                            report += `Other${name}: <b>${count}</b>\n`;
+                        }
+                    } else {
+                        const input = document.getElementById(idBase);
+                        const count = parseInt(input.value) || 0;
+                        if (count > 0) {
+                            report += `${trade}: <b>${count}</b>\n`;
+                        }
+                    }
+                });
+
+                report += `\nSITE 1600 HEADCOUNT (<b>${total1600.textContent}</b> Total)\n-----------------------------------\n`;
+                 headcountTrades1600.forEach(trade => {
+                    const idBase = `hc-1600-${trade.toLowerCase().replace(/ /g, '-')}`;
+                    if (trade === 'Other') {
+                        const countInput = document.getElementById(`${idBase}-count`);
+                        const nameInput = document.getElementById(`${idBase}-name`);
+                        const count = parseInt(countInput.value) || 0;
+                        if (count > 0) {
+                            const name = nameInput.value ? ` (${nameInput.value})` : '';
+                            report += `Other${name}: <b>${count}</b>\n`;
+                        }
+                    } else {
+                        const input = document.getElementById(idBase);
+                        const count = parseInt(input.value) || 0;
+                        if (count > 0) {
+                            report += `${trade}: <b>${count}</b>\n`;
+                        }
+                    }
+                });
+                return report;
+            }
+
+            function getAfternoonReportRawContent() {
+                let report = '';
+                afternoonTasks.forEach(group => {
+                    let groupContent = '';
+                    let allNA = true;
+
+                    group.tasks.forEach(task => {
+                        const taskName = (typeof task === 'object') ? task.name : task;
+                        const taskId = taskName.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+                        if (typeof task === 'object' && task.type === 'single_checkbox_walk') {
+                            const check = document.getElementById(`${taskId}-completed`);
+                            if (check.checked) {
+                                allNA = false;
+                                groupContent += `${task.name}: <b>Completed</b>\n`;
+                            }
+                        } else if (typeof task === 'object' && task.type === 'inspector') {
+                            const toggle = document.getElementById(`toggle-${taskId}`);
+                            if (toggle.checked) {
+                                allNA = false;
+                                const select = document.getElementById(`select-${taskId}`);
+                                let inspector = select.value;
+                                if (inspector === 'Other') {
+                                    inspector = document.getElementById(`other-${taskId}`).value || 'Other';
+                                }
+                                groupContent += `${task.name} by: <b>${inspector}</b>\n`;
+                            }
+                        } else if (typeof task === 'object' && task.type === 'multiselect') {
+                            const involved = [];
+                            document.querySelectorAll(`input[name="${taskId}"]:checked`).forEach(checkbox => {
+                                involved.push(checkbox.value);
+                            });
+
+                            const otherCheckbox = document.getElementById(`${taskId}-other-check`);
+                            if (otherCheckbox && otherCheckbox.checked) {
+                                const otherText = document.getElementById(`${taskId}-other-text`).value;
+                                involved.push(otherText || 'Other');
+                            }
+
+                            if (involved.length > 0) {
+                                allNA = false;
+                                groupContent += `${task.name} with: <b>${involved.join(', ')}</b>\n`;
+                            }
+                        } else {
+                            const status = document.getElementById(`select-${taskId}`).value;
+                            if (status !== 'N/A') {
+                                allNA = false;
+                                const comment = document.getElementById(`comment-${taskId}`).value;
+                                groupContent += `${taskName}: <b>${status}</b>\n`;
+                                if (comment) {
+                                    groupContent += `  <b>${comment}</b>\n`;
+                                }
+                            }
+                        }
+                    });
+
+                    if (!allNA) {
+                        report += `${group.group.toUpperCase()}\n-------------------------------------\n`;
+                        report += groupContent + '\n';
+                    } else {
+                        if (group.group === 'Site Incidents') {
+                            report += `SITE INCIDENTS\n-------------------------------------\nNo site incidents.\n\n`;
+                        } else if (group.group === 'Orientations') {
+                            report += `ORIENTATIONS\n-------------------------------------\nNo orientations conducted.\n\n`;
+                        }
+                    }
+                });
+
+                const observations = [];
+                observationsContainer.querySelectorAll('.observation-item').forEach(item => {
+                    const site = item.querySelector('input[name^="observationSite-"]:checked').value;
+                    const text = item.querySelector('textarea').value;
+                    if (text.trim()) {
+                        observations.push({ site, text });
+                    }
+                });
+
+                if (observations.length > 0) {
+                    const obsBySite1475 = observations.filter(o => o.site === '1475');
+                    const obsBySite1600 = observations.filter(o => o.site === '1600');
+                    const obsBySiteBoth = observations.filter(o => o.site === 'Both');
+
+                    if(obsBySite1475.length > 0) {
+                        report += `ADDITIONAL OBSERVATIONS (Site 1475)\n-------------------------------------\n`;
+                        obsBySite1475.forEach(o => report += `<b>- ${o.text.trim()}</b>\n\n`);
+                    }
+                    if(obsBySite1600.length > 0) {
+                        report += `ADDITIONAL OBSERVATIONS (Site 1600)\n-------------------------------------\n`;
+                        obsBySite1600.forEach(o => report += `<b>- ${o.text.trim()}</b>\n\n`);
+                    }
+                    if(obsBySiteBoth.length > 0) {
+                        report += `ADDITIONAL OBSERVATIONS (General)\n-------------------------------------\n`;
+                        obsBySiteBoth.forEach(o => report += `<b>- ${o.text.trim()}</b>\n\n`);
+                    }
+                }
+                
+                return report;
+            }
+
+            function generateFullReport() {
+                const morningContent = getMorningReportRawContent();
+                const afternoonContent = getAfternoonReportRawContent();
+                let fullReport = `CSO DAILY LOG - FULL REPORT\n===================================\n`;
+                fullReport += `Date: <b>${checklistDate.value || 'N/A'}</b>\nCSO Name: <b>${csoName.value || 'N/A'}</b>\n\n`;
+                fullReport += morningContent;
+                fullReport += '\n\n' + afternoonContent;
+                
+                reportContent.innerHTML = fullReport;
+                reportOutput.classList.remove('hidden');
+                reportOutput.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            generateFullReportBtn.addEventListener('click', generateFullReport);
+
+            copyBtn.addEventListener('click', () => {
+                const reportClone = reportContent.cloneNode(true);
+                const textToCopy = reportClone.textContent;
+
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                textArea.style.position = "fixed"; textArea.style.top = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    copyBtn.textContent = '¡Copiado!';
+                } catch (err) {
+                    copyBtn.textContent = 'Error al Copiar';
+                }
+                document.body.removeChild(textArea);
+                setTimeout(() => { copyBtn.textContent = 'Copiar Reporte'; }, 2000);
+            });
+
+            function exportReportToPdf() {
+                const { jsPDF } = window.jspdf;
+                const reportElement = document.getElementById('report-content');
+                
+                const csoNameValue = csoName.value || 'CSO';
+                const checklistDateValue = checklistDate.value || new Date().toISOString().slice(0, 10);
+                const fileName = `CSO_Report_${csoNameValue.replace(/ /g, '_')}_${checklistDateValue}.pdf`;
+
+                html2canvas(reportElement, { scale: 2, useCORS: true }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF({
+                        orientation: 'p',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = pdf.internal.pageSize.getHeight();
+                    const canvasWidth = canvas.width;
+                    const canvasHeight = canvas.height;
+                    const ratio = canvasWidth / canvasHeight;
+                    
+                    let imgWidth = pdfWidth - 20; // with 10mm margin on each side
+                    let imgHeight = imgWidth / ratio;
+
+                    if (imgHeight > pdfHeight - 20) {
+                        imgHeight = pdfHeight - 20;
+                        imgWidth = imgHeight * ratio;
+                    }
+
+                    const x = (pdfWidth - imgWidth) / 2;
+                    const y = 10;
+
+                    pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+                    pdf.save(fileName);
+                });
+            }
+
+            exportPdfBtn.addEventListener('click', exportReportToPdf);
+
+            // --- INITIALIZATION ---
+            loadData();
+        });
+    </script>
+
+</body>
+</html>
