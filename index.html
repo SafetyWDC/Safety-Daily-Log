@@ -257,7 +257,9 @@
                 { group: 'Crane', tasks: [
                     { name: 'Crane Daily Inspection', type: 'inspector', inspectors: ['Noah C.', 'Eric J.', 'Miguel M.'] }, 
                     { name: 'Rigging Daily Inspection', type: 'inspector', inspectors: ['Noah C.', 'Eric J.', 'Miguel M.'] },
-                    { name: 'Overlapping Procedure', type: 'multiselect', options: ['Jensen Construction', 'Corona Excavations', 'Blacktail Reinforcing', 'Astra Concrete', 'Cardinal Concrete', 'Corridor Concrete'] }
+                    { name: 'Overlapping Procedure', type: 'multiselect', options: ['Jensen Construction', 'Corona Excavations', 'Blacktail Reinforcing', 'Astra Concrete', 'Cardinal Concrete', 'Corridor Concrete'] },
+                    // NEW CHECKBOX
+                    'Cold Weather Crane Inspection'
                 ]},
                 { group: 'Mobile Equipment (1475 & 1600)', tasks: [
                     { name: 'Lemyre Boom Lift (Green) Daily Inspection', type: 'inspector', inspectors: ['Daniel-alexandre A', 'Serhii D', 'Austin W', 'Terrence', 'Shayne L.', 'Dave Santerre'] },
@@ -409,18 +411,35 @@
                             </div>
                         `;
                     } else {
-                        const isDefaultNA = group.default === 'N/A';
-                        groupHtml += `
-                            <div class="task-item">
-                                <span class="text-sm text-gray-800">${taskName}</span>
-                                <select id="select-${taskId}" class="form-select afternoon-input">
-                                    <option ${isDefaultNA ? 'selected' : ''}>N/A</option>
-                                    <option>Yes</option>
-                                    <option>No</option>
-                                </select>
-                                <input type="text" id="comment-${taskId}" class="form-input afternoon-input" placeholder="Comments...">
-                            </div>
-                        `;
+                        // Regular checkbox (like Cold Weather Crane Inspection) or Select/Comment (for Safety Meetings, Permits, Incidents, Orientations, Weekend Work)
+                        const isSimpleCheckbox = typeof task === 'string' && group.group === 'Crane'; // Assuming Cold Weather Crane Inspection is the only new simple checkbox here
+                        
+                        if (isSimpleCheckbox) {
+                             groupHtml += `
+                                <div class="p-4 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-semibold text-gray-800">${taskName}</span>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="${taskId}-completed" class="h-5 w-5 rounded text-blue-600 mr-2">
+                                            Completed
+                                        </label>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            const isDefaultNA = group.default === 'N/A';
+                            groupHtml += `
+                                <div class="task-item">
+                                    <span class="text-sm text-gray-800">${taskName}</span>
+                                    <select id="select-${taskId}" class="form-select afternoon-input">
+                                        <option ${isDefaultNA ? 'selected' : ''}>N/A</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                    <input type="text" id="comment-${taskId}" class="form-input afternoon-input" placeholder="Comments...">
+                                </div>
+                            `;
+                        }
                     }
                 });
                 groupHtml += '</div></fieldset>';
@@ -696,13 +715,26 @@
                                 groupContent += `${task.name} with: <b>${involved.join(', ')}</b>\n`;
                             }
                         } else {
-                            const status = document.getElementById(`select-${taskId}`).value;
-                            if (status !== 'N/A') {
-                                allNA = false;
-                                const comment = document.getElementById(`comment-${taskId}`).value;
-                                groupContent += `${taskName}: <b>${status}</b>\n`;
-                                if (comment) {
-                                    groupContent += `  <b>${comment}</b>\n`;
+                            // Simple Checkbox Logic (Cold Weather Crane Inspection)
+                            const isSimpleCheckbox = typeof task === 'string' && group.group === 'Crane';
+                            const checkId = taskId + (isSimpleCheckbox ? '-completed' : '');
+
+                            if (isSimpleCheckbox) {
+                                const check = document.getElementById(checkId);
+                                if (check.checked) {
+                                    allNA = false;
+                                    groupContent += `${taskName}: <b>Completed</b>\n`;
+                                }
+                            } else {
+                                // Default Select/Comment
+                                const status = document.getElementById(`select-${taskId}`).value;
+                                if (status !== 'N/A') {
+                                    allNA = false;
+                                    const comment = document.getElementById(`comment-${taskId}`).value;
+                                    groupContent += `${taskName}: <b>${status}</b>\n`;
+                                    if (comment) {
+                                        groupContent += `  <b>${comment}</b>\n`;
+                                    }
                                 }
                             }
                         }
