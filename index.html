@@ -99,12 +99,16 @@
             border-radius: 0.5rem;
             border: 1px solid #e5e7eb;
         }
+        /* Updated grid for site selector */
         @media (min-width: 768px) {
             .task-item {
                 grid-template-columns: 2fr 1fr 2fr;
             }
+            .task-item.with-site {
+                grid-template-columns: 2fr 1fr 1fr 2fr;
+            }
         }
-        .observation-item {
+        .observation-item, .permit-item {
             background-color: #f9fafb;
             border: 1px solid #e5e7eb;
             border-radius: 0.5rem;
@@ -201,7 +205,7 @@
             <div class="card">
                 <h2 class="text-xl font-semibold mb-4 text-gray-800">Site Headcount: 1600 Mount Fee Road</h2>
                 <div class="headcount-grid" id="headcount-1600">
-                     <!-- Headcount inputs will be dynamically generated here -->
+                      <!-- Headcount inputs will be dynamically generated here -->
                 </div>
                 <div class="text-right mt-4 font-bold text-lg text-gray-800">1600 Total Headcount: <span id="total-1600">0</span></div>
             </div>
@@ -211,9 +215,21 @@
         <div id="content-afternoon" class="hidden">
             <div class="card">
                 <h2 class="text-xl font-semibold mb-4 text-gray-800">Afternoon Tasks & Observations</h2>
+                
+                <!-- Work Permits Dynamic Section -->
+                <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <h3 class="text-lg font-bold text-blue-800 mb-2">Active Work Permits</h3>
+                    <p class="text-sm text-blue-600 mb-4">Review and manage active permits for today. Each entry represents a contractor/activity.</p>
+                    <div id="work-permits-container" class="space-y-3">
+                        <!-- Dynamic Permits will be added here -->
+                    </div>
+                    <button id="add-permit-btn" class="btn btn-secondary mt-3 w-full md:w-auto">+ Add Work Permit</button>
+                </div>
+
                 <div id="afternoon-tasks" class="space-y-4">
                     <!-- Afternoon tasks will be generated here -->
                 </div>
+
                 <div class="mt-6 border-t pt-4">
                     <label class="block text-lg font-semibold text-gray-700 mb-2">Additional Observations</label>
                     <div id="additional-observations-container">
@@ -230,6 +246,7 @@
              
              <!-- Reset Button -->
              <button id="resetForm" class="btn btn-danger w-full">Reset Form</button>
+             <p class="text-xs text-center text-gray-500 italic">*Reset will clear everything EXCEPT Work Permits.</p>
         </div>
 
         <!-- Report Output -->
@@ -237,8 +254,8 @@
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Generated Report</h2>
             <div id="report-content" class="bg-gray-50 p-4 rounded-lg whitespace-pre-wrap text-sm text-gray-700"></div>
             <div class="flex flex-col md:flex-row gap-4 mt-4">
-                <button id="exportPdf" class="btn btn-primary flex-1">Exportar a PDF</button>
-                <button id="copyReport" class="btn btn-gray flex-1">Copiar Reporte</button>
+                <button id="exportPdf" class="btn btn-primary flex-1">Export PDF</button>
+                <button id="copyReport" class="btn btn-gray flex-1">Copy Report</button>
             </div>
         </div>
 
@@ -247,22 +264,26 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // --- DATA DEFINITIONS ---
+            // Corrected Trade Names
             const headcountTrades1475 = [
-                'WDC', 'Labour', 'Siding', 'Plumber', 'Electricians', 'Roofers', 
+                'WDC', 'Labour', 'Siding', 'Plumbing', 'Electrical', 'Roofing', 
                 'Drywall', 'Fire Protection', 'Windows', 'HVAC', 
-                'Masonry', 'Painters', 'Finishers', 'Insulation', 'Flooring', 'Exterior Painting', 'Railing', 
+                'Masonry', 'Painting', 'Finishing', 'Insulation', 'Flooring', 'Exterior Painting', 'Railing', 
                 'Landscaping', 'Elevators', 'Other'
             ];
 
             const headcountTrades1600 = [
-                'Excavation', 'Reinforcing', 'Forming', 'Plumber', 'Masonry', 'Framers', 'Electrician', 'Other'
+                'Excavation', 'Reinforcing', 'Forming', 'Plumbing', 'Masonry', 'Framing', 'Electrical', 'Other'
             ];
+
+            // Inspectors List updated
+            const craneInspectors = ['Noah C.', 'Eric J.', 'Miguel M.', 'Mahlon Taylor', 'Mike Butcher', 'Dan Hirst'];
 
             const afternoonTasks = [
                 { group: 'Crane', tasks: [
-                    { name: 'Crane Daily Inspection', type: 'inspector', inspectors: ['Noah C.', 'Eric J.', 'Miguel M.'] }, 
-                    { name: 'Rigging Daily Inspection', type: 'inspector', inspectors: ['Noah C.', 'Eric J.', 'Miguel M.'] },
-                    { name: 'Overlapping Procedure', type: 'multiselect', options: ['Jensen Construction', 'Corona Excavations', 'Blacktail Reinforcing', 'Astra Concrete', 'Cardinal Concrete', 'Corridor Concrete'] },
+                    { name: 'Crane Daily Inspection', type: 'inspector', inspectors: craneInspectors }, 
+                    { name: 'Rigging Daily Inspection', type: 'inspector', inspectors: craneInspectors },
+                    { name: 'Overlapping Procedure', type: 'multiselect', options: ['Jensen Construction', 'Corona Excavations', 'Blacktail Reinforcing', 'Astra Concrete', 'Cardinal Concrete', 'Corridor Concrete', 'Bjordal'] },
                     'Cold Weather Crane Inspection'
                 ]},
                 { group: 'Mobile Equipment (1475 & 1600)', tasks: [
@@ -270,8 +291,9 @@
                     { name: 'Lemyre Boom Lift (Blue) Daily Inspection', type: 'inspector', inspectors: ['Daniel-alexandre A', 'Serhii D', 'Austin W', 'Terrence', 'Shayne L.', 'Dave Santerre'] },
                     { name: 'Lemyre Boom Lift (Orange) Daily Inspection', type: 'inspector', inspectors: ['Daniel-alexandre A', 'Serhii D', 'Austin W', 'Terrence', 'Shayne L.', 'Dave Santerre'] },
                     { name: 'WDC Telehandler Daily Inspection', type: 'inspector', inspectors: ['Dan M.', 'Daniel-A. A.', 'Austin W.', 'Jordan W.', 'Dylan', 'Dan E.', 'Shayne L.'] },
-                    { name: 'JENSEN Telehandler Daily Inspection', type: 'inspector', inspectors: ['Noah C.', 'Eric J.', 'Miguel M.'] },
-                    { name: 'JENSEN Magni Rotatic telehandler Daily inspection', type: 'inspector', inspectors: ['Noah C.', 'Eric J.', 'Miguel M.'] },
+                    { name: 'JENSEN Telehandler Daily Inspection', type: 'inspector', inspectors: ['Noah C.', 'Eric J.', 'Miguel M.', 'Pat Foster'] },
+                    { name: 'Jensen Bobcat Daily Inspection', type: 'inspector', inspectors: ['Noah C.', 'Eric J.', 'Miguel M.', 'Pat Foster'] },
+                    { name: 'Jordan Red Mini Telehandler Daily Inspection', type: 'inspector', inspectors: ['Dan M.', 'Daniel-A. A.', 'Austin W.', 'Jordan W.', 'Dylan', 'Dan E.', 'Shayne L.'] },
                     { name: 'Painter Boomlift Blue Daily Inspection', type: 'inspector', inspectors: ['Mathieu L.', 'Daniel-alexandre A', 'Serhii D', 'Austin W', 'Terrence', 'Shayne L.', 'Dave Santerre'] }
                 ]},
                 { group: 'Site Inspections', tasks: [
@@ -281,11 +303,38 @@
                     { name: 'Weekly Safety Site Inspection 1600', type: 'single_checkbox_walk' }
                 ]},
                 { group: 'Safety Meetings', tasks: ['Weekly Safety Meeting (Tuesdays)'] },
-                { group: 'Work Permits', tasks: ['Silica Dust Exposure Plan', 'Hot Work Permit', 'Fall Protection Plan', 'Critical Lift Plan', 'Confined Space Entry Permit'], default: 'N/A' },
+                // REMOVED 'Work Permits' from here to make it dynamic
                 { group: 'Site Incidents', tasks: ['First Aid', 'Near Miss', 'Incident Investigation Reports', 'Claim Management'], default: 'N/A' },
                 { group: 'Orientations', tasks: ['Young Worker Orientation', 'New Worker Orientation'], default: 'N/A' },
                 { group: 'Weekend Work', tasks: ['Working on Weekend'], default: 'N/A' }
             ];
+
+            const permitTypes = [
+                'Silica Dust Exposure Plan', 
+                'Hot Work Permit', 
+                'Fall Protection Plan', 
+                'Critical Lift Plan', 
+                'Confined Space Entry Permit',
+                'Other'
+            ];
+            
+            // PRE-DEFINED ACTIVE PERMITS
+            const defaultActivePermits = [
+                { type: 'Silica Dust Exposure Plan', site: '1475', contractor: 'Lemyre (Cladding assembly)' },
+                { type: 'Silica Dust Exposure Plan', site: '1475', contractor: 'CMO Flooring (Mixing and pouring cement)' },
+                { type: 'Silica Dust Exposure Plan', site: '1475', contractor: 'Terracraft (cutting tiles)' },
+                { type: 'Silica Dust Exposure Plan', site: '1475', contractor: 'Tantalus Flooring (Mixing and pouring cement)' },
+                { type: 'Fall Protection Plan', site: '1600', contractor: 'Bjordal (Framing and erecting walls on 1600)' },
+                { type: 'Fall Protection Plan', site: '1475', contractor: 'Lemyre (cladding exterior and roof of building 1 and 2)' },
+                { type: 'Fall Protection Plan', site: '1475', contractor: 'Terracraft (working on B1, B2 L3 L4 installing Tiles on Balconies)' },
+                { type: 'Fall Protection Plan', site: '1475', contractor: 'Tantalus Flooring (receiving materials)' },
+                { type: 'Fall Protection Plan', site: '1475', contractor: 'CMO Flooring (receiving materials)' },
+                { type: 'Fall Protection Plan', site: '1475', contractor: 'Linton Painting (receiving materials)' },
+                { type: 'Fall Protection Plan', site: '1475', contractor: 'Coastal Mountain Mechanical (receiving Materials)' },
+                { type: 'Fall Protection Plan', site: '1475', contractor: 'AMC (Receiving materials from balcony L3&L4 B1&B2)' }
+            ];
+
+            const siteSpecificGroups = ['Site Incidents', 'Orientations'];
 
             // --- UI ELEMENT REFERENCES ---
             const checklistDate = document.getElementById('checklistDate');
@@ -310,6 +359,8 @@
             const addObservationBtn = document.getElementById('add-observation-btn');
             const observationsContainer = document.getElementById('additional-observations-container');
             const resetFormBtn = document.getElementById('resetForm');
+            const workPermitsContainer = document.getElementById('work-permits-container');
+            const addPermitBtn = document.getElementById('add-permit-btn');
 
             // --- DYNAMIC UI GENERATION ---
 
@@ -340,6 +391,10 @@
 
             afternoonTasks.forEach(group => {
                 let groupHtml = `<fieldset class="border-t pt-4" data-group="${group.group}"><legend class="text-lg font-semibold text-gray-700 px-2">${group.group}</legend><div class="space-y-3 mt-2">`;
+                
+                // Check if this group needs site selectors
+                const isSiteSpecificGroup = siteSpecificGroups.includes(group.group);
+
                 group.tasks.forEach(task => {
                     const taskName = (typeof task === 'object') ? task.name : task;
                     const taskId = taskName.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -431,17 +486,34 @@
                         } else {
                             // Select + Comment (Safety Meetings, Permits, etc.)
                             const isDefaultNA = group.default === 'N/A';
+                            // Different layout if site specific
+                            const containerClass = isSiteSpecificGroup ? 'task-item with-site' : 'task-item md:flex md:items-center md:justify-between';
+                            
+                            let siteSelectorHtml = '';
+                            if (isSiteSpecificGroup) {
+                                siteSelectorHtml = `
+                                    <div class="w-full my-2 md:my-0">
+                                        <select id="site-${taskId}" class="form-select afternoon-input w-full text-sm" data-group="${group.group}">
+                                            <option value="1475 & 1600">Site: 1475 & 1600</option>
+                                            <option value="1475">Site: 1475</option>
+                                            <option value="1600">Site: 1600</option>
+                                        </select>
+                                    </div>
+                                `;
+                            }
+
                             groupHtml += `
-                                <div class="task-item md:flex md:items-center md:justify-between">
-                                    <span class="text-sm text-gray-800 md:w-1/3">${taskName}</span>
-                                    <div class="md:w-1/4 w-full my-2 md:my-0">
+                                <div class="${containerClass}">
+                                    <span class="text-sm text-gray-800 md:w-auto">${taskName}</span>
+                                    <div class="w-full my-2 md:my-0">
                                          <select id="select-${taskId}" class="form-select afternoon-input w-full" data-group="${group.group}">
                                             <option ${isDefaultNA ? 'selected' : ''}>N/A</option>
                                             <option>Yes</option>
                                             <option>No</option>
                                         </select>
                                     </div>
-                                    <div class="md:w-1/3 w-full">
+                                    ${siteSelectorHtml}
+                                    <div class="w-full">
                                          <input type="text" id="comment-${taskId}" class="form-input afternoon-input w-full" placeholder="Comments..." data-group="${group.group}">
                                     </div>
                                 </div>
@@ -517,6 +589,55 @@
                 hotworkStatus.className = `text-lg font-bold text-center ${isRestricted ? 'text-red-600' : 'text-green-600'}`;
             }
 
+            // --- WORK PERMITS LOGIC ---
+
+            function createWorkPermitHTML(permit = { type: 'Silica Dust Exposure Plan', site: '1475', contractor: '' }) {
+                const uniqueId = `perm-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                
+                let typeOptions = permitTypes.map(t => `<option ${t === permit.type ? 'selected' : ''}>${t}</option>`).join('');
+                
+                return `
+                    <div class="permit-item relative grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase">Permit Type</label>
+                            <select class="form-select text-sm mt-1 permit-type">
+                                ${typeOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase">Site</label>
+                            <div class="flex flex-col mt-2 space-y-1">
+                                <label class="inline-flex items-center"><input type="radio" name="permSite-${uniqueId}" value="1475" class="permit-site text-blue-600" ${permit.site === '1475' ? 'checked' : ''}> <span class="ml-2 text-sm">1475</span></label>
+                                <label class="inline-flex items-center"><input type="radio" name="permSite-${uniqueId}" value="1600" class="permit-site text-blue-600" ${permit.site === '1600' ? 'checked' : ''}> <span class="ml-2 text-sm">1600</span></label>
+                                <label class="inline-flex items-center"><input type="radio" name="permSite-${uniqueId}" value="1475 & 1600" class="permit-site text-blue-600" ${permit.site === '1475 & 1600' ? 'checked' : ''}> <span class="ml-2 text-sm">1475 & 1600</span></label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase">Contractor & Task Description</label>
+                            <input type="text" class="form-input text-sm mt-1 permit-contractor" placeholder="e.g. WDC (Task details)..." value="${permit.contractor}">
+                        </div>
+                        <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-permit-btn text-xs px-2 py-1">Remove</button>
+                    </div>
+                `;
+            }
+
+            function addWorkPermitItem(permit) {
+                const div = document.createElement('div');
+                div.innerHTML = createWorkPermitHTML(permit);
+                const item = div.firstElementChild;
+                workPermitsContainer.appendChild(item);
+
+                // Add listeners
+                item.querySelectorAll('input, select').forEach(el => el.addEventListener('input', saveData));
+                item.querySelector('.remove-permit-btn').addEventListener('click', () => {
+                    item.remove();
+                    saveData();
+                });
+            }
+
+            addPermitBtn.addEventListener('click', () => addWorkPermitItem());
+
+
             function saveData() {
                 const data = {};
                 document.querySelectorAll('input:not([type="radio"]), select, textarea').forEach(el => {
@@ -529,6 +650,7 @@
                     }
                 });
 
+                // Save Observations
                 const observations = [];
                 observationsContainer.querySelectorAll('.observation-item').forEach(item => {
                     const site = item.querySelector('input[name^="observationSite-"]:checked').value;
@@ -537,10 +659,21 @@
                 });
                 data.additionalObservations = JSON.stringify(observations);
 
+                // Save Work Permits
+                const permits = [];
+                workPermitsContainer.querySelectorAll('.permit-item').forEach(item => {
+                    const type = item.querySelector('.permit-type').value;
+                    const siteInput = item.querySelector('input[name^="permSite-"]:checked');
+                    const site = siteInput ? siteInput.value : '1475';
+                    const contractor = item.querySelector('.permit-contractor').value;
+                    permits.push({ type, site, contractor });
+                });
+                data.activeWorkPermits = JSON.stringify(permits);
+
                 localStorage.setItem('csoChecklistData', JSON.stringify(data));
             }
 
-             function addObservationItem(obs = { site: 'Both', text: '' }) {
+             function addObservationItem(obs = { site: '1475 & 1600', text: '' }) {
                 const uniqueId = `obs-${Date.now()}`;
                 const newItem = document.createElement('div');
                 newItem.className = 'observation-item relative';
@@ -549,7 +682,7 @@
                         <span class="text-sm font-medium text-gray-700">Site:</span>
                         <label class="flex items-center"><input type="radio" name="observationSite-${uniqueId}" value="1475" class="h-4 w-4 text-blue-600" ${obs.site === '1475' ? 'checked' : ''}> <span class="ml-2">1475</span></label>
                         <label class="flex items-center"><input type="radio" name="observationSite-${uniqueId}" value="1600" class="h-4 w-4 text-blue-600" ${obs.site === '1600' ? 'checked' : ''}> <span class="ml-2">1600</span></label>
-                        <label class="flex items-center"><input type="radio" name="observationSite-${uniqueId}" value="Both" class="h-4 w-4 text-blue-600" ${obs.site === 'Both' ? 'checked' : ''}> <span class="ml-2">Both/General</span></label>
+                        <label class="flex items-center"><input type="radio" name="observationSite-${uniqueId}" value="1475 & 1600" class="h-4 w-4 text-blue-600" ${obs.site === '1475 & 1600' ? 'checked' : ''}> <span class="ml-2">1475 & 1600</span></label>
                     </div>
                     <textarea class="form-textarea" rows="3" placeholder="Enter observation...">${obs.text}</textarea>
                     <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-observation-btn">X</button>
@@ -588,10 +721,22 @@
                             }
                         });
 
+                        // Load Observations
                         if (data.additionalObservations) {
-                            observationsContainer.innerHTML = ''; // Clear before loading
+                            observationsContainer.innerHTML = ''; 
                             const observations = JSON.parse(data.additionalObservations);
                             observations.forEach(obs => addObservationItem(obs));
+                        }
+
+                        // Load Work Permits - If empty or undefined, load active defaults
+                        if (data.activeWorkPermits && JSON.parse(data.activeWorkPermits).length > 0) {
+                            workPermitsContainer.innerHTML = '';
+                            const permits = JSON.parse(data.activeWorkPermits);
+                            permits.forEach(p => addWorkPermitItem(p));
+                        } else {
+                            // First time load or empty: populate defaults
+                            workPermitsContainer.innerHTML = '';
+                            defaultActivePermits.forEach(p => addWorkPermitItem(p));
                         }
 
                         document.querySelectorAll('.equipment-toggle').forEach(toggle => {
@@ -614,7 +759,16 @@
                                 else textField.classList.add('hidden');
                            }
                         });
+                    } else {
+                        // Not same day but data exists? load defaults for permits anyway? 
+                        // The user probably wants defaults on a new day too.
+                         workPermitsContainer.innerHTML = '';
+                         defaultActivePermits.forEach(p => addWorkPermitItem(p));
                     }
+                } else {
+                    // No data at all - fresh load
+                    workPermitsContainer.innerHTML = '';
+                    defaultActivePermits.forEach(p => addWorkPermitItem(p));
                 }
                 
                 updateHeadcounts();
@@ -680,9 +834,35 @@
 
             function getAfternoonReportRawContent() {
                 let report = '';
+
+                // WORK PERMITS REPORT
+                const permits = [];
+                workPermitsContainer.querySelectorAll('.permit-item').forEach(item => {
+                    const type = item.querySelector('.permit-type').value;
+                    const siteInput = item.querySelector('input[name^="permSite-"]:checked');
+                    const site = siteInput ? siteInput.value : 'N/A';
+                    const contractor = item.querySelector('.permit-contractor').value;
+                    if (contractor) {
+                        permits.push({ type, site, contractor });
+                    }
+                });
+
+                if (permits.length > 0) {
+                    report += `WORK PERMITS\n-------------------------------------\n`;
+                    permits.forEach(p => {
+                        report += `- ${p.type} (${p.site}): <b>${p.contractor}</b>\n`;
+                    });
+                    report += `\n`;
+                } else {
+                    report += `WORK PERMITS\n-------------------------------------\nNo active work permits.\n\n`;
+                }
+
+
                 afternoonTasks.forEach(group => {
                     let groupContent = '';
                     let allNA = true;
+                    
+                    const isSiteSpecificGroup = siteSpecificGroups.includes(group.group);
 
                     group.tasks.forEach(task => {
                         const taskName = (typeof task === 'object') ? task.name : task;
@@ -737,7 +917,13 @@
                                 if (status !== 'N/A') {
                                     allNA = false;
                                     const comment = document.getElementById(`comment-${taskId}`).value;
-                                    groupContent += `${taskName}: <b>${status}</b>\n`;
+                                    let siteInfo = '';
+                                    if(isSiteSpecificGroup) {
+                                        const siteVal = document.getElementById(`site-${taskId}`).value;
+                                        if (siteVal !== '1475 & 1600') siteInfo = ` [Site: ${siteVal}]`;
+                                    }
+
+                                    groupContent += `${taskName}: <b>${status}</b>${siteInfo}\n`;
                                     if (comment) {
                                         groupContent += `  <b>${comment}</b>\n`;
                                     }
@@ -770,7 +956,7 @@
                 if (observations.length > 0) {
                     const obsBySite1475 = observations.filter(o => o.site === '1475');
                     const obsBySite1600 = observations.filter(o => o.site === '1600');
-                    const obsBySiteBoth = observations.filter(o => o.site === 'Both');
+                    const obsBySiteBoth = observations.filter(o => o.site === '1475 & 1600');
 
                     if(obsBySite1475.length > 0) {
                         report += `ADDITIONAL OBSERVATIONS (Site 1475)\n-------------------------------------\n`;
@@ -781,7 +967,7 @@
                         obsBySite1600.forEach(o => report += `<b>- ${o.text.trim()}</b>\n\n`);
                     }
                     if(obsBySiteBoth.length > 0) {
-                        report += `ADDITIONAL OBSERVATIONS (General)\n-------------------------------------\n`;
+                        report += `ADDITIONAL OBSERVATIONS (1475 & 1600)\n-------------------------------------\n`;
                         obsBySiteBoth.forEach(o => report += `<b>- ${o.text.trim()}</b>\n\n`);
                     }
                 }
@@ -812,13 +998,13 @@
                     document.getElementById('fireDanger').selectedIndex = 0;
                     checkHotworkStatus();
 
-                    // 2. Clear Inputs (excluding Work Permits)
+                    // 2. Clear Inputs (excluding Work Permits section)
                     document.querySelectorAll('input, select, textarea').forEach(el => {
-                        const fieldset = el.closest('fieldset');
-                        const group = fieldset ? fieldset.dataset.group : null;
+                        // Check if this input is inside the work permits container
+                        const isWorkPermitInput = el.closest('#work-permits-container');
                         
-                        // Don't clear if part of Work Permits group
-                        if (group !== 'Work Permits') {
+                        // Don't clear if it is a work permit input
+                        if (!isWorkPermitInput) {
                             // Don't clear metadata or buttons
                             if (el.type !== 'button' && el.id !== 'checklistDate' && el.id !== 'csoName') {
                                 if (el.type === 'checkbox' || el.type === 'radio') {
@@ -860,16 +1046,11 @@
                          const textField = document.getElementById(checkbox.id.replace('-check', '-text'));
                          if (textField) textField.classList.add('hidden');
                     });
-                    
-                    // 7. Reset Simple Checkboxes (Cold weather, Safety Walks)
-                    // Covered by generic step 2, but ensures specific non-grouped ones are caught?
-                    // The logic in step 2 catches everything not in "Work Permits" fieldset.
-                    // Safety walks are in "Site Inspections", Cold Weather in "Crane".
 
                     // 8. Hide Report Output
                     reportOutput.classList.add('hidden');
 
-                    // 9. Save clean state
+                    // 9. Save clean state (This will save empty data for everything else, but keep work permits if they exist in DOM)
                     saveData();
                 }
             });
@@ -887,12 +1068,12 @@
                 textArea.select();
                 try {
                     document.execCommand('copy');
-                    copyBtn.textContent = '¡Copiado!';
+                    copyBtn.textContent = 'Copied!';
                 } catch (err) {
-                    copyBtn.textContent = 'Error al Copiar';
+                    copyBtn.textContent = 'Error Copying';
                 }
                 document.body.removeChild(textArea);
-                setTimeout(() => { copyBtn.textContent = 'Copiar Reporte'; }, 2000);
+                setTimeout(() => { copyBtn.textContent = 'Copy Report'; }, 2000);
             });
 
             function exportReportToPdf() {
