@@ -735,7 +735,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function saveData() {
         const data = {};
         document.querySelectorAll('input:not([type="radio"]), select, textarea').forEach(el => {
-            if (el.id) data[el.id] = el.type==='checkbox' ? el.checked : el.value;
+            if (el.id) {
+                if (el.type==='checkbox') data[el.id] = el.checked;
+                else if (el.classList.contains('headcount-input')) data[el.id] = parseInt(el.value)||0;
+                else data[el.id] = el.value;
+            }
         });
 
         // Orientations
@@ -820,7 +824,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.querySelectorAll('input:not([type="radio"]), select, textarea').forEach(el => {
                     if (el.id && data[el.id] !== undefined) {
                         if (el.type==='checkbox') el.checked = data[el.id];
-                        else el.value = data[el.id];
+                        else if (el.classList.contains('headcount-input')) {
+                            el.value = parseInt(data[el.id]) || 0;
+                        } else {
+                            el.value = data[el.id];
+                        }
                     }
                 });
 
