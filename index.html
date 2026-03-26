@@ -5,1225 +5,1589 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Safety Checklist</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Raleway:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; }
-        .tab-active { border-bottom-color: #3b82f6; color: #3b82f6; font-weight: 600; }
-        .form-input, .form-select, .form-textarea {
-            border-radius: 0.5rem; border: 1px solid #d1d5db;
-            padding: 0.75rem 1rem; width: 100%;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none; border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59,130,246,0.4);
-        }
-        .card {
-            background-color: white; border-radius: 0.75rem; padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0/.1),0 2px 4px -2px rgb(0 0 0/.1);
-            margin-bottom: 1.5rem;
-        }
-        .btn { padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-align: center; cursor: pointer; transition: background-color 0.2s; }
-        .btn-primary { background-color: #3b82f6; color: white; }
-        .btn-primary:hover { background-color: #2563eb; }
-        .btn-secondary { background-color: #10b981; color: white; }
-        .btn-secondary:hover { background-color: #059669; }
-        .btn-gray { background-color: #6b7280; color: white; }
-        .btn-gray:hover { background-color: #4b5563; }
-        .btn-purple { background-color: #8b5cf6; color: white; }
-        .btn-purple:hover { background-color: #7c3aed; }
-        .btn-danger { background-color: #ef4444; color: white; padding: 0.5rem 1rem; }
-        .btn-danger:hover { background-color: #dc2626; }
-        .headcount-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(150px,1fr)); gap: 1rem; }
-        .task-item {
-            display: grid; grid-template-columns: 1fr; gap: 1rem;
-            align-items: center; padding: 0.75rem;
-            background-color: #f9fafb; border-radius: 0.5rem; border: 1px solid #e5e7eb;
-        }
-        @media (min-width: 768px) {
-            .task-item { grid-template-columns: 2fr 1fr 2fr; }
-            .task-item.with-site { grid-template-columns: 2fr 1fr 1fr 2fr; }
-        }
-        .observation-item, .permit-item, .orientation-item {
-            background-color: #f9fafb; border: 1px solid #e5e7eb;
-            border-radius: 0.5rem; padding: 1rem; margin-top: 1rem;
-        }
-        .orientation-item { background-color: #f0fdf4; border-color: #bbf7d0; }
-        .toggle-bg { transition: background-color 0.2s; }
-        .toggle-dot { transition: transform 0.2s; }
-        input:checked ~ .toggle-bg { background-color: #3b82f6; }
-        input:checked ~ .toggle-dot { transform: translateX(100%); }
+        body { font-family:'Inter',sans-serif; background:#f0f2f5; }
+        .tab-active { border-bottom-color:#003D52!important; color:#003D52!important; font-weight:700; }
+        .tab-btn { padding:0.65rem 0.6rem; border-bottom:3px solid transparent; font-size:0.72rem; font-weight:500; color:#6b7280; cursor:pointer; white-space:nowrap; transition:all 0.15s; }
+        .tab-btn:hover:not(.tab-active){ color:#003D52; border-bottom-color:#96C61C; }
+        .form-input,.form-select,.form-textarea{ border-radius:0.5rem; border:1px solid #d1d5db; padding:0.55rem 0.85rem; width:100%; transition:border-color 0.2s,box-shadow 0.2s; font-size:0.875rem; }
+        .form-input:focus,.form-select:focus,.form-textarea:focus{ outline:none; border-color:#003D52; box-shadow:0 0 0 2px rgba(0,61,82,0.2); }
+        .card{ background:white; border-radius:0.75rem; padding:1.25rem; box-shadow:0 4px 6px -1px rgb(0 0 0/.07),0 2px 4px -2px rgb(0 0 0/.05); margin-bottom:1rem; }
+        .btn{ padding:0.6rem 1.1rem; border-radius:0.5rem; font-weight:600; text-align:center; cursor:pointer; transition:background-color 0.2s; display:inline-block; font-size:0.85rem; }
+        .btn-primary{ background:#003D52; color:white; } .btn-primary:hover{ background:#002a39; }
+        .btn-green{ background:#96C61C; color:white; } .btn-green:hover{ background:#7faa14; }
+        .btn-gray{ background:#6b7280; color:white; } .btn-gray:hover{ background:#4b5563; }
+        .btn-purple{ background:#8b5cf6; color:white; } .btn-purple:hover{ background:#7c3aed; }
+        .btn-danger{ background:#ef4444; color:white; padding:0.4rem 0.85rem; } .btn-danger:hover{ background:#dc2626; }
+        .btn-sm{ padding:0.28rem 0.6rem; font-size:0.7rem; border-radius:0.35rem; font-weight:600; cursor:pointer; }
+        /* Headcount table */
+        .hc-table{ width:100%; border-collapse:collapse; }
+        .hc-table th{ font-size:0.72rem; font-weight:700; padding:0.45rem 0.6rem; text-align:center; }
+        .hc-table th.th-trade{ text-align:left; color:#374151; }
+        .hc-table th.th-1475{ color:#2563eb; background:#eff6ff; }
+        .hc-table th.th-1600{ color:#7c3aed; background:#f5f3ff; }
+        .hc-table th.th-1825{ color:#059669; background:#f0fdf4; }
+        .hc-table th.th-custom{ color:#d97706; background:#fffbeb; }
+        .hc-table td{ padding:0.3rem 0.45rem; border-bottom:1px solid #f3f4f6; }
+        .hc-table td.td-trade{ font-size:0.8rem; color:#374151; font-weight:500; }
+        .hc-table td.td-wdc{ font-size:0.8rem; color:#003D52; font-weight:700; }
+        .hc-table tr:hover td{ background:#fafafa; }
+        .hc-table tr.wdc-row td{ background:#f0f7ff; }
+        .hc-table tr.add-trade-row td{ background:#f9fafb; }
+        .hc-num-input{ width:52px; text-align:center; border:1px solid #d1d5db; border-radius:0.35rem; padding:0.28rem 0.15rem; font-size:0.82rem; }
+        .hc-num-input:focus{ outline:none; border-color:#003D52; }
+        .totals-row td{ font-weight:700; font-size:0.82rem; border-top:2px solid #e5e7eb; background:#f9fafb!important; }
+        /* Permit / orientation / obs items */
+        .observation-item,.permit-item,.orientation-item{ background:#f9fafb; border:1px solid #e5e7eb; border-radius:0.5rem; padding:0.85rem; margin-top:0.65rem; }
+        .orientation-item{ background:#f0fdf4; border-color:#bbf7d0; }
+        /* Toggle */
+        .toggle-bg{ transition:background-color 0.2s; }
+        .toggle-dot{ transition:transform 0.2s; }
+        input:checked~.toggle-bg{ background:#003D52; }
+        input:checked~.toggle-dot{ transform:translateX(100%); }
+        /* Equipment / crane cards */
+        .equipment-card{ background:#f9fafb; border:1px solid #e5e7eb; border-radius:0.5rem; padding:0.85rem; }
+        /* Site pills */
+        .site-pill{ font-size:0.68rem; padding:0.18rem 0.55rem; border-radius:9999px; border:1.5px solid; cursor:pointer; font-weight:600; transition:all 0.15s; display:inline-flex; align-items:center; gap:3px; }
+        .site-pill:not([class*="active-"]),.site-pill.inactive{ background:white; color:#6b7280; border-color:#d1d5db; }
+        .site-pill.active-1475{ background:#2563eb; color:white; border-color:#2563eb; }
+        .site-pill.active-1600{ background:#7c3aed; color:white; border-color:#7c3aed; }
+        .site-pill.active-1825{ background:#059669; color:white; border-color:#059669; }
+        .site-pill.active-Other{ background:#d97706; color:white; border-color:#d97706; }
+        .site-pill.add-site-pill{ border-style:dashed; color:#003D52; border-color:#003D52; }
+        .site-pill.delete-site-pill{ background:#fee2e2; color:#dc2626; border-color:#fca5a5; font-size:0.6rem; }
+        /* Section tabs */
+        #section-tabs{ overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+        #section-tabs::-webkit-scrollbar{ display:none; }
+        /* Manage sites panel */
+        #manage-sites-panel{ display:none; }
+        #manage-sites-panel.open{ display:block; }
+        /* Tag pill for "other" label inline */
+        .tag-chip{ display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; background:#e0f2fe; color:#0369a1; border-radius:9999px; padding:0.1rem 0.5rem; font-weight:600; }
+        /* Print handled via popup window — no @media print needed here */
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-3 md:p-5">
 <div class="max-w-4xl mx-auto">
-    <header class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Smart Safety Checklist</h1>
-        <p class="text-md text-gray-500">CSO Daily Log for Whistler Projects</p>
-    </header>
 
-    <!-- General Info -->
-    <div class="card">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<header class="text-center mb-4">
+    <h1 class="text-2xl font-bold" style="color:#003D52">Smart Safety Checklist</h1>
+    <p class="text-xs text-gray-500">CSO Daily Log — Whistler 2020 Development</p>
+</header>
+
+<!-- ═══ TOP CARD: Date / CSO / Conditions ═══ -->
+<div class="card">
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Date</label>
+            <input type="date" id="checklistDate" class="form-input">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">CSO Name</label>
+            <input type="text" id="csoName" class="form-input" placeholder="Your name">
+        </div>
+    </div>
+    <div class="border-t pt-3">
+        <div class="grid grid-cols-2 gap-3">
             <div>
-                <label for="checklistDate" class="block text-sm font-medium text-gray-700 mb-1">Checklist Date:</label>
-                <input type="date" id="checklistDate" name="checklistDate" class="form-input">
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Water Use</label>
+                <select id="waterUse" class="form-select"><option>L1</option><option>L2</option><option>L3</option></select>
             </div>
             <div>
-                <label for="csoName" class="block text-sm font-medium text-gray-700 mb-1">CSO Name:</label>
-                <input type="text" id="csoName" name="csoName" class="form-input" placeholder="Enter your name">
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Fire Danger</label>
+                <select id="fireDanger" class="form-select"><option>Low</option><option>Moderate</option><option>High</option><option>Extreme</option></select>
             </div>
         </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="mb-6 border-b border-gray-200">
-        <nav class="flex -mb-px space-x-6">
-            <button id="tab-morning" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none tab-active">Morning Checklist</button>
-            <button id="tab-afternoon" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none">Afternoon Checklist</button>
-        </nav>
-    </div>
-
-    <!-- MORNING -->
-    <div id="content-morning">
-        <div class="card">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Site Conditions</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="waterUse" class="block text-sm font-medium text-gray-700 mb-1">Water Use</label>
-                    <select id="waterUse" class="form-select"><option>L1</option><option>L2</option><option>L3</option></select>
-                </div>
-                <div>
-                    <label for="fireDanger" class="block text-sm font-medium text-gray-700 mb-1">Fire Danger</label>
-                    <select id="fireDanger" class="form-select"><option>Low</option><option>Moderate</option><option>High</option><option>Extreme</option></select>
-                </div>
-            </div>
-            <div class="mt-4 p-4 rounded-lg bg-gray-50">
-                <p id="hotwork-status" class="text-lg font-semibold text-center"></p>
-            </div>
-        </div>
-
-        <!-- Headcount 1475 -->
-        <div class="card">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Site Headcount: 1475 Mount Fee Road</h2>
-            <div class="headcount-grid" id="headcount-1475"></div>
-            <div class="text-right mt-4 font-bold text-lg text-gray-800">1475 Total: <span id="total-1475">0</span></div>
-        </div>
-
-        <!-- Headcount 1600 -->
-        <div class="card">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Site Headcount: 1600 Mount Fee Road</h2>
-            <div class="headcount-grid" id="headcount-1600"></div>
-            <div class="text-right mt-4 font-bold text-lg text-gray-800">1600 Total: <span id="total-1600">0</span></div>
-        </div>
-
-        <!-- Headcount 1825 (NEW) -->
-        <div class="card">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Site Headcount: 1825 Mount Fee Road</h2>
-            <div class="headcount-grid" id="headcount-1825"></div>
-            <div class="text-right mt-4 font-bold text-lg text-gray-800">1825 Total: <span id="total-1825">0</span></div>
-        </div>
-
-        <div class="card">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Orientations, Permits & Inspections</h2>
-
-            <!-- ORIENTATIONS - dynamic system -->
-            <div class="mb-6 p-4 bg-green-50 rounded-lg border border-green-100">
-                <h3 class="text-lg font-bold text-green-800 mb-1">Orientations</h3>
-                <p class="text-sm text-green-600 mb-3">Add each orientation with its site and type.</p>
-                <div id="orientations-container" class="space-y-3"></div>
-                <button id="add-orientation-btn" class="btn btn-secondary mt-3 w-full md:w-auto">+ Add Orientation</button>
-            </div>
-
-            <!-- Work Permits -->
-            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                <h3 class="text-lg font-bold text-blue-800 mb-2">Active Work Permits</h3>
-                <p class="text-sm text-blue-600 mb-4">Review and manage active permits for today.</p>
-                <div id="work-permits-container" class="space-y-3"></div>
-                <button id="add-permit-btn" class="btn btn-secondary mt-3 w-full md:w-auto">+ Add Work Permit</button>
-            </div>
-
-            <div id="morning-tasks" class="space-y-4"></div>
-        </div>
-    </div>
-
-    <!-- AFTERNOON -->
-    <div id="content-afternoon" class="hidden">
-        <div class="card">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Afternoon Tasks & Observations</h2>
-            <div id="afternoon-tasks" class="space-y-4"></div>
-
-            <!-- SAFETY MEETINGS - dynamic -->
-            <div class="mt-6 border-t pt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-100">
-                <h3 class="text-lg font-bold text-yellow-800 mb-1">Safety Meetings</h3>
-                <p class="text-sm text-yellow-700 mb-3">Add one entry per site where the meeting was held.</p>
-                <div id="safety-meetings-container" class="space-y-3"></div>
-                <button id="add-meeting-btn" type="button" class="btn btn-secondary mt-3 w-full md:w-auto">+ Add Safety Meeting</button>
-            </div>
-
-            <!-- SITE INCIDENTS - dynamic -->
-            <div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-100">
-                <h3 class="text-lg font-bold text-red-800 mb-1">Site Incidents</h3>
-                <p class="text-sm text-red-700 mb-3">Log each incident with its site, type, and details.</p>
-                <div id="site-incidents-container" class="space-y-3"></div>
-                <button id="add-incident-btn" type="button" class="btn btn-danger mt-3 w-full md:w-auto">+ Add Incident</button>
-            </div>
-
-            <!-- WEEKEND WORK - dynamic -->
-            <div class="mt-4 p-4 bg-purple-50 rounded-lg border border-purple-100">
-                <h3 class="text-lg font-bold text-purple-800 mb-1">Weekend Work</h3>
-                <p class="text-sm text-purple-700 mb-3">Log weekend work per site.</p>
-                <div id="weekend-work-container" class="space-y-3"></div>
-                <button id="add-weekend-btn" type="button" class="btn btn-purple mt-3 w-full md:w-auto">+ Add Weekend Work</button>
-            </div>
-
-            <div class="mt-6 border-t pt-4">
-                <label class="block text-lg font-semibold text-gray-700 mb-2">Additional Observations</label>
-                <div id="additional-observations-container"></div>
-                <button id="add-observation-btn" type="button" class="btn btn-primary mt-2">Add Observation</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="mt-8 space-y-4">
-        <button id="generateFullReport" class="btn btn-purple w-full">Generate Full Report</button>
-        <button id="resetForm" class="btn btn-danger w-full">Reset Form</button>
-        <p class="text-xs text-center text-gray-500 italic">*Reset will clear everything EXCEPT Work Permits.</p>
-    </div>
-
-    <!-- Report -->
-    <div id="report-output" class="card mt-8 hidden">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">Generated Report</h2>
-        <div id="report-content" class="bg-gray-50 p-4 rounded-lg whitespace-pre-wrap text-sm text-gray-700"></div>
-        <div class="flex flex-col md:flex-row gap-4 mt-4">
-            <button id="exportPdf" class="btn btn-primary flex-1">Export PDF</button>
-            <button id="copyReport" class="btn btn-gray flex-1">Copy Report</button>
+        <div class="mt-2 p-2 rounded-lg bg-gray-50">
+            <p id="hotwork-status" class="text-sm font-bold text-center"></p>
         </div>
     </div>
 </div>
 
+<!-- ═══ SITE MANAGER ═══ -->
+<div class="card mb-3 p-3">
+    <div class="flex items-center justify-between">
+        <span class="text-sm font-semibold" style="color:#003D52">Active Sites</span>
+        <button id="toggle-site-manager" class="btn btn-sm btn-primary">Manage Sites</button>
+    </div>
+    <div id="site-pills-display" class="flex flex-wrap gap-2 mt-2"></div>
+    <div id="manage-sites-panel" class="mt-3 border-t pt-3">
+        <p class="text-xs text-gray-500 mb-2">Add or remove project sites. Sites are used everywhere (headcount columns, site selectors, inspections).</p>
+        <div class="flex gap-2">
+            <input type="text" id="new-site-input" class="form-input text-sm" placeholder="New site name (e.g. 2050)..." style="max-width:200px">
+            <button id="add-site-btn" class="btn btn-green btn-sm">+ Add</button>
+        </div>
+        <div id="site-delete-list" class="mt-3 space-y-1"></div>
+    </div>
+</div>
+
+<!-- ═══ TABS ═══ -->
+<div class="mb-3 border-b border-gray-200" id="section-tabs">
+    <nav class="flex -mb-px">
+        <button class="tab-btn tab-active" data-tab="headcount">Headcount</button>
+        <button class="tab-btn" data-tab="inspections">Inspections</button>
+        <button class="tab-btn" data-tab="orientations">Orientations</button>
+        <button class="tab-btn" data-tab="permits">Permits</button>
+        <button class="tab-btn" data-tab="crane">Crane</button>
+        <button class="tab-btn" data-tab="equipment">Equipment</button>
+        <button class="tab-btn" data-tab="meetings">Meetings</button>
+        <button class="tab-btn" data-tab="incidents">Incidents</button>
+        <button class="tab-btn" data-tab="weekend">Weekend</button>
+        <button class="tab-btn" data-tab="observations">Observations</button>
+    </nav>
+</div>
+
+<!-- ═══ TAB: HEADCOUNT ═══ -->
+<div id="tab-headcount" class="tab-content">
+    <div class="card">
+        <h2 class="text-base font-semibold mb-1" style="color:#003D52">Site Headcount</h2>
+        <p class="text-xs text-gray-500 mb-3">WDC counted once (all sites). All trades show columns per active site.</p>
+        <div class="overflow-x-auto">
+            <table class="hc-table">
+                <thead><tr id="hc-thead-row"></tr></thead>
+                <tbody id="hc-tbody"></tbody>
+            </table>
+        </div>
+        <div id="hc-totals-row" class="mt-3 flex gap-2 flex-wrap"></div>
+        <div class="mt-1 text-right font-bold text-gray-700 text-sm">Grand Total: <span id="grand-total">0</span></div>
+    </div>
+</div>
+
+<!-- ═══ TAB: INSPECTIONS ═══ -->
+<div id="tab-inspections" class="tab-content hidden">
+    <div class="card">
+        <h2 class="text-base font-semibold mb-3" style="color:#003D52">Site Inspections</h2>
+        <div id="morning-tasks" class="space-y-2"></div>
+    </div>
+</div>
+
+<!-- ═══ TAB: ORIENTATIONS ═══ -->
+<div id="tab-orientations" class="tab-content hidden">
+    <div class="card">
+        <h2 class="text-base font-semibold mb-1" style="color:#003D52">Orientations</h2>
+        <div id="orientations-container" class="space-y-2"></div>
+        <button id="add-orientation-btn" class="btn btn-green mt-3 w-full md:w-auto">+ Add Orientation</button>
+    </div>
+</div>
+
+<!-- ═══ TAB: PERMITS ═══ -->
+<div id="tab-permits" class="tab-content hidden">
+    <div class="card">
+        <h2 class="text-base font-semibold mb-1" style="color:#003D52">Active Work Permits</h2>
+        <p class="text-xs text-gray-500 mb-3">Preserved on reset. Remove only when expired.</p>
+        <div id="work-permits-container" class="space-y-2"></div>
+        <button id="add-permit-btn" class="btn btn-green mt-3 w-full md:w-auto">+ Add Work Permit</button>
+    </div>
+</div>
+
+<!-- ═══ TAB: CRANE ═══ -->
+<div id="tab-crane" class="tab-content hidden">
+    <div class="card">
+        <h2 class="text-base font-semibold mb-1" style="color:#003D52">Crane</h2>
+        <p class="text-xs text-gray-500 mb-3">One card per crane. Multiple cranes / sites supported.</p>
+        <div id="crane-container" class="space-y-4"></div>
+        <button id="add-crane-btn" class="btn btn-green mt-3 w-full md:w-auto">+ Add Crane</button>
+    </div>
+</div>
+
+<!-- ═══ TAB: EQUIPMENT ═══ -->
+<div id="tab-equipment" class="tab-content hidden">
+    <div class="card">
+        <h2 class="text-base font-semibold mb-1" style="color:#003D52">Mobile Equipment</h2>
+        <div id="mobile-equipment-container" class="space-y-2"></div>
+        <button id="add-equipment-btn" class="btn btn-green mt-3 w-full md:w-auto">+ Add Equipment</button>
+    </div>
+</div>
+
+<!-- ═══ TAB: MEETINGS ═══ -->
+<div id="tab-meetings" class="tab-content hidden">
+    <div class="card">
+        <h2 class="text-base font-semibold mb-1" style="color:#003D52">Safety Meetings</h2>
+        <div id="safety-meetings-container" class="space-y-2"></div>
+        <button id="add-meeting-btn" class="btn btn-green mt-3 w-full md:w-auto">+ Add Safety Meeting</button>
+    </div>
+</div>
+
+<!-- ═══ TAB: INCIDENTS ═══ -->
+<div id="tab-incidents" class="tab-content hidden">
+    <div class="card">
+        <h2 class="text-base font-semibold mb-1" style="color:#003D52">Site Incidents</h2>
+        <div id="site-incidents-container" class="space-y-2"></div>
+        <button id="add-incident-btn" class="btn btn-danger mt-3 w-full md:w-auto">+ Add Incident</button>
+    </div>
+</div>
+
+<!-- ═══ TAB: WEEKEND ═══ -->
+<div id="tab-weekend" class="tab-content hidden">
+    <div class="card">
+        <h2 class="text-base font-semibold mb-3" style="color:#003D52">Weekend Work</h2>
+        <div id="weekend-work-container" class="space-y-2"></div>
+        <button id="add-weekend-btn" class="btn btn-purple mt-3 w-full md:w-auto">+ Add Weekend Work</button>
+    </div>
+</div>
+
+<!-- ═══ TAB: OBSERVATIONS ═══ -->
+<div id="tab-observations" class="tab-content hidden">
+    <div class="card">
+        <h2 class="text-base font-semibold mb-3" style="color:#003D52">Additional Observations</h2>
+        <div id="additional-observations-container"></div>
+        <button id="add-observation-btn" class="btn btn-primary mt-3">Add Observation</button>
+    </div>
+</div>
+
+<!-- ═══ ACTIONS ═══ -->
+<div class="mt-5 space-y-2">
+    <button id="generateFullReport" class="btn btn-primary w-full">Generate Full Report (by Site)</button>
+    <button id="resetForm" class="btn btn-danger w-full">Reset Form</button>
+    <p class="text-xs text-center text-gray-400 italic">*Reset clears all data EXCEPT Work Permits.</p>
+</div>
+
+<!-- ═══ REPORT ═══ -->
+<div id="report-output" class="card mt-5 hidden" style="border-top:4px solid #96C61C">
+    <div class="flex items-center gap-3 mb-3">
+        <div style="width:6px;height:28px;background:#96C61C;border-radius:3px"></div>
+        <h2 class="text-base font-bold" style="color:#003D52;font-family:'Raleway',sans-serif;letter-spacing:0.04em">Generated Report</h2>
+    </div>
+    <div id="report-content" style="
+        background:#f8fafc;
+        border:1px solid #e2e8f0;
+        border-left:4px solid #003D52;
+        border-radius:0.5rem;
+        padding:1.25rem 1.5rem;
+        white-space:pre-wrap;
+        font-family:'Raleway',sans-serif;
+        font-size:0.78rem;
+        line-height:1.7;
+        color:#1e293b;
+    "></div>
+    <div class="flex gap-3 mt-3">
+        <button id="exportPdf" class="btn btn-primary flex-1" style="font-family:'Raleway',sans-serif;letter-spacing:0.03em">Print / Save PDF</button>
+        <button id="copyReport" class="btn btn-gray flex-1" style="font-family:'Raleway',sans-serif">Copy Report</button>
+    </div>
+</div>
+
+</div><!-- /max-w -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 
-    // ── DATA ──────────────────────────────────────────────
-    const headcountTrades1475 = [
-        'WDC','Labour','Siding','Plumbing','Electrical','Roofing',
-        'Drywall','Fire Protection','Windows','HVAC',
-        'Masonry','Painting','Finishing','Insulation','Flooring',
-        'Exterior Painting','Railing','Landscaping','Elevators','Other'
-    ];
-    const headcountTrades1600 = [
-        'Excavation','Reinforcing','Forming','Plumbing','Masonry','Framing','Electrical','Other'
-    ];
-    // 1825 – Stage 1: Site clearing & prep trades
-    const headcountTrades1825 = [
-        'WDC',
-        'Tree Removal',
-        'Excavation',
-        'Blasting',
-        'Surveying',
-        'Environmental Monitoring',
-        'Erosion Control',
-        'Labour',
-        'Other'
-    ];
+// ══════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════
+const BASE_SITES = ['1475','1600','1825'];
 
-    const craneInspectors   = ['Noah C.','Eric J.','Miguel M.','Mahlon Taylor','Mike Butcher','Dan Hirst','Tim C.'];
-    const bjordalInspectors = ['Mike Butcher','Mahlon Taylor','Tim C.'];
+const BASE_TRADES = [
+    { name:'WDC', wdc:true },
+    { name:'Labour' },{ name:'Plumbing' },{ name:'Electrical' },{ name:'HVAC' },{ name:'Masonry' },
+    { name:'Siding' },{ name:'Roofing' },{ name:'Drywall' },{ name:'Fire Protection' },{ name:'Windows' },
+    { name:'Painting' },{ name:'Finishing' },{ name:'Insulation' },{ name:'Flooring' },
+    { name:'Exterior Painting' },{ name:'Railing' },{ name:'Landscaping' },{ name:'Elevators' },
+    { name:'Excavation' },{ name:'Reinforcing' },{ name:'Forming' },{ name:'Framing' },
+    { name:'Tree Removal' },{ name:'Blasting' },{ name:'Surveying' },
+    { name:'Environmental Monitoring' },{ name:'Erosion Control' },
+];
 
-    // All possible sites (used throughout)
-    const allSites = ['1475','1600','1825','All Sites'];
+const CRANE_INSPECTORS   = ['Noah C.','Eric J.','Miguel M.','Mahlon Taylor','Mike Butcher','Dan Hirst','Tim C.'];
+const BJORDAL_INSPECTORS = ['Mike Butcher','Mahlon Taylor','Tim C.'];
 
-    const orientationTypes = [
-        'Young Worker Orientation',
-        'New Worker Orientation',
-        'Site-Specific Orientation',
-        'Visitor Orientation',
-        'Other'
-    ];
+const EQUIPMENT_LIST = [
+    { name:'Lemyre Boom Lift (Green)',    site:'1475', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
+    { name:'Lemyre Boom Lift (Blue)',     site:'1475', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
+    { name:'Lemyre Boom Lift (Orange)',   site:'1475', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
+    { name:'WDC Telehandler',             site:'1475', inspectors:['Dan M.','Daniel-A. A.','Austin W.','Jordan W.','Dylan','Dan E.','Shayne L.'] },
+    { name:'Jensen Telehandler',          site:'1600', inspectors:['Noah C.','Eric J.','Miguel M.','Pat Foster'] },
+    { name:'Jensen Bobcat',               site:'1600', inspectors:['Noah C.','Eric J.','Miguel M.','Pat Foster'] },
+    { name:'Jordan Red Mini Telehandler', site:'1600', inspectors:['Noah C.','Eric J.','Miguel M.','Pat Foster'] },
+    { name:'Bjordal Telehandler',         site:'1600', inspectors:BJORDAL_INSPECTORS },
+    { name:'Bjordal Boom Lift',           site:'1600', inspectors:BJORDAL_INSPECTORS },
+    { name:'Painter Boomlift Blue',       site:'1475', inspectors:['Mathieu L.','Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
+];
 
-    const morningTasks = [
-        { group: 'Site Inspections', tasks: [
-            { name: 'Safety Walk 1475', type: 'single_checkbox_walk' },
-            { name: 'Safety Walk 1600', type: 'single_checkbox_walk' },
-            { name: 'Safety Walk 1825', type: 'single_checkbox_walk' },
-            { name: 'Weekly Safety Site Inspection 1475', type: 'single_checkbox_walk' },
-            { name: 'Weekly Safety Site Inspection 1600', type: 'single_checkbox_walk' },
-            { name: 'Weekly Safety Site Inspection 1825', type: 'single_checkbox_walk' }
-        ]}
-    ];
+const OVERLAP_COMPANIES = ['Jensen Construction','Corona Excavations','Blacktail Reinforcing','Astra Concrete','Cardinal Concrete','Corridor Concrete','Bjordal'];
+const ORIENTATION_TYPES = ['Young Worker Orientation','New Worker Orientation','Site-Specific Orientation','Visitor Orientation'];
+const PERMIT_TYPES      = ['Silica Dust Exposure Plan','Hot Work Permit','Fall Protection Plan','Critical Lift Plan','Confined Space Entry Permit'];
+const INCIDENT_TYPES    = ['First Aid','Near Miss','Incident Investigation Report','Claim Management'];
 
-    const afternoonTasks = [
-        { group: 'Crane', tasks: [
-            { name: 'Crane Daily Inspection',   type: 'inspector', inspectors: craneInspectors },
-            { name: 'Rigging Daily Inspection', type: 'inspector', inspectors: craneInspectors },
-            { name: 'Overlapping Procedure', type: 'multiselect', options: [
-                'Jensen Construction','Corona Excavations','Blacktail Reinforcing',
-                'Astra Concrete','Cardinal Concrete','Corridor Concrete','Bjordal'
-            ]},
-            'Cold Weather Crane Inspection'
-        ]},
-        { group: 'Mobile Equipment (1475 & 1600)', tasks: [
-            { name: 'Lemyre Boom Lift (Green) Daily Inspection',  type: 'inspector', inspectors: ['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
-            { name: 'Lemyre Boom Lift (Blue) Daily Inspection',   type: 'inspector', inspectors: ['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
-            { name: 'Lemyre Boom Lift (Orange) Daily Inspection', type: 'inspector', inspectors: ['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
-            { name: 'WDC Telehandler Daily Inspection',           type: 'inspector', inspectors: ['Dan M.','Daniel-A. A.','Austin W.','Jordan W.','Dylan','Dan E.','Shayne L.'] },
-            { name: 'Jensen Telehandler Daily Inspection',        type: 'inspector', inspectors: ['Noah C.','Eric J.','Miguel M.','Pat Foster'] },
-            { name: 'Jensen Bobcat Daily Inspection',             type: 'inspector', inspectors: ['Noah C.','Eric J.','Miguel M.','Pat Foster'] },
-            { name: 'Jordan Red Mini Telehandler Daily Inspection',type: 'inspector', inspectors: ['Noah C.','Eric J.','Miguel M.','Pat Foster'] },
-            { name: 'Bjordal Telehandler Daily Inspection',       type: 'inspector', inspectors: bjordalInspectors },
-            { name: 'Bjordal Boom Lift daily inspection',         type: 'inspector', inspectors: bjordalInspectors },
-            { name: 'Painter Boomlift Blue Daily Inspection',     type: 'inspector', inspectors: ['Mathieu L.','Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] }
-        ]},
-        // Safety Meetings, Site Incidents and Weekend Work are now dynamic sections (rendered separately)
-    ];
+const DEFAULT_PERMITS = [
+    { type:'Silica Dust Exposure Plan', site:'1475', contractor:'Lemyre (Cladding assembly)' },
+    { type:'Silica Dust Exposure Plan', site:'1475', contractor:'CMO Flooring (Mixing and pouring cement)' },
+    { type:'Silica Dust Exposure Plan', site:'1475', contractor:'Terracraft (cutting tiles)' },
+    { type:'Silica Dust Exposure Plan', site:'1475', contractor:'Tantalus Flooring (Mixing and pouring cement)' },
+    { type:'Fall Protection Plan', site:'1600', contractor:'Bjordal (Framing and erecting walls on 1600)' },
+    { type:'Fall Protection Plan', site:'1475', contractor:'Lemyre (cladding exterior and roof of building 1 and 2)' },
+    { type:'Fall Protection Plan', site:'1475', contractor:'Terracraft (B1 B2 L3 L4 installing Tiles on Balconies)' },
+    { type:'Fall Protection Plan', site:'1475', contractor:'Tantalus Flooring (receiving materials)' },
+    { type:'Fall Protection Plan', site:'1475', contractor:'CMO Flooring (receiving materials)' },
+    { type:'Fall Protection Plan', site:'1475', contractor:'Linton Painting (receiving materials)' },
+    { type:'Fall Protection Plan', site:'1475', contractor:'Coastal Mountain Mechanical (receiving Materials)' },
+    { type:'Fall Protection Plan', site:'1475', contractor:'AMC (Receiving materials from balcony L3&L4 B1&B2)' },
+];
 
-    const permitTypes = [
-        'Silica Dust Exposure Plan','Hot Work Permit','Fall Protection Plan',
-        'Critical Lift Plan','Confined Space Entry Permit','Other'
-    ];
+// ══════════════════════════════════════════════════════
+// SITE MANAGEMENT (persisted in localStorage)
+// ══════════════════════════════════════════════════════
+function getCustomSites() { return JSON.parse(localStorage.getItem('customSites_v5')||'[]'); }
+function saveCustomSites(arr) { localStorage.setItem('customSites_v5', JSON.stringify(arr)); }
+function getAllSites() { return [...BASE_SITES, ...getCustomSites()]; }
+function getAllTrades() {
+    const custom = JSON.parse(localStorage.getItem('customTrades_v5')||'[]');
+    return [...BASE_TRADES, ...custom.map(n=>({name:n}))];
+}
+function saveCustomTrades(arr) { localStorage.setItem('customTrades_v5', JSON.stringify(arr)); }
+function getCustomTrades() { return JSON.parse(localStorage.getItem('customTrades_v5')||'[]'); }
 
-    const defaultActivePermits = [
-        { type: 'Silica Dust Exposure Plan', site: '1475', contractor: 'Lemyre (Cladding assembly)' },
-        { type: 'Silica Dust Exposure Plan', site: '1475', contractor: 'CMO Flooring (Mixing and pouring cement)' },
-        { type: 'Silica Dust Exposure Plan', site: '1475', contractor: 'Terracraft (cutting tiles)' },
-        { type: 'Silica Dust Exposure Plan', site: '1475', contractor: 'Tantalus Flooring (Mixing and pouring cement)' },
-        { type: 'Fall Protection Plan', site: '1600', contractor: 'Bjordal (Framing and erecting walls on 1600)' },
-        { type: 'Fall Protection Plan', site: '1475', contractor: 'Lemyre (cladding exterior and roof of building 1 and 2)' },
-        { type: 'Fall Protection Plan', site: '1475', contractor: 'Terracraft (working on B1, B2 L3 L4 installing Tiles on Balconies)' },
-        { type: 'Fall Protection Plan', site: '1475', contractor: 'Tantalus Flooring (receiving materials)' },
-        { type: 'Fall Protection Plan', site: '1475', contractor: 'CMO Flooring (receiving materials)' },
-        { type: 'Fall Protection Plan', site: '1475', contractor: 'Linton Painting (receiving materials)' },
-        { type: 'Fall Protection Plan', site: '1475', contractor: 'Coastal Mountain Mechanical (receiving Materials)' },
-        { type: 'Fall Protection Plan', site: '1475', contractor: 'AMC (Receiving materials from balcony L3&L4 B1&B2)' }
-    ];
+function siteColor(s) {
+    if(s==='1475') return '#2563eb';
+    if(s==='1600') return '#7c3aed';
+    if(s==='1825') return '#059669';
+    return '#d97706';
+}
 
-    const siteSpecificGroups = ['Site Incidents'];
-
-    // ── ELEMENT REFS ──────────────────────────────────────
-    const checklistDate       = document.getElementById('checklistDate');
-    const csoName             = document.getElementById('csoName');
-    const waterUse            = document.getElementById('waterUse');
-    const fireDanger          = document.getElementById('fireDanger');
-    const hotworkStatus       = document.getElementById('hotwork-status');
-    const tabMorning          = document.getElementById('tab-morning');
-    const tabAfternoon        = document.getElementById('tab-afternoon');
-    const contentMorning      = document.getElementById('content-morning');
-    const contentAfternoon    = document.getElementById('content-afternoon');
-    const hc1475              = document.getElementById('headcount-1475');
-    const hc1600              = document.getElementById('headcount-1600');
-    const hc1825              = document.getElementById('headcount-1825');
-    const total1475El         = document.getElementById('total-1475');
-    const total1600El         = document.getElementById('total-1600');
-    const total1825El         = document.getElementById('total-1825');
-    const morningTasksContainer   = document.getElementById('morning-tasks');
-    const afternoonTasksContainer = document.getElementById('afternoon-tasks');
-    const generateFullReportBtn   = document.getElementById('generateFullReport');
-    const reportOutput        = document.getElementById('report-output');
-    const reportContent       = document.getElementById('report-content');
-    const copyBtn             = document.getElementById('copyReport');
-    const exportPdfBtn        = document.getElementById('exportPdf');
-    const addObservationBtn   = document.getElementById('add-observation-btn');
-    const observationsContainer   = document.getElementById('additional-observations-container');
-    const resetFormBtn        = document.getElementById('resetForm');
-    const workPermitsContainer    = document.getElementById('work-permits-container');
-    const addPermitBtn        = document.getElementById('add-permit-btn');
-    const orientationsContainer   = document.getElementById('orientations-container');
-    const addOrientationBtn   = document.getElementById('add-orientation-btn');
-
-    // ── HEADCOUNT BUILDER ─────────────────────────────────
-    function createInput(trade, site) {
-        const id = `hc-${site}-${trade.toLowerCase().replace(/ /g,'-')}`;
-        if (trade === 'Other') {
-            return `<div class="col-span-1 md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Other</label>
-                <div class="flex items-center gap-2">
-                    <input type="number" id="${id}-count" class="form-input headcount-input w-24 flex-shrink-0" data-site="${site}" min="0" value="0">
-                    <input type="text" id="${id}-name" class="form-input" placeholder="Specify name">
-                </div></div>`;
-        }
-        return `<div>
-            <label for="${id}" class="block text-sm font-medium text-gray-700 mb-1">${trade}</label>
-            <input type="number" id="${id}" class="form-input headcount-input" data-site="${site}" min="0" value="0">
-        </div>`;
-    }
-    headcountTrades1475.forEach(t => hc1475.innerHTML += createInput(t,'1475'));
-    headcountTrades1600.forEach(t => hc1600.innerHTML += createInput(t,'1600'));
-    headcountTrades1825.forEach(t => hc1825.innerHTML += createInput(t,'1825'));
-
-    // ── SITE RADIO BUTTONS HTML helper ───────────────────
-    function siteRadiosHtml(nameAttr, selected) {
-        return allSites.map(s =>
-            `<label class="inline-flex items-center">
-                <input type="radio" name="${nameAttr}" value="${s}" class="h-4 w-4 text-blue-600"
-                    ${selected === s ? 'checked' : ''}>
-                <span class="ml-1 text-sm">${s}</span>
-            </label>`
-        ).join('');
-    }
-
-    // ── ORIENTATIONS (dynamic) ────────────────────────────
-    function addOrientationItem(ori = { type: 'New Worker Orientation', site: '1475', worker: '' }) {
-        const uid = `ori-${Date.now()}-${Math.floor(Math.random()*1000)}`;
-        const typeOptions = orientationTypes.map(t =>
-            `<option ${t === ori.type ? 'selected' : ''}>${t}</option>`
-        ).join('');
-        const div = document.createElement('div');
-        div.className = 'orientation-item relative';
-        div.innerHTML = `
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Type</label>
-                    <select class="form-select text-sm orientation-type">${typeOptions}</select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Site</label>
-                    <div class="flex flex-wrap gap-x-3 gap-y-1 mt-1">
-                        ${siteRadiosHtml('oriSite-'+uid, ori.site)}
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Worker / Notes</label>
-                    <input type="text" class="form-input text-sm orientation-worker" placeholder="Worker name or notes..." value="${ori.worker || ''}">
-                </div>
-            </div>
-            <button type="button" class="btn btn-danger absolute top-2 right-2 text-xs px-2 py-1 remove-orientation-btn">Remove</button>
-        `;
-        orientationsContainer.appendChild(div);
-        div.querySelectorAll('input, select').forEach(el => el.addEventListener('input', saveData));
-        div.querySelector('.remove-orientation-btn').addEventListener('click', () => { div.remove(); saveData(); });
-    }
-    addOrientationBtn.addEventListener('click', () => { addOrientationItem(); saveData(); });
-
-    // ── TASK GROUPS RENDERER ──────────────────────────────
-    function renderTaskGroups(tasksArray, containerEl) {
-        tasksArray.forEach(group => {
-            const isSiteSpecific = siteSpecificGroups.includes(group.group);
-            const isSafetyMeeting = group.group === 'Safety Meetings';
-            let html = `<fieldset class="border-t pt-4" data-group="${group.group}">
-                <legend class="text-lg font-semibold text-gray-700 px-2">${group.group}</legend>
-                <div class="space-y-3 mt-2">`;
-
-            group.tasks.forEach(task => {
-                const taskName = typeof task === 'object' ? task.name : task;
-                const taskId   = taskName.toLowerCase().replace(/[^a-z0-9]/g,'');
-
-                if (typeof task === 'object' && task.type === 'single_checkbox_walk') {
-                    html += `<div class="task-item">
-                        <span class="text-sm text-gray-800">${task.name}</span>
-                        <label class="flex items-center">
-                            <input type="checkbox" id="${taskId}-completed" class="h-5 w-5 rounded text-blue-600 mr-2">
-                            Completed
-                        </label>
-                    </div>`;
-
-                } else if (typeof task === 'object' && task.type === 'inspector') {
-                    const opts = [...(task.inspectors||[]),'Other'].map(i => `<option>${i}</option>`).join('');
-                    html += `<div class="p-4 bg-gray-50 rounded-lg space-y-2 border border-gray-200">
-                        <div class="flex items-center justify-between">
-                            <span class="font-semibold text-gray-800">${task.name}</span>
-                            <label for="toggle-${taskId}" class="flex items-center cursor-pointer">
-                                <span class="mr-3 text-gray-700">Done</span>
-                                <div class="relative">
-                                    <input type="checkbox" id="toggle-${taskId}" class="sr-only equipment-toggle" data-details-id="details-${taskId}">
-                                    <div class="toggle-bg block bg-gray-300 w-12 h-7 rounded-full"></div>
-                                    <div class="toggle-dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full"></div>
-                                </div>
-                            </label>
-                        </div>
-                        <div id="details-${taskId}" class="hidden pl-4 border-l-2 border-gray-200 mt-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Inspected by:</label>
-                            <div class="flex flex-col sm:flex-row gap-2">
-                                <select id="select-${taskId}" class="form-select inspector-select" data-other-id="other-${taskId}">${opts}</select>
-                                <input type="text" id="other-${taskId}" class="form-input hidden" placeholder="Other inspector...">
-                            </div>
-                        </div>
-                    </div>`;
-
-                } else if (typeof task === 'object' && task.type === 'multiselect') {
-                    const checks = task.options.map(opt => {
-                        const oid = `${taskId}-${opt.toLowerCase().replace(/ /g,'-')}`;
-                        return `<label class="flex items-center p-2 bg-white rounded border border-gray-200">
-                            <input type="checkbox" id="${oid}" name="${taskId}" value="${opt}" class="h-4 w-4 rounded text-blue-600">
-                            <span class="ml-2 text-sm">${opt}</span></label>`;
-                    }).join('');
-                    html += `<div class="p-4 bg-gray-50 rounded-lg space-y-2 border border-gray-200">
-                        <span class="font-semibold text-gray-800">${task.name}</span>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">${checks}</div>
-                        <div class="mt-2">
-                            <label class="flex items-center p-2 bg-white rounded border border-gray-200">
-                                <input type="checkbox" id="${taskId}-other-check" class="h-4 w-4 rounded text-blue-600 other-checkbox">
-                                <span class="ml-2 text-sm">Other:</span>
-                            </label>
-                            <input type="text" id="${taskId}-other-text" class="form-input mt-2 hidden" placeholder="Specify other company...">
-                        </div>
-                    </div>`;
-
-                } else {
-                    const isSimpleCrane = typeof task === 'string' && group.group === 'Crane';
-                    if (isSimpleCrane) {
-                        html += `<div class="task-item">
-                            <span class="text-sm text-gray-800">${taskName}</span>
-                            <label class="flex items-center">
-                                <input type="checkbox" id="${taskId}-completed" class="h-5 w-5 rounded text-blue-600 mr-2">
-                                Completed
-                            </label>
-                        </div>`;
-                    } else {
-                        const isDefaultNA = group.default === 'N/A';
-                        // Site selector for site-specific groups AND safety meetings
-                        let siteSel = '';
-                        if (isSiteSpecific || isSafetyMeeting) {
-                            // Include 1825 in site selectors
-                            const siteOpts = ['1475','1600','1825','All Sites'].map(s =>
-                                `<option value="${s}">Site: ${s}</option>`).join('');
-                            siteSel = `<div class="w-full my-2 md:my-0">
-                                <select id="site-${taskId}" class="form-select afternoon-input w-full text-sm">${siteOpts}</select>
-                            </div>`;
-                        }
-                        const cls = (isSiteSpecific||isSafetyMeeting) ? 'task-item with-site' : 'task-item md:flex md:items-center md:justify-between';
-                        html += `<div class="${cls}">
-                            <span class="text-sm text-gray-800">${taskName}</span>
-                            <div class="w-full my-2 md:my-0">
-                                <select id="select-${taskId}" class="form-select afternoon-input w-full">
-                                    <option ${isDefaultNA?'selected':''}>N/A</option>
-                                    <option>Yes</option><option>No</option>
-                                </select>
-                            </div>
-                            ${siteSel}
-                            <div class="w-full">
-                                <input type="text" id="comment-${taskId}" class="form-input afternoon-input w-full" placeholder="Comments...">
-                            </div>
-                        </div>`;
-                    }
-                }
-            });
-            html += '</div></fieldset>';
-            containerEl.innerHTML += html;
-        });
-
-        // Attach toggle listeners after render
-        containerEl.querySelectorAll('.equipment-toggle').forEach(t => {
-            t.addEventListener('change', e => {
-                document.getElementById(e.target.dataset.detailsId)
-                    .classList.toggle('hidden', !e.target.checked);
-            });
-        });
-        containerEl.querySelectorAll('.inspector-select').forEach(s => {
-            s.addEventListener('change', e => {
-                const oth = document.getElementById(e.target.dataset.otherId);
-                oth.classList.toggle('hidden', e.target.value !== 'Other');
-            });
-        });
-        containerEl.querySelectorAll('.other-checkbox').forEach(cb => {
-            cb.addEventListener('change', e => {
-                document.getElementById(e.target.id.replace('-check','-text'))
-                    .classList.toggle('hidden', !e.target.checked);
-            });
-        });
-    }
-
-    renderTaskGroups(morningTasks, morningTasksContainer);
-    renderTaskGroups(afternoonTasks, afternoonTasksContainer);
-
-    // ── TABS ──────────────────────────────────────────────
-    checklistDate.valueAsDate = new Date();
-    tabMorning.addEventListener('click', () => {
-        tabMorning.classList.add('tab-active'); tabAfternoon.classList.remove('tab-active');
-        contentMorning.classList.remove('hidden'); contentAfternoon.classList.add('hidden');
+// Render site pill badges in top display
+function renderSiteDisplay() {
+    const cont = document.getElementById('site-pills-display');
+    cont.innerHTML = '';
+    getAllSites().forEach(s => {
+        const span = document.createElement('span');
+        span.style.cssText = `background:${siteColor(s)};color:white;font-size:0.72rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:9999px`;
+        span.textContent = s;
+        cont.appendChild(span);
     });
-    tabAfternoon.addEventListener('click', () => {
-        tabAfternoon.classList.add('tab-active'); tabMorning.classList.remove('tab-active');
-        contentAfternoon.classList.remove('hidden'); contentMorning.classList.add('hidden');
+    renderSiteDeleteList();
+}
+
+function renderSiteDeleteList() {
+    const list = document.getElementById('site-delete-list');
+    const custom = getCustomSites();
+    list.innerHTML = '';
+    if (custom.length === 0) { list.innerHTML='<p class="text-xs text-gray-400">No custom sites added yet.</p>'; return; }
+    custom.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between bg-orange-50 border border-orange-100 rounded p-2';
+        row.innerHTML = `<span class="text-sm font-semibold" style="color:#d97706">${s}</span>
+            <button class="btn btn-danger btn-sm del-site-btn" data-site="${s}">Delete</button>`;
+        row.querySelector('.del-site-btn').addEventListener('click', () => {
+            if (!confirm(`Delete site "${s}"? This will remove it from all selectors.`)) return;
+            const arr = getCustomSites().filter(x=>x!==s);
+            saveCustomSites(arr);
+            renderSiteDisplay();
+            rebuildHeadcount();
+            rebuildInspections();
+            refreshAllSitePills();
+            saveData();
+        });
+        list.appendChild(row);
+    });
+}
+
+document.getElementById('toggle-site-manager').addEventListener('click', () => {
+    document.getElementById('manage-sites-panel').classList.toggle('open');
+});
+
+document.getElementById('add-site-btn').addEventListener('click', () => {
+    const inp = document.getElementById('new-site-input');
+    const name = inp.value.trim();
+    if (!name) return;
+    const custom = getCustomSites();
+    if (custom.includes(name) || BASE_SITES.includes(name)) { alert('Site already exists.'); return; }
+    custom.push(name);
+    saveCustomSites(custom);
+    inp.value = '';
+    renderSiteDisplay();
+    rebuildHeadcount();
+    rebuildInspections();
+    refreshAllSitePills();
+    saveData();
+});
+
+// ══════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════
+function uid() { return Date.now()+'-'+Math.floor(Math.random()*9999); }
+
+function buildSiteRadiosHtml(nameAttr, selected) {
+    return getAllSites().map(s =>
+        `<label class="inline-flex items-center mr-3 mb-1 text-sm">
+            <input type="radio" name="${nameAttr}" value="${s}" class="h-4 w-4 mr-1" ${s===selected?'checked':''}>
+            <span style="color:${siteColor(s)};font-weight:600">${s}</span>
+        </label>`
+    ).join('');
+}
+
+// Build site selector pills (for crane / equipment)
+function buildSitePillsInto(container, currentSite) {
+    container.innerHTML = '';
+    getAllSites().forEach(s => {
+        const isActive = s === currentSite;
+        const btn = document.createElement('button');
+        btn.type='button';
+        btn.className = `site-pill ${isActive ? 'active-'+s : 'inactive'}`;
+        btn.dataset.site = s;
+        if (isActive) btn.style.background = siteColor(s);
+        btn.textContent = s;
+        btn.addEventListener('click', () => {
+            container.querySelectorAll('.site-pill').forEach(p=>{ p.className='site-pill inactive'; p.style.background=''; });
+            btn.className = `site-pill active-${s}`;
+            btn.style.background = siteColor(s);
+            const hiddenInp = container.nextElementSibling;
+            if (hiddenInp && hiddenInp.type==='hidden') hiddenInp.value = s;
+            saveData();
+        });
+        container.appendChild(btn);
+    });
+}
+
+// Refresh all existing crane + equipment site pills when sites change
+function refreshAllSitePills() {
+    document.querySelectorAll('.crane-site-pills').forEach(container => {
+        const hiddenInp = container.nextElementSibling;
+        const currentSite = (hiddenInp && hiddenInp.type==='hidden') ? hiddenInp.value : getAllSites()[0];
+        // If the current site was deleted, fall back to first available
+        const validSite = getAllSites().includes(currentSite) ? currentSite : getAllSites()[0];
+        if(hiddenInp) hiddenInp.value = validSite;
+        buildSitePillsInto(container, validSite);
+    });
+    document.querySelectorAll('.equip-site-pills').forEach(container => {
+        const hiddenInp = container.nextElementSibling;
+        const currentSite = (hiddenInp && hiddenInp.type==='hidden') ? hiddenInp.value : getAllSites()[0];
+        const validSite = getAllSites().includes(currentSite) ? currentSite : getAllSites()[0];
+        if(hiddenInp) hiddenInp.value = validSite;
+        buildSitePillsInto(container, validSite);
+    });
+}
+
+// "Other (specify)" row for any dropdown that has an "Other" option
+function otherFieldHtml(id, val) {
+    return `<div class="other-specify-row mt-1 flex items-center gap-1">
+        <span class="text-xs text-gray-500">Specify:</span>
+        <input type="text" id="${id}" class="form-input text-xs other-specify-input" style="max-width:220px" placeholder="Describe…" value="${val||''}">
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════
+document.getElementById('checklistDate').valueAsDate = new Date();
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('tab-active'));
+        document.querySelectorAll('.tab-content').forEach(c=>c.classList.add('hidden'));
+        btn.classList.add('tab-active');
+        document.getElementById('tab-'+btn.dataset.tab).classList.remove('hidden');
+    });
+});
+
+// ══════════════════════════════════════════════════════
+// HEADCOUNT TABLE  — dynamic: columns = all active sites
+// WDC = single row spanning all columns
+// Each normal trade = one input per site
+// + Add Trade button at bottom
+// ══════════════════════════════════════════════════════
+const hcTbody = document.getElementById('hc-tbody');
+
+function captureCurrentHC() {
+    const hc={};
+    document.querySelectorAll('.headcount-input').forEach(inp=>{hc[inp.id]=parseInt(inp.value)||0;});
+    return hc;
+}
+function captureCurrentWalks() {
+    const walks={};
+    document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]').forEach(cb=>{walks[cb.id]=cb.checked;});
+    return walks;
+}
+
+function rebuildHeadcount(savedHC) {
+    if(!savedHC) savedHC = captureCurrentHC();
+    const hcTheadRow = document.getElementById('hc-thead-row');
+    hcTheadRow.innerHTML = `<th class="th-trade hc-table">Trade</th>`;
+    getAllSites().forEach(s => {
+        hcTheadRow.innerHTML += `<th class="th-trade" style="color:${siteColor(s)};background:${siteColor(s)}18">${s}</th>`;
     });
 
-    // ── HEADCOUNT ─────────────────────────────────────────
-    function updateHeadcounts() {
-        let s1475=0, s1600=0, s1825=0;
-        document.querySelectorAll('.headcount-input').forEach(inp => {
-            const v = parseInt(inp.value)||0;
-            if (inp.dataset.site==='1475') s1475+=v;
-            else if (inp.dataset.site==='1600') s1600+=v;
-            else if (inp.dataset.site==='1825') s1825+=v;
-        });
-        total1475El.textContent=s1475;
-        total1600El.textContent=s1600;
-        total1825El.textContent=s1825;
-    }
-
-    // ── HOT WORK ──────────────────────────────────────────
-    function checkHotworkStatus() {
-        const restricted = waterUse.value==='L3' || fireDanger.value==='Extreme';
-        hotworkStatus.textContent = restricted
-            ? 'Hot work is not permitted within 10m of the forest interface.'
-            : 'Hot work is safe to do.';
-        hotworkStatus.className = `text-lg font-bold text-center ${restricted?'text-red-600':'text-green-600'}`;
-    }
-
-    // ── WORK PERMITS ──────────────────────────────────────
-    function createPermitHTML(permit = { type:'Silica Dust Exposure Plan', site:'1475', contractor:'' }) {
-        const uid = `perm-${Date.now()}-${Math.floor(Math.random()*1000)}`;
-        const typeOpts = permitTypes.map(t => `<option ${t===permit.type?'selected':''}>${t}</option>`).join('');
-        // Include 1825 in permit site radios
-        const siteRadios = ['1475','1600','1825','All Sites'].map(s =>
-            `<label class="inline-flex items-center">
-                <input type="radio" name="permSite-${uid}" value="${s}" class="permit-site text-blue-600" ${permit.site===s?'checked':''}>
-                <span class="ml-2 text-sm">${s}</span>
-            </label>`
-        ).join('');
-        return `<div class="permit-item relative grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase">Permit Type</label>
-                <select class="form-select text-sm mt-1 permit-type">${typeOpts}</select>
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase">Site</label>
-                <div class="flex flex-col mt-2 space-y-1">${siteRadios}</div>
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase">Contractor & Task</label>
-                <input type="text" class="form-input text-sm mt-1 permit-contractor" placeholder="e.g. WDC (Task details)..." value="${permit.contractor}">
-            </div>
-            <button type="button" class="btn btn-danger absolute top-2 right-2 remove-permit-btn text-xs px-2 py-1">Remove</button>
-        </div>`;
-    }
-
-    function addWorkPermitItem(permit) {
-        const div = document.createElement('div');
-        div.innerHTML = createPermitHTML(permit);
-        const item = div.firstElementChild;
-        workPermitsContainer.appendChild(item);
-        item.querySelectorAll('input,select').forEach(el => el.addEventListener('input', saveData));
-        item.querySelector('.remove-permit-btn').addEventListener('click', () => { item.remove(); saveData(); });
-    }
-    addPermitBtn.addEventListener('click', () => addWorkPermitItem());
-
-    // ── ADDITIONAL OBSERVATIONS ───────────────────────────
-    function addObservationItem(obs = { site:'1475', text:'' }) {
-        const uid = `obs-${Date.now()}`;
-        const div = document.createElement('div');
-        div.className = 'observation-item relative';
-        // Include 1825 in observation site radios
-        const radios = ['1475','1600','1825','All Sites'].map(s =>
-            `<label class="flex items-center">
-                <input type="radio" name="observationSite-${uid}" value="${s}" class="h-4 w-4 text-blue-600" ${obs.site===s?'checked':''}>
-                <span class="ml-2">${s}</span>
-            </label>`
-        ).join('');
-        div.innerHTML = `
-            <div class="flex flex-wrap items-center gap-3 mb-2">
-                <span class="text-sm font-medium text-gray-700">Site:</span>${radios}
-            </div>
-            <textarea class="form-textarea" rows="3" placeholder="Enter observation...">${obs.text}</textarea>
-            <button type="button" class="btn btn-danger absolute top-2 right-2 remove-observation-btn">X</button>`;
-        observationsContainer.appendChild(div);
-        div.querySelectorAll('input,textarea').forEach(el => el.addEventListener('input', saveData));
-        div.querySelector('.remove-observation-btn').addEventListener('click', () => { div.remove(); saveData(); });
-    }
-    addObservationBtn.addEventListener('click', () => addObservationItem());
-
-    // ── SAFETY MEETINGS (dynamic) ─────────────────────────
-    const safetyMeetingsContainer = document.getElementById('safety-meetings-container');
-    const addMeetingBtn           = document.getElementById('add-meeting-btn');
-
-    function addMeetingItem(item = { site:'1475', status:'Yes', comment:'' }) {
-        const uid = `mtg-${Date.now()}-${Math.floor(Math.random()*1000)}`;
-        const radios = ['1475','1600','1825','All Sites'].map(s =>
-            `<label class="inline-flex items-center text-sm">
-                <input type="radio" name="mtgSite-${uid}" value="${s}" class="h-4 w-4 text-yellow-600 mr-1" ${item.site===s?'checked':''}>
-                ${s}
-            </label>`
-        ).join('');
-        const div = document.createElement('div');
-        div.className = 'relative bg-white border border-yellow-200 rounded-lg p-3 space-y-2';
-        div.innerHTML = `
-            <div class="flex flex-wrap items-center gap-3">
-                <span class="text-sm font-semibold text-gray-700">Weekly Safety Meeting (Tuesdays)</span>
-                <select class="form-select w-auto text-sm mtg-status">
-                    <option ${item.status==='Yes'?'selected':''}>Yes</option>
-                    <option ${item.status==='No'?'selected':''}>No</option>
-                    <option ${item.status==='N/A'?'selected':''}>N/A</option>
-                </select>
-            </div>
-            <div class="flex flex-wrap gap-3">
-                <span class="text-sm font-medium text-gray-600">Site:</span>${radios}
-            </div>
-            <input type="text" class="form-input text-sm mtg-comment" placeholder="Comments..." value="${item.comment||''}">
-            <button type="button" class="btn btn-danger absolute top-2 right-2 text-xs px-2 py-1 remove-mtg-btn">Remove</button>
-        `;
-        safetyMeetingsContainer.appendChild(div);
-        div.querySelectorAll('input,select').forEach(el => el.addEventListener('input', saveData));
-        div.querySelector('.remove-mtg-btn').addEventListener('click', () => { div.remove(); saveData(); });
-    }
-    addMeetingBtn.addEventListener('click', () => { addMeetingItem(); saveData(); });
-
-    // ── SITE INCIDENTS (dynamic) ──────────────────────────
-    const siteIncidentsContainer = document.getElementById('site-incidents-container');
-    const addIncidentBtn         = document.getElementById('add-incident-btn');
-    const incidentTypes = ['First Aid','Near Miss','Incident Investigation Report','Claim Management','Other'];
-
-    function addIncidentItem(item = { site:'1475', type:'First Aid', comment:'' }) {
-        const uid = `inc-${Date.now()}-${Math.floor(Math.random()*1000)}`;
-        const typeOpts = incidentTypes.map(t =>
-            `<option ${t===item.type?'selected':''}>${t}</option>`
-        ).join('');
-        const radios = ['1475','1600','1825','All Sites'].map(s =>
-            `<label class="inline-flex items-center text-sm">
-                <input type="radio" name="incSite-${uid}" value="${s}" class="h-4 w-4 text-red-600 mr-1" ${item.site===s?'checked':''}>
-                ${s}
-            </label>`
-        ).join('');
-        const div = document.createElement('div');
-        div.className = 'relative bg-white border border-red-200 rounded-lg p-3 space-y-2';
-        div.innerHTML = `
-            <div class="flex flex-wrap items-center gap-3">
-                <select class="form-select w-auto text-sm inc-type">${typeOpts}</select>
-            </div>
-            <div class="flex flex-wrap gap-3">
-                <span class="text-sm font-medium text-gray-600">Site:</span>${radios}
-            </div>
-            <input type="text" class="form-input text-sm inc-comment" placeholder="Details / Comments..." value="${item.comment||''}">
-            <button type="button" class="btn btn-danger absolute top-2 right-2 text-xs px-2 py-1 remove-inc-btn">Remove</button>
-        `;
-        siteIncidentsContainer.appendChild(div);
-        div.querySelectorAll('input,select').forEach(el => el.addEventListener('input', saveData));
-        div.querySelector('.remove-inc-btn').addEventListener('click', () => { div.remove(); saveData(); });
-    }
-    addIncidentBtn.addEventListener('click', () => { addIncidentItem(); saveData(); });
-
-    // ── WEEKEND WORK (dynamic) ────────────────────────────
-    const weekendWorkContainer = document.getElementById('weekend-work-container');
-    const addWeekendBtn        = document.getElementById('add-weekend-btn');
-
-    function addWeekendItem(item = { site:'1475', status:'Yes', comment:'' }) {
-        const uid = `wknd-${Date.now()}-${Math.floor(Math.random()*1000)}`;
-        const radios = ['1475','1600','1825','All Sites'].map(s =>
-            `<label class="inline-flex items-center text-sm">
-                <input type="radio" name="wkndSite-${uid}" value="${s}" class="h-4 w-4 text-purple-600 mr-1" ${item.site===s?'checked':''}>
-                ${s}
-            </label>`
-        ).join('');
-        const div = document.createElement('div');
-        div.className = 'relative bg-white border border-purple-200 rounded-lg p-3 space-y-2';
-        div.innerHTML = `
-            <div class="flex flex-wrap items-center gap-3">
-                <span class="text-sm font-semibold text-gray-700">Working on Weekend</span>
-                <select class="form-select w-auto text-sm wknd-status">
-                    <option ${item.status==='Yes'?'selected':''}>Yes</option>
-                    <option ${item.status==='No'?'selected':''}>No</option>
-                    <option ${item.status==='N/A'?'selected':''}>N/A</option>
-                </select>
-            </div>
-            <div class="flex flex-wrap gap-3">
-                <span class="text-sm font-medium text-gray-600">Site:</span>${radios}
-            </div>
-            <input type="text" class="form-input text-sm wknd-comment" placeholder="Details / Comments..." value="${item.comment||''}">
-            <button type="button" class="btn btn-danger absolute top-2 right-2 text-xs px-2 py-1 remove-wknd-btn">Remove</button>
-        `;
-        weekendWorkContainer.appendChild(div);
-        div.querySelectorAll('input,select').forEach(el => el.addEventListener('input', saveData));
-        div.querySelector('.remove-wknd-btn').addEventListener('click', () => { div.remove(); saveData(); });
-    }
-    addWeekendBtn.addEventListener('click', () => { addWeekendItem(); saveData(); });
-
-    // ── SAVE ──────────────────────────────────────────────
-    function saveData() {
-        const data = {};
-        document.querySelectorAll('input:not([type="radio"]), select, textarea').forEach(el => {
-            if (el.id) {
-                if (el.type==='checkbox') data[el.id] = el.checked;
-                else if (el.classList.contains('headcount-input')) data[el.id] = parseInt(el.value)||0;
-                else data[el.id] = el.value;
-            }
-        });
-
-        // Orientations
-        const oris = [];
-        orientationsContainer.querySelectorAll('.orientation-item').forEach(item => {
-            const siteInp = item.querySelector('input[name^="oriSite-"]:checked');
-            oris.push({
-                type:   item.querySelector('.orientation-type').value,
-                site:   siteInp ? siteInp.value : '1475',
-                worker: item.querySelector('.orientation-worker').value
-            });
-        });
-        data.orientationsData = JSON.stringify(oris);
-
-        // Observations
-        const obs = [];
-        observationsContainer.querySelectorAll('.observation-item').forEach(item => {
-            const siteInp = item.querySelector('input[name^="observationSite-"]:checked');
-            obs.push({ site: siteInp ? siteInp.value : '1475', text: item.querySelector('textarea').value });
-        });
-        data.additionalObservations = JSON.stringify(obs);
-
-        // Work Permits
-        const permits = [];
-        workPermitsContainer.querySelectorAll('.permit-item').forEach(item => {
-            const siteInp = item.querySelector('input[name^="permSite-"]:checked');
-            permits.push({
-                type:       item.querySelector('.permit-type').value,
-                site:       siteInp ? siteInp.value : '1475',
-                contractor: item.querySelector('.permit-contractor').value
-            });
-        });
-        data.activeWorkPermits = JSON.stringify(permits);
-
-        // Safety Meetings
-        const meetings = [];
-        safetyMeetingsContainer.querySelectorAll('.relative').forEach(div => {
-            const siteInp = div.querySelector('input[name^="mtgSite-"]:checked');
-            meetings.push({
-                site:    siteInp ? siteInp.value : '1475',
-                status:  div.querySelector('.mtg-status').value,
-                comment: div.querySelector('.mtg-comment').value
-            });
-        });
-        data.safetyMeetingsData = JSON.stringify(meetings);
-
-        // Site Incidents
-        const incidents = [];
-        siteIncidentsContainer.querySelectorAll('.relative').forEach(div => {
-            const siteInp = div.querySelector('input[name^="incSite-"]:checked');
-            incidents.push({
-                site:    siteInp ? siteInp.value : '1475',
-                type:    div.querySelector('.inc-type').value,
-                comment: div.querySelector('.inc-comment').value
-            });
-        });
-        data.siteIncidentsData = JSON.stringify(incidents);
-
-        // Weekend Work
-        const weekends = [];
-        weekendWorkContainer.querySelectorAll('.relative').forEach(div => {
-            const siteInp = div.querySelector('input[name^="wkndSite-"]:checked');
-            weekends.push({
-                site:    siteInp ? siteInp.value : '1475',
-                status:  div.querySelector('.wknd-status').value,
-                comment: div.querySelector('.wknd-comment').value
-            });
-        });
-        data.weekendWorkData = JSON.stringify(weekends);
-
-        localStorage.setItem('csoChecklistData', JSON.stringify(data));
-    }
-
-    // ── LOAD ──────────────────────────────────────────────
-    function loadData() {
-        const data = JSON.parse(localStorage.getItem('csoChecklistData'));
-        const today = checklistDate.value;
-        if (data) {
-            if (data.csoName) csoName.value = data.csoName;
-            const isSameDay = data.checklistDate === today;
-            if (isSameDay) {
-                document.querySelectorAll('input:not([type="radio"]), select, textarea').forEach(el => {
-                    if (el.id && data[el.id] !== undefined) {
-                        if (el.type==='checkbox') el.checked = data[el.id];
-                        else if (el.classList.contains('headcount-input')) {
-                            el.value = parseInt(data[el.id]) || 0;
-                        } else {
-                            el.value = data[el.id];
-                        }
-                    }
-                });
-
-                // Orientations
-                if (data.orientationsData) {
-                    orientationsContainer.innerHTML = '';
-                    JSON.parse(data.orientationsData).forEach(o => addOrientationItem(o));
-                }
-
-                // Observations
-                if (data.additionalObservations) {
-                    observationsContainer.innerHTML = '';
-                    JSON.parse(data.additionalObservations).forEach(o => addObservationItem(o));
-                }
-
-                // Permits – always respect what was saved
-                workPermitsContainer.innerHTML = '';
-                if (data.activeWorkPermits) {
-                    const permits = JSON.parse(data.activeWorkPermits);
-                    if (permits.length > 0) permits.forEach(p => addWorkPermitItem(p));
-                    else defaultActivePermits.forEach(p => addWorkPermitItem(p));
-                } else {
-                    defaultActivePermits.forEach(p => addWorkPermitItem(p));
-                }
-
-                // Safety Meetings
-                if (data.safetyMeetingsData) {
-                    safetyMeetingsContainer.innerHTML = '';
-                    JSON.parse(data.safetyMeetingsData).forEach(m => addMeetingItem(m));
-                }
-                // Site Incidents
-                if (data.siteIncidentsData) {
-                    siteIncidentsContainer.innerHTML = '';
-                    JSON.parse(data.siteIncidentsData).forEach(i => addIncidentItem(i));
-                }
-                // Weekend Work
-                if (data.weekendWorkData) {
-                    weekendWorkContainer.innerHTML = '';
-                    JSON.parse(data.weekendWorkData).forEach(w => addWeekendItem(w));
-                }
-
-                // Restore toggle visibility
-                document.querySelectorAll('.equipment-toggle').forEach(t => {
-                    const d = document.getElementById(t.dataset.detailsId);
-                    if (d) d.classList.toggle('hidden', !t.checked);
-                });
-                document.querySelectorAll('.inspector-select').forEach(s => {
-                    const oth = document.getElementById(s.dataset.otherId);
-                    if (oth) oth.classList.toggle('hidden', s.value !== 'Other');
-                });
-                document.querySelectorAll('.other-checkbox').forEach(cb => {
-                    const tf = document.getElementById(cb.id.replace('-check','-text'));
-                    if (tf) tf.classList.toggle('hidden', !cb.checked);
-                });
-            } else {
-                workPermitsContainer.innerHTML = '';
-                defaultActivePermits.forEach(p => addWorkPermitItem(p));
-            }
+    hcTbody.innerHTML = '';
+    const trades = getAllTrades();
+    trades.forEach(trade => {
+        const tr = document.createElement('tr');
+        if (trade.wdc) {
+            tr.className = 'wdc-row';
+            tr.innerHTML = `
+                <td class="td-wdc">WDC</td>
+                ${getAllSites().map(site => {
+                    const id = `hc-wdc-${site}`;
+                    const val = savedHC && savedHC[id] != null ? savedHC[id] : 0;
+                    return `<td class="text-center">
+                        <input type="number" min="0" value="${val}" id="${id}"
+                            class="hc-num-input headcount-input" data-site="${site}" data-trade="WDC">
+                    </td>`;
+                }).join('')}`;
         } else {
-            workPermitsContainer.innerHTML = '';
-            defaultActivePermits.forEach(p => addWorkPermitItem(p));
+            const tId = trade.name.toLowerCase().replace(/[^a-z0-9]/g,'-');
+            const isCustom = getCustomTrades().includes(trade.name);
+            tr.innerHTML = `
+                <td class="td-trade" style="${isCustom?'color:#d97706':''}">
+                    ${trade.name}
+                    ${isCustom?`<button type="button" class="btn btn-danger btn-sm ml-1 del-trade-btn" style="font-size:0.6rem;padding:0.1rem 0.4rem" data-trade="${trade.name}">×</button>`:''}
+                </td>
+                ${getAllSites().map(site => {
+                    const id = `hc-${site}-${tId}`;
+                    const val = savedHC && savedHC[id] != null ? savedHC[id] : 0;
+                    return `<td class="text-center">
+                        <input type="number" min="0" value="${val}" id="${id}"
+                            class="hc-num-input headcount-input" data-site="${site}" data-trade="${trade.name}">
+                    </td>`;
+                }).join('')}`;
         }
-        updateHeadcounts();
-        checkHotworkStatus();
-    }
-
-    document.querySelectorAll('input, select, textarea').forEach(el => el.addEventListener('input', saveData));
-    document.querySelectorAll('.headcount-input').forEach(i => i.addEventListener('input', updateHeadcounts));
-    waterUse.addEventListener('input', checkHotworkStatus);
-    fireDanger.addEventListener('input', checkHotworkStatus);
-
-    // ── REPORT ────────────────────────────────────────────
-    function getMorningReport() {
-        let r = '';
-        r += `SITE CONDITIONS\n-----------------------------------\n`;
-        r += `Water Use: <b>${waterUse.value}</b>\nFire Danger: <b>${fireDanger.value}</b>\n\n`;
-        r += `HOT WORK STATUS\n-----------------------------------\n<b>${hotworkStatus.textContent}</b>\n\n`;
-
-        // Headcounts
-        const buildHC = (trades, site, totalEl) => {
-            let out = `SITE ${site} HEADCOUNT (<b>${totalEl.textContent}</b> Total)\n-----------------------------------\n`;
-            trades.forEach(trade => {
-                const base = `hc-${site}-${trade.toLowerCase().replace(/ /g,'-')}`;
-                if (trade === 'Other') {
-                    const cnt = parseInt(document.getElementById(`${base}-count`)?.value)||0;
-                    const nm  = document.getElementById(`${base}-name`)?.value || '';
-                    if (cnt > 0) out += `Other${nm?` (${nm})`:''}: <b>${cnt}</b>\n`;
-                } else {
-                    const cnt = parseInt(document.getElementById(base)?.value)||0;
-                    if (cnt > 0) out += `${trade}: <b>${cnt}</b>\n`;
-                }
-            });
-            return out + '\n';
-        };
-        r += buildHC(headcountTrades1475, '1475', total1475El);
-        r += buildHC(headcountTrades1600, '1600', total1600El);
-        r += buildHC(headcountTrades1825, '1825', total1825El);
-
-        // Orientations
-        const oris = [];
-        orientationsContainer.querySelectorAll('.orientation-item').forEach(item => {
-            const siteInp = item.querySelector('input[name^="oriSite-"]:checked');
-            oris.push({
-                type:   item.querySelector('.orientation-type').value,
-                site:   siteInp ? siteInp.value : '1475',
-                worker: item.querySelector('.orientation-worker').value
-            });
-        });
-        r += `ORIENTATIONS\n-------------------------------------\n`;
-        if (oris.length > 0) {
-            oris.forEach(o => {
-                r += `${o.type} [Site: ${o.site}]`;
-                if (o.worker) r += ` – <b>${o.worker}</b>`;
-                r += '\n';
-            });
-        } else {
-            r += `No orientations conducted.\n`;
-        }
-
-        // Work Permits
-        const permits = [];
-        workPermitsContainer.querySelectorAll('.permit-item').forEach(item => {
-            const siteInp = item.querySelector('input[name^="permSite-"]:checked');
-            const contractor = item.querySelector('.permit-contractor').value;
-            if (contractor) permits.push({
-                type: item.querySelector('.permit-type').value,
-                site: siteInp ? siteInp.value : 'N/A',
-                contractor
-            });
-        });
-        r += `\nWORK PERMITS\n-------------------------------------\n`;
-        if (permits.length > 0) permits.forEach(p => r += `- ${p.type} (${p.site}): <b>${p.contractor}</b>\n`);
-        else r += `No active work permits.\n`;
-
-        // Site Inspections
-        let siContent = '';
-        morningTasks.forEach(group => {
-            group.tasks.forEach(task => {
-                if (typeof task === 'object' && task.type === 'single_checkbox_walk') {
-                    const taskId = task.name.toLowerCase().replace(/[^a-z0-9]/g,'');
-                    const chk = document.getElementById(`${taskId}-completed`);
-                    if (chk && chk.checked) siContent += `${task.name}: <b>Completed</b>\n`;
-                }
-            });
-        });
-        if (siContent) r += `\nSITE INSPECTIONS\n-------------------------------------\n${siContent}`;
-
-        return r;
-    }
-
-    function getAfternoonReport() {
-        let r = '';
-        afternoonTasks.forEach(group => {
-            let gc = '';
-            let allNA = true;
-            const isSiteSpecific = siteSpecificGroups.includes(group.group);
-            const isSafetyMeeting = group.group === 'Safety Meetings';
-
-            group.tasks.forEach(task => {
-                const taskName = typeof task === 'object' ? task.name : task;
-                const taskId   = taskName.toLowerCase().replace(/[^a-z0-9]/g,'');
-
-                if (typeof task === 'object' && task.type === 'single_checkbox_walk') {
-                    const chk = document.getElementById(`${taskId}-completed`);
-                    if (chk && chk.checked) { allNA=false; gc += `${task.name}: <b>Completed</b>\n`; }
-
-                } else if (typeof task === 'object' && task.type === 'inspector') {
-                    const tog = document.getElementById(`toggle-${taskId}`);
-                    if (tog && tog.checked) {
-                        allNA=false;
-                        const sel = document.getElementById(`select-${taskId}`);
-                        let insp = sel.value;
-                        if (insp==='Other') insp = document.getElementById(`other-${taskId}`)?.value || 'Other';
-                        gc += `${task.name} by: <b>${insp}</b>\n`;
-                    }
-
-                } else if (typeof task === 'object' && task.type === 'multiselect') {
-                    const inv = [];
-                    document.querySelectorAll(`input[name="${taskId}"]:checked`).forEach(cb => inv.push(cb.value));
-                    const othCb = document.getElementById(`${taskId}-other-check`);
-                    if (othCb && othCb.checked) inv.push(document.getElementById(`${taskId}-other-text`)?.value || 'Other');
-                    if (inv.length) { allNA=false; gc += `${task.name} with: <b>${inv.join(', ')}</b>\n`; }
-
-                } else {
-                    const isSimpleCrane = typeof task === 'string' && group.group === 'Crane';
-                    if (isSimpleCrane) {
-                        const chk = document.getElementById(`${taskId}-completed`);
-                        if (chk && chk.checked) { allNA=false; gc += `${taskName}: <b>Completed</b>\n`; }
-                    } else {
-                        const status = document.getElementById(`select-${taskId}`)?.value;
-                        if (status && status !== 'N/A') {
-                            allNA=false;
-                            const comment = document.getElementById(`comment-${taskId}`)?.value || '';
-                            let siteInfo = '';
-                            if (isSiteSpecific || isSafetyMeeting) {
-                                const sv = document.getElementById(`site-${taskId}`)?.value;
-                                if (sv && sv !== 'All Sites') siteInfo = ` [Site: ${sv}]`;
-                                else if (sv) siteInfo = ` [${sv}]`;
-                            }
-                            gc += `${taskName}: <b>${status}</b>${siteInfo}\n`;
-                            if (comment) gc += `  <b>${comment}</b>\n`;
-                        }
-                    }
-                }
-            });
-
-            if (!allNA) {
-                r += `${group.group.toUpperCase()}\n-------------------------------------\n${gc}\n`;
-            }
-        });
-
-        // Safety Meetings
-        const meetings = [];
-        safetyMeetingsContainer.querySelectorAll('.relative').forEach(div => {
-            const siteInp = div.querySelector('input[name^="mtgSite-"]:checked');
-            meetings.push({
-                site:    siteInp ? siteInp.value : '1475',
-                status:  div.querySelector('.mtg-status').value,
-                comment: div.querySelector('.mtg-comment').value
-            });
-        });
-        if (meetings.length > 0) {
-            r += `SAFETY MEETINGS\n-------------------------------------\n`;
-            meetings.forEach(m => {
-                r += `Weekly Safety Meeting [Site: ${m.site}]: <b>${m.status}</b>\n`;
-                if (m.comment) r += `  <b>${m.comment}</b>\n`;
-            });
-            r += '\n';
-        }
-
-        // Site Incidents
-        const incidents = [];
-        siteIncidentsContainer.querySelectorAll('.relative').forEach(div => {
-            const siteInp = div.querySelector('input[name^="incSite-"]:checked');
-            const comment = div.querySelector('.inc-comment').value;
-            incidents.push({
-                site:    siteInp ? siteInp.value : '1475',
-                type:    div.querySelector('.inc-type').value,
-                comment
-            });
-        });
-        if (incidents.length > 0) {
-            r += `SITE INCIDENTS\n-------------------------------------\n`;
-            incidents.forEach(i => {
-                r += `${i.type} [Site: ${i.site}]\n`;
-                if (i.comment) r += `  <b>${i.comment}</b>\n`;
-            });
-            r += '\n';
-        } else {
-            r += `SITE INCIDENTS\n-------------------------------------\nNo site incidents.\n\n`;
-        }
-
-        // Weekend Work
-        const weekends = [];
-        weekendWorkContainer.querySelectorAll('.relative').forEach(div => {
-            const siteInp = div.querySelector('input[name^="wkndSite-"]:checked');
-            weekends.push({
-                site:    siteInp ? siteInp.value : '1475',
-                status:  div.querySelector('.wknd-status').value,
-                comment: div.querySelector('.wknd-comment').value
-            });
-        });
-        if (weekends.length > 0) {
-            r += `WEEKEND WORK\n-------------------------------------\n`;
-            weekends.forEach(w => {
-                r += `Working on Weekend [Site: ${w.site}]: <b>${w.status}</b>\n`;
-                if (w.comment) r += `  <b>${w.comment}</b>\n`;
-            });
-            r += '\n';
-        }
-
-        // Additional observations – now with 1825
-        const obs = [];
-        observationsContainer.querySelectorAll('.observation-item').forEach(item => {
-            const siteInp = item.querySelector('input[name^="observationSite-"]:checked');
-            const text = item.querySelector('textarea').value;
-            if (text.trim()) obs.push({ site: siteInp ? siteInp.value : '1475', text });
-        });
-        if (obs.length) {
-            ['1475','1600','1825','All Sites'].forEach(s => {
-                const filtered = obs.filter(o => o.site === s);
-                if (filtered.length) {
-                    r += `ADDITIONAL OBSERVATIONS (Site ${s})\n-------------------------------------\n`;
-                    filtered.forEach(o => r += `<b>- ${o.text.trim()}</b>\n\n`);
-                }
+        hcTbody.appendChild(tr);
+        tr.querySelectorAll('.headcount-input').forEach(inp=>inp.addEventListener('input',()=>{updateHeadcounts();saveData();}));
+        const delBtn = tr.querySelector('.del-trade-btn');
+        if (delBtn) {
+            delBtn.addEventListener('click', () => {
+                if (!confirm(`Remove trade "${delBtn.dataset.trade}"?`)) return;
+                const custom = getCustomTrades().filter(x=>x!==delBtn.dataset.trade);
+                saveCustomTrades(custom);
+                rebuildHeadcount();
+                saveData();
             });
         }
-        return r;
-    }
-
-    generateFullReportBtn.addEventListener('click', () => {
-        let full = `CSO DAILY LOG - FULL REPORT\n===================================\n`;
-        full += `Date: <b>${checklistDate.value||'N/A'}</b>\nCSO Name: <b>${csoName.value||'N/A'}</b>\n\n`;
-        full += getMorningReport();
-        full += '\n\n' + getAfternoonReport();
-        reportContent.innerHTML = full;
-        reportOutput.classList.remove('hidden');
-        reportOutput.scrollIntoView({ behavior:'smooth' });
     });
 
-    // ── RESET ─────────────────────────────────────────────
-    resetFormBtn.addEventListener('click', () => {
-        if (!confirm('Are you sure you want to reset the form? This will clear all data EXCEPT Work Permits.')) return;
-
-        // Capture current permits BEFORE clearing
-        const savedPermits = [];
-        workPermitsContainer.querySelectorAll('.permit-item').forEach(item => {
-            const siteInp = item.querySelector('input[name^="permSite-"]:checked');
-            savedPermits.push({
-                type:       item.querySelector('.permit-type').value,
-                site:       siteInp ? siteInp.value : '1475',
-                contractor: item.querySelector('.permit-contractor').value
-            });
-        });
-
-        document.getElementById('waterUse').selectedIndex = 0;
-        document.getElementById('fireDanger').selectedIndex = 0;
-        checkHotworkStatus();
-
-        document.querySelectorAll('input, select, textarea').forEach(el => {
-            if (el.closest('#work-permits-container')) return;
-            if (el.type==='button' || el.id==='csoName') return;
-            if (el.type==='checkbox'||el.type==='radio') el.checked=false;
-            else if (el.tagName==='SELECT') el.selectedIndex=0;
-            else el.value='';
-        });
-
-        // Reset date to today
-        checklistDate.valueAsDate = new Date();
-
-        document.querySelectorAll('.headcount-input').forEach(i => { i.value='0'; });
-        updateHeadcounts();
-
-        observationsContainer.innerHTML = '';
-        orientationsContainer.innerHTML = '';
-        safetyMeetingsContainer.innerHTML = '';
-        siteIncidentsContainer.innerHTML = '';
-        weekendWorkContainer.innerHTML = '';
-
-        document.querySelectorAll('.equipment-toggle').forEach(t => {
-            t.checked=false;
-            const d = document.getElementById(t.dataset.detailsId);
-            if (d) d.classList.add('hidden');
-        });
-        document.querySelectorAll('.inspector-select').forEach(s => {
-            s.selectedIndex=0;
-            const oth = document.getElementById(s.dataset.otherId);
-            if (oth) oth.classList.add('hidden');
-        });
-        document.querySelectorAll('.other-checkbox').forEach(cb => {
-            cb.checked=false;
-            const tf = document.getElementById(cb.id.replace('-check','-text'));
-            if (tf) tf.classList.add('hidden');
-        });
-
-        reportOutput.classList.add('hidden');
-
-        // Restore permits
-        workPermitsContainer.innerHTML = '';
-        savedPermits.forEach(p => addWorkPermitItem(p));
+    // + Add Trade row
+    const addTr = document.createElement('tr');
+    addTr.className = 'add-trade-row';
+    addTr.innerHTML = `
+        <td colspan="${getAllSites().length+1}" class="py-2">
+            <div class="flex items-center gap-2">
+                <input type="text" id="new-trade-input" class="form-input text-xs" style="max-width:180px" placeholder="New trade name…">
+                <button type="button" id="add-trade-btn" class="btn btn-green btn-sm">+ Add Trade</button>
+            </div>
+        </td>`;
+    hcTbody.appendChild(addTr);
+    document.getElementById('add-trade-btn').addEventListener('click', () => {
+        const inp = document.getElementById('new-trade-input');
+        const name = inp.value.trim();
+        if (!name) return;
+        const existing = getAllTrades().map(t=>t.name.toLowerCase());
+        if (existing.includes(name.toLowerCase())) { alert('Trade already exists.'); return; }
+        const custom = getCustomTrades();
+        custom.push(name);
+        saveCustomTrades(custom);
+        inp.value = '';
+        rebuildHeadcount();
         saveData();
     });
 
-    // ── COPY / PDF ────────────────────────────────────────
-    copyBtn.addEventListener('click', () => {
-        const text = reportContent.cloneNode(true).textContent;
-        const ta = document.createElement('textarea');
-        ta.value=text; ta.style.position='fixed'; ta.style.top='-9999px';
-        document.body.appendChild(ta); ta.focus(); ta.select();
-        try { document.execCommand('copy'); copyBtn.textContent='Copied!'; }
-        catch { copyBtn.textContent='Error Copying'; }
-        document.body.removeChild(ta);
-        setTimeout(()=>{ copyBtn.textContent='Copy Report'; }, 2000);
+    // Totals
+    const totalsRow = document.getElementById('hc-totals-row');
+    totalsRow.innerHTML = `<div></div>`;
+    getAllSites().forEach(s => {
+        totalsRow.innerHTML += `<div class="rounded-lg p-2 text-center" style="background:${siteColor(s)}18;min-width:60px">
+            <div class="text-xs font-semibold" style="color:${siteColor(s)}">${s}</div>
+            <div id="total-${s}" class="text-lg font-bold" style="color:${siteColor(s)}">0</div>
+        </div>`;
     });
 
-    exportPdfBtn.addEventListener('click', () => {
-        const { jsPDF } = window.jspdf;
-        const el = document.getElementById('report-content');
-        const fname = `CSO_Report_${(csoName.value||'CSO').replace(/ /g,'_')}_${checklistDate.value||'date'}.pdf`;
-        html2canvas(el,{scale:2,useCORS:true}).then(canvas => {
-            const img  = canvas.toDataURL('image/png');
-            const pdf  = new jsPDF({orientation:'p',unit:'mm',format:'a4'});
-            const pw   = pdf.internal.pageSize.getWidth();
-            const ph   = pdf.internal.pageSize.getHeight();
-            const ratio = canvas.width/canvas.height;
-            let iw = pw-20, ih = iw/ratio;
-            if (ih > ph-20) { ih=ph-20; iw=ih*ratio; }
-            pdf.addImage(img,'PNG',(pw-iw)/2,10,iw,ih);
-            pdf.save(fname);
+    updateHeadcounts();
+}
+
+function updateHeadcounts() {
+    const sums = {};
+    getAllSites().forEach(s=>sums[s]=0);
+    document.querySelectorAll('.headcount-input').forEach(inp=>{
+        const v=parseInt(inp.value)||0;
+        const site=inp.dataset.site;
+        if(sums[site]!=null) sums[site]+=v;
+    });
+    let grand = 0;
+    getAllSites().forEach(s=>{
+        const el=document.getElementById('total-'+s); if(el) el.textContent=sums[s];
+        grand+=sums[s];
+    });
+    document.getElementById('grand-total').textContent = grand;
+}
+
+// ══════════════════════════════════════════════════════
+// HOT WORK
+// ══════════════════════════════════════════════════════
+function checkHotwork() {
+    const waterUse = document.getElementById('waterUse').value;
+    const fireDanger = document.getElementById('fireDanger').value;
+    const restricted = waterUse==='L3' || fireDanger==='Extreme';
+    const el = document.getElementById('hotwork-status');
+    el.textContent = restricted ? '⚠ Hot work NOT permitted within 10m of the forest interface.' : '✓ Hot work is safe to do.';
+    el.className = `text-sm font-bold text-center ${restricted?'text-red-600':'text-green-600'}`;
+}
+
+// ══════════════════════════════════════════════════════
+// INSPECTIONS — dynamic per active site
+// ══════════════════════════════════════════════════════
+function rebuildInspections(savedWalks) {
+    if(!savedWalks) savedWalks = captureCurrentWalks();
+    const cont = document.getElementById('morning-tasks');
+    cont.innerHTML = '';
+    const walkTypes = ['Safety Walk','Weekly Safety Site Inspection'];
+    const sites = getAllSites();
+
+    // Build table: rows = inspection types, cols = sites
+    const table = document.createElement('table');
+    table.style.cssText = 'width:100%;border-collapse:collapse;';
+
+    // Header row
+    const thead = document.createElement('thead');
+    let thHtml = `<tr>
+        <th style="text-align:left;padding:0.45rem 0.6rem;font-size:0.75rem;font-weight:700;color:#374151;background:#f9fafb;border-bottom:2px solid #e5e7eb;min-width:160px">Inspection Type</th>`;
+    sites.forEach(s => {
+        thHtml += `<th style="text-align:center;padding:0.45rem 0.5rem;font-size:0.75rem;font-weight:700;color:${siteColor(s)};background:${siteColor(s)}12;border-bottom:2px solid #e5e7eb;min-width:70px">${s}</th>`;
+    });
+    thHtml += '</tr>';
+    thead.innerHTML = thHtml;
+    table.appendChild(thead);
+
+    // Body rows
+    const tbody = document.createElement('tbody');
+    walkTypes.forEach((wt, rowIdx) => {
+        const tr = document.createElement('tr');
+        tr.style.background = rowIdx % 2 === 0 ? 'white' : '#f9fafb';
+        let tdHtml = `<td style="padding:0.5rem 0.6rem;font-size:0.82rem;color:#374151;font-weight:500;border-bottom:1px solid #f3f4f6">${wt}</td>`;
+        sites.forEach(site => {
+            const label = `${wt} ${site}`;
+            const id = label.toLowerCase().replace(/[^a-z0-9]/g,'') + '-completed';
+            const checked = savedWalks && savedWalks[id] ? 'checked' : '';
+            tdHtml += `<td style="text-align:center;padding:0.5rem 0.3rem;border-bottom:1px solid #f3f4f6">
+                <input type="checkbox" id="${id}" class="h-5 w-5 insp-check" style="accent-color:${siteColor(site)};cursor:pointer" ${checked}>
+            </td>`;
+        });
+        tr.innerHTML = tdHtml;
+        tbody.appendChild(tr);
+        tr.querySelectorAll('.insp-check').forEach(cb => cb.addEventListener('change', saveData));
+    });
+    table.appendChild(tbody);
+
+    const wrapper = document.createElement('div');
+    wrapper.style.overflowX = 'auto';
+    wrapper.appendChild(table);
+    cont.appendChild(wrapper);
+}
+
+// ══════════════════════════════════════════════════════
+// SITE RADIO ROWS (orientations, permits, meetings, etc.)
+// These are created inline with a data-site-radios attr
+// ══════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════
+// CRANE — dynamic cards
+// ══════════════════════════════════════════════════════
+function buildCrane() {
+    document.getElementById('crane-container').innerHTML = '';
+    addCraneCard({ name:'Crane #1', site:'1600', done:false, inspector:'', otherInspector:'',
+        rigging:false, riggingInspector:'', riggingOtherInspector:'', coldWeather:false,
+        overlap:[], overlapOtherChecked:false, overlapOtherText:'',
+        overlapOther2Checked:false, overlapOther2Text:'' });
+}
+
+function addCraneCard(data) {
+    data = data||{};
+    const id = uid();
+    const inspOpts  = [...CRANE_INSPECTORS,'Other'].map(i=>`<option ${i===(data.inspector||'')?'selected':''}>${i}</option>`).join('');
+    const rinspOpts = [...CRANE_INSPECTORS,'Other'].map(i=>`<option ${i===(data.riggingInspector||'')?'selected':''}>${i}</option>`).join('');
+
+    // Build overlap company checkboxes
+    const overlapChecks = OVERLAP_COMPANIES.map(c => {
+        const chk = data.overlap && data.overlap.includes(c) ? 'checked' : '';
+        return `<label class="flex items-center gap-1 p-1 bg-white rounded border border-gray-200 text-xs">
+            <input type="checkbox" value="${c}" class="h-3 w-3 overlap-check" ${chk}><span>${c}</span></label>`;
+    }).join('');
+
+    const div = document.createElement('div');
+    div.className = 'equipment-card crane-card border-2 border-sky-100';
+    div.innerHTML = `
+        <div class="flex items-center gap-2 mb-2">
+            <input type="text" class="form-input text-sm font-bold crane-name flex-1" value="${data.name||'Crane'}" placeholder="Crane name…" style="color:#003D52">
+            <button type="button" class="btn btn-danger btn-sm remove-crane-btn">Remove</button>
+        </div>
+        <div class="mb-2">
+            <label class="text-xs font-semibold text-gray-500">SITE</label>
+            <div class="flex flex-wrap gap-1 mt-1 crane-site-pills"></div>
+            <input type="hidden" class="crane-site-val" value="${data.site||'1600'}">
+        </div>
+        <!-- Crane Daily Inspection -->
+        <div class="border rounded-lg p-2 mb-2 bg-white">
+            <div class="flex items-center justify-between gap-2">
+                <span class="text-sm font-semibold text-gray-700">Crane Daily Inspection</span>
+                <label class="flex items-center cursor-pointer gap-1">
+                    <span class="text-xs text-gray-500">Done</span>
+                    <div class="relative"><input type="checkbox" class="sr-only crane-daily-toggle" ${data.done?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
+                </label>
+            </div>
+            <div class="crane-daily-det ${data.done?'':'hidden'} mt-2 pl-2 border-l-2 border-sky-200">
+                <label class="text-xs font-semibold text-gray-500">Inspected by</label>
+                <div class="flex gap-1 mt-1 flex-wrap">
+                    <select class="form-select text-xs crane-insp-sel" style="max-width:180px">${inspOpts}</select>
+                    <input type="text" class="form-input text-xs crane-insp-other ${(data.inspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${data.otherInspector||''}">
+                </div>
+            </div>
+        </div>
+        <!-- Rigging Daily Inspection -->
+        <div class="border rounded-lg p-2 mb-2 bg-white">
+            <div class="flex items-center justify-between gap-2">
+                <span class="text-sm font-semibold text-gray-700">Rigging Daily Inspection</span>
+                <label class="flex items-center cursor-pointer gap-1">
+                    <span class="text-xs text-gray-500">Done</span>
+                    <div class="relative"><input type="checkbox" class="sr-only crane-rigging-toggle" ${data.rigging?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
+                </label>
+            </div>
+            <div class="crane-rigging-det ${data.rigging?'':'hidden'} mt-2 pl-2 border-l-2 border-sky-200">
+                <label class="text-xs font-semibold text-gray-500">Inspected by</label>
+                <div class="flex gap-1 mt-1 flex-wrap">
+                    <select class="form-select text-xs crane-rigging-sel" style="max-width:180px">${rinspOpts}</select>
+                    <input type="text" class="form-input text-xs crane-rigging-other ${(data.riggingInspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${data.riggingOtherInspector||''}">
+                </div>
+            </div>
+        </div>
+        <!-- Cold Weather -->
+        <div class="border rounded-lg p-2 mb-2 bg-white flex items-center justify-between">
+            <span class="text-sm font-semibold text-gray-700">Cold Weather Crane Inspection</span>
+            <label class="flex items-center gap-1 cursor-pointer">
+                <input type="checkbox" class="h-4 w-4 crane-cold-check" style="accent-color:#003D52" ${data.coldWeather?'checked':''}><span class="text-xs">Done</span>
+            </label>
+        </div>
+        <!-- Overlapping Procedure -->
+        <div class="border rounded-lg p-2 bg-white">
+            <span class="text-sm font-semibold text-gray-700">Overlapping Procedure</span>
+            <div class="grid grid-cols-2 gap-1 mt-2">${overlapChecks}</div>
+            <!-- Other 1 -->
+            <div class="mt-1">
+                <label class="flex items-center gap-1 text-xs p-1 bg-gray-50 rounded border border-gray-200 cursor-pointer">
+                    <input type="checkbox" class="h-3 w-3 overlap-other1-check" ${data.overlapOtherChecked?'checked':''}>
+                    <span>Other:</span>
+                </label>
+                <input type="text" class="form-input text-xs mt-1 overlap-other1-text ${data.overlapOtherChecked?'':'hidden'}" placeholder="Company name…" value="${data.overlapOtherText||''}">
+            </div>
+            <!-- Other 2 -->
+            <div class="mt-1">
+                <label class="flex items-center gap-1 text-xs p-1 bg-gray-50 rounded border border-gray-200 cursor-pointer">
+                    <input type="checkbox" class="h-3 w-3 overlap-other2-check" ${data.overlapOther2Checked?'checked':''}>
+                    <span>Other 2:</span>
+                </label>
+                <input type="text" class="form-input text-xs mt-1 overlap-other2-text ${data.overlapOther2Checked?'':'hidden'}" placeholder="Company name…" value="${data.overlapOther2Text||''}">
+            </div>
+        </div>`;
+
+    // Site pills
+    buildSitePillsInto(div.querySelector('.crane-site-pills'), data.site||'1600');
+
+    // Toggle listeners
+    const dailyTog = div.querySelector('.crane-daily-toggle');
+    const dailyDet = div.querySelector('.crane-daily-det');
+    dailyTog.addEventListener('change',()=>{dailyDet.classList.toggle('hidden',!dailyTog.checked);saveData();});
+    const riggTog = div.querySelector('.crane-rigging-toggle');
+    const riggDet = div.querySelector('.crane-rigging-det');
+    riggTog.addEventListener('change',()=>{riggDet.classList.toggle('hidden',!riggTog.checked);saveData();});
+
+    // Inspector other
+    const insSel=div.querySelector('.crane-insp-sel'), insOth=div.querySelector('.crane-insp-other');
+    insSel.addEventListener('change',()=>{insOth.classList.toggle('hidden',insSel.value!=='Other');saveData();});
+    const rigSel=div.querySelector('.crane-rigging-sel'), rigOth=div.querySelector('.crane-rigging-other');
+    rigSel.addEventListener('change',()=>{rigOth.classList.toggle('hidden',rigSel.value!=='Other');saveData();});
+
+    // Overlap other toggles
+    div.querySelector('.overlap-other1-check').addEventListener('change',e=>{div.querySelector('.overlap-other1-text').classList.toggle('hidden',!e.target.checked);saveData();});
+    div.querySelector('.overlap-other2-check').addEventListener('change',e=>{div.querySelector('.overlap-other2-text').classList.toggle('hidden',!e.target.checked);saveData();});
+
+    div.querySelector('.remove-crane-btn').addEventListener('click',()=>{div.remove();saveData();});
+    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    document.getElementById('crane-container').appendChild(div);
+}
+
+document.getElementById('add-crane-btn').addEventListener('click',()=>{
+    const n = document.getElementById('crane-container').querySelectorAll('.crane-card').length+1;
+    addCraneCard({name:`Crane #${n}`,site:'1600',done:false,inspector:'',rigging:false,riggingInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''});
+    saveData();
+});
+
+// ══════════════════════════════════════════════════════
+// MOBILE EQUIPMENT
+// ══════════════════════════════════════════════════════
+function buildMobileEquipment() {
+    document.getElementById('mobile-equipment-container').innerHTML='';
+    EQUIPMENT_LIST.forEach(eq=>addEquipmentItem({name:eq.name,site:eq.site,done:false,inspector:'',otherInspector:'',inspectors:eq.inspectors}));
+}
+
+function addEquipmentItem(data) {
+    const inspList = data.inspectors||[];
+    const hasNamed = inspList.length > 0;
+    const inspOpts = hasNamed ? [...inspList,'Other'].map(i=>`<option ${i===(data.inspector||'')?'selected':''}>${i}</option>`).join('') : '';
+    const div = document.createElement('div');
+    div.className = 'equipment-card mb-2 equipment-item';
+    div.innerHTML = `
+        <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+            <input type="text" class="form-input text-sm font-semibold equip-name flex-1" style="min-width:150px" value="${data.name||''}" placeholder="Equipment name…">
+            <label class="flex items-center cursor-pointer ml-1 gap-1">
+                <span class="text-xs text-gray-500">Done</span>
+                <div class="relative"><input type="checkbox" class="sr-only equip-toggle" ${data.done?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
+            </label>
+        </div>
+        <div class="mb-2">
+            <label class="text-xs font-semibold text-gray-500">SITE</label>
+            <div class="flex flex-wrap gap-1 mt-1 equip-site-pills"></div>
+            <input type="hidden" class="equip-site-val" value="${data.site||'1475'}">
+        </div>
+        <div class="equip-details ${data.done?'':'hidden'} pl-2 border-l-2 border-orange-200">
+            <label class="text-xs font-semibold text-gray-500">Inspected by</label>
+            <div class="flex gap-1 mt-1 flex-wrap">
+                ${hasNamed
+                    ? `<select class="form-select text-xs equip-inspector-sel" style="max-width:180px">${inspOpts}</select>
+                       <input type="text" class="form-input text-xs equip-inspector-other ${(data.inspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${data.otherInspector||''}">`
+                    : `<input type="text" class="form-input text-xs equip-inspector-free" style="max-width:220px" placeholder="Inspector name…" value="${data.otherInspector||data.inspector||''}">`
+                }
+            </div>
+        </div>
+        <button type="button" class="btn btn-danger btn-sm mt-2 remove-equip-btn">Remove</button>`;
+
+    buildSitePillsInto(div.querySelector('.equip-site-pills'), data.site||'1475');
+
+    const tog=div.querySelector('.equip-toggle');
+    const det=div.querySelector('.equip-details');
+    tog.addEventListener('change',()=>{det.classList.toggle('hidden',!tog.checked);saveData();});
+    const sel=div.querySelector('.equip-inspector-sel');
+    if(sel){const oth=div.querySelector('.equip-inspector-other');sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});}
+    div.querySelector('.remove-equip-btn').addEventListener('click',()=>{div.remove();saveData();});
+    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    document.getElementById('mobile-equipment-container').appendChild(div);
+}
+document.getElementById('add-equipment-btn').addEventListener('click',()=>{addEquipmentItem({name:'',site:'1475',done:false,inspector:'',otherInspector:'',inspectors:[]});saveData();});
+
+// ══════════════════════════════════════════════════════
+// ORIENTATIONS
+// ══════════════════════════════════════════════════════
+const ORIENTATION_TYPES_FULL = [...ORIENTATION_TYPES, 'Other'];
+function addOrientationItem(data={type:'New Worker Orientation',site:'1475',typeOther:'',worker:''}) {
+    const id=uid();
+    const typeOpts=ORIENTATION_TYPES_FULL.map(t=>`<option ${t===data.type?'selected':''}>${t}</option>`).join('');
+    const div=document.createElement('div');
+    div.className='orientation-item relative';
+    div.innerHTML=`
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Type</label>
+                <select class="form-select text-sm orientation-type">${typeOpts}</select>
+                <input type="text" class="form-input text-xs mt-1 orientation-type-other ${data.type==='Other'?'':'hidden'}" placeholder="Specify type…" value="${data.typeOther||''}">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Site</label>
+                <div class="flex flex-wrap mt-1">${buildSiteRadiosHtml('oriSite-'+id,data.site)}</div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Worker / Notes</label>
+                <input type="text" class="form-input text-sm orientation-worker" placeholder="Worker name…" value="${data.worker||''}">
+            </div>
+        </div>
+        <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-orientation-btn">Remove</button>`;
+    const sel=div.querySelector('.orientation-type'), oth=div.querySelector('.orientation-type-other');
+    sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});
+    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    div.querySelector('.remove-orientation-btn').addEventListener('click',()=>{div.remove();saveData();});
+    document.getElementById('orientations-container').appendChild(div);
+}
+document.getElementById('add-orientation-btn').addEventListener('click',()=>{addOrientationItem();saveData();});
+
+// ══════════════════════════════════════════════════════
+// WORK PERMITS
+// ══════════════════════════════════════════════════════
+const PERMIT_TYPES_FULL = [...PERMIT_TYPES, 'Other'];
+function addWorkPermitItem(data={type:'Fall Protection Plan',site:'1475',typeOther:'',contractor:''}) {
+    const id=uid();
+    const typeOpts=PERMIT_TYPES_FULL.map(t=>`<option ${t===data.type?'selected':''}>${t}</option>`).join('');
+    const div=document.createElement('div');
+    div.className='permit-item relative';
+    div.innerHTML=`
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase">Permit Type</label>
+                <select class="form-select text-sm mt-1 permit-type">${typeOpts}</select>
+                <input type="text" class="form-input text-xs mt-1 permit-type-other ${data.type==='Other'?'':'hidden'}" placeholder="Specify type…" value="${data.typeOther||''}">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase">Site</label>
+                <div class="flex flex-col mt-1 space-y-0.5">${buildSiteRadiosHtml('permSite-'+id,data.site)}</div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase">Contractor & Task</label>
+                <input type="text" class="form-input text-sm mt-1 permit-contractor" placeholder="e.g. WDC (task)…" value="${data.contractor||''}">
+            </div>
+        </div>
+        <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-permit-btn">Remove</button>`;
+    const sel=div.querySelector('.permit-type'),oth=div.querySelector('.permit-type-other');
+    sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});
+    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    div.querySelector('.remove-permit-btn').addEventListener('click',()=>{div.remove();saveData();});
+    document.getElementById('work-permits-container').appendChild(div);
+}
+document.getElementById('add-permit-btn').addEventListener('click',()=>{addWorkPermitItem();saveData();});
+
+// ══════════════════════════════════════════════════════
+// SAFETY MEETINGS
+// ══════════════════════════════════════════════════════
+function addMeetingItem(data={site:'1475',status:'Yes',comment:''}) {
+    const id=uid();
+    const div=document.createElement('div');
+    div.className='relative bg-white border border-yellow-200 rounded-lg p-2 space-y-1';
+    div.innerHTML=`
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="text-sm font-semibold text-gray-700">Weekly Safety Meeting</span>
+            <select class="form-select w-auto text-sm mtg-status">
+                ${['Yes','No','N/A'].map(v=>`<option ${v===data.status?'selected':''}>${v}</option>`).join('')}
+            </select>
+        </div>
+        <div class="flex flex-wrap items-center gap-1">
+            <span class="text-xs font-semibold text-gray-600">Site:</span>
+            ${buildSiteRadiosHtml('mtgSite-'+id,data.site)}
+        </div>
+        <input type="text" class="form-input text-sm mtg-comment" placeholder="Comments…" value="${data.comment||''}">
+        <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-mtg-btn">Remove</button>`;
+    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    div.querySelector('.remove-mtg-btn').addEventListener('click',()=>{div.remove();saveData();});
+    document.getElementById('safety-meetings-container').appendChild(div);
+}
+document.getElementById('add-meeting-btn').addEventListener('click',()=>{addMeetingItem();saveData();});
+
+// ══════════════════════════════════════════════════════
+// SITE INCIDENTS
+// ══════════════════════════════════════════════════════
+const INCIDENT_TYPES_FULL = [...INCIDENT_TYPES,'Other'];
+function addIncidentItem(data={site:'1475',type:'First Aid',typeOther:'',comment:''}) {
+    const id=uid();
+    const typeOpts=INCIDENT_TYPES_FULL.map(t=>`<option ${t===data.type?'selected':''}>${t}</option>`).join('');
+    const div=document.createElement('div');
+    div.className='relative bg-white border border-red-200 rounded-lg p-2 space-y-1';
+    div.innerHTML=`
+        <div class="flex flex-wrap items-center gap-2">
+            <select class="form-select w-auto text-sm inc-type">${typeOpts}</select>
+            <input type="text" class="form-input text-xs inc-type-other ${data.type==='Other'?'':'hidden'}" style="max-width:200px" placeholder="Specify type…" value="${data.typeOther||''}">
+        </div>
+        <div class="flex flex-wrap items-center gap-1">
+            <span class="text-xs font-semibold text-gray-600">Site:</span>
+            ${buildSiteRadiosHtml('incSite-'+id,data.site)}
+        </div>
+        <input type="text" class="form-input text-sm inc-comment" placeholder="Details / Comments…" value="${data.comment||''}">
+        <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-inc-btn">Remove</button>`;
+    const sel=div.querySelector('.inc-type'),oth=div.querySelector('.inc-type-other');
+    sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});
+    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    div.querySelector('.remove-inc-btn').addEventListener('click',()=>{div.remove();saveData();});
+    document.getElementById('site-incidents-container').appendChild(div);
+}
+document.getElementById('add-incident-btn').addEventListener('click',()=>{addIncidentItem();saveData();});
+
+// ══════════════════════════════════════════════════════
+// WEEKEND WORK
+// ══════════════════════════════════════════════════════
+function addWeekendItem(data={site:'1475',status:'Yes',comment:''}) {
+    const id=uid();
+    const div=document.createElement('div');
+    div.className='relative bg-white border border-purple-200 rounded-lg p-2 space-y-1';
+    div.innerHTML=`
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="text-sm font-semibold text-gray-700">Working on Weekend</span>
+            <select class="form-select w-auto text-sm wknd-status">
+                ${['Yes','No','N/A'].map(v=>`<option ${v===data.status?'selected':''}>${v}</option>`).join('')}
+            </select>
+        </div>
+        <div class="flex flex-wrap items-center gap-1">
+            <span class="text-xs font-semibold text-gray-600">Site:</span>
+            ${buildSiteRadiosHtml('wkndSite-'+id,data.site)}
+        </div>
+        <input type="text" class="form-input text-sm wknd-comment" placeholder="Details…" value="${data.comment||''}">
+        <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-wknd-btn">Remove</button>`;
+    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    div.querySelector('.remove-wknd-btn').addEventListener('click',()=>{div.remove();saveData();});
+    document.getElementById('weekend-work-container').appendChild(div);
+}
+document.getElementById('add-weekend-btn').addEventListener('click',()=>{addWeekendItem();saveData();});
+
+// ══════════════════════════════════════════════════════
+// OBSERVATIONS
+// ══════════════════════════════════════════════════════
+function buildObsSiteOptions(selected) {
+    const opts = [...getAllSites(), 'All Sites', 'Other'];
+    return opts.map(s=>`<option value="${s}" ${s===selected?'selected':''}>${s}</option>`).join('');
+}
+
+function addObservationItem(data={site:'1475',siteOther:'',text:''}) {
+    const div=document.createElement('div');
+    div.className='observation-item relative';
+    const siteVal = data.site||'1475';
+    div.innerHTML=`
+        <div class="flex flex-wrap items-center gap-2 mb-2">
+            <span class="text-xs font-semibold text-gray-600">Site:</span>
+            <select class="form-select text-sm obs-site-sel" style="max-width:160px">
+                ${buildObsSiteOptions(siteVal)}
+            </select>
+            <input type="text" class="form-input text-xs obs-site-other ${siteVal==='Other'?'':'hidden'}" style="max-width:150px" placeholder="Specify site…" value="${data.siteOther||''}">
+            <span class="obs-allsites-badge ${siteVal==='All Sites'?'':'hidden'}" style="font-size:0.7rem;background:#003D5218;color:#003D52;font-weight:700;padding:0.15rem 0.5rem;border-radius:9999px">All Sites</span>
+        </div>
+        <textarea class="form-textarea obs-text" rows="3" placeholder="Enter observation…">${data.text||''}</textarea>
+        <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-obs-btn">X</button>`;
+
+    const sel = div.querySelector('.obs-site-sel');
+    const oth = div.querySelector('.obs-site-other');
+    const badge = div.querySelector('.obs-allsites-badge');
+    sel.addEventListener('change', ()=>{
+        oth.classList.toggle('hidden', sel.value !== 'Other');
+        badge.classList.toggle('hidden', sel.value !== 'All Sites');
+        saveData();
+    });
+    div.querySelectorAll('input,textarea,select').forEach(el=>el.addEventListener('input',saveData));
+    div.querySelector('.remove-obs-btn').addEventListener('click',()=>{div.remove();saveData();});
+    document.getElementById('additional-observations-container').appendChild(div);
+}
+document.getElementById('add-observation-btn').addEventListener('click',()=>{addObservationItem();saveData();});
+
+// ══════════════════════════════════════════════════════
+// SAVE
+// ══════════════════════════════════════════════════════
+function saveData() {
+    const d = {
+        checklistDate: document.getElementById('checklistDate').value,
+        csoName:       document.getElementById('csoName').value,
+        waterUse:      document.getElementById('waterUse').value,
+        fireDanger:    document.getElementById('fireDanger').value,
+    };
+    // headcounts
+    const hc={};
+    document.querySelectorAll('.headcount-input').forEach(inp=>{hc[inp.id]=parseInt(inp.value)||0;});
+    d.headcounts=JSON.stringify(hc);
+    // inspections
+    const walks={};
+    document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]').forEach(cb=>{walks[cb.id]=cb.checked;});
+    d.morningWalks=JSON.stringify(walks);
+    // orientations
+    const oris=[];
+    document.getElementById('orientations-container').querySelectorAll('.orientation-item').forEach(item=>{
+        const s=item.querySelector('input[name^="oriSite-"]:checked');
+        const sel=item.querySelector('.orientation-type');
+        oris.push({type:sel.value,typeOther:item.querySelector('.orientation-type-other')?.value||'',site:s?s.value:'1475',worker:item.querySelector('.orientation-worker').value});
+    });
+    d.orientations=JSON.stringify(oris);
+    // permits (always saved)
+    const permits=[];
+    document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{
+        const s=item.querySelector('input[name^="permSite-"]:checked');
+        const sel=item.querySelector('.permit-type');
+        permits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?.value||'',site:s?s.value:'1475',contractor:item.querySelector('.permit-contractor').value});
+    });
+    d.permits=JSON.stringify(permits);
+    // crane
+    const cranes=[];
+    document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(div=>{
+        const companies=[];
+        div.querySelectorAll('.overlap-check:checked').forEach(cb=>companies.push(cb.value));
+        cranes.push({
+            name:div.querySelector('.crane-name')?.value||'Crane',
+            site:div.querySelector('.crane-site-val')?.value||'1600',
+            done:div.querySelector('.crane-daily-toggle')?.checked||false,
+            inspector:div.querySelector('.crane-insp-sel')?.value||'',
+            otherInspector:div.querySelector('.crane-insp-other')?.value||'',
+            rigging:div.querySelector('.crane-rigging-toggle')?.checked||false,
+            riggingInspector:div.querySelector('.crane-rigging-sel')?.value||'',
+            riggingOtherInspector:div.querySelector('.crane-rigging-other')?.value||'',
+            coldWeather:div.querySelector('.crane-cold-check')?.checked||false,
+            overlap:companies,
+            overlapOtherChecked:div.querySelector('.overlap-other1-check')?.checked||false,
+            overlapOtherText:div.querySelector('.overlap-other1-text')?.value||'',
+            overlapOther2Checked:div.querySelector('.overlap-other2-check')?.checked||false,
+            overlapOther2Text:div.querySelector('.overlap-other2-text')?.value||''
+        });
+    });
+    d.craneData=JSON.stringify(cranes);
+    // equipment
+    const equip=[];
+    document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{
+        const sel=div.querySelector('.equip-inspector-sel');
+        const freeInp=div.querySelector('.equip-inspector-free');
+        equip.push({
+            name:div.querySelector('.equip-name').value,
+            site:div.querySelector('.equip-site-val').value,
+            done:div.querySelector('.equip-toggle')?.checked||false,
+            inspector:sel?sel.value:'',
+            otherInspector:freeInp?freeInp.value:(div.querySelector('.equip-inspector-other')?.value||'')
+        });
+    });
+    d.equipment=JSON.stringify(equip);
+    // meetings
+    const mtgs=[];
+    document.getElementById('safety-meetings-container').querySelectorAll('.relative').forEach(div=>{
+        const s=div.querySelector('input[name^="mtgSite-"]:checked');
+        mtgs.push({site:s?s.value:'1475',status:div.querySelector('.mtg-status').value,comment:div.querySelector('.mtg-comment').value});
+    });
+    d.meetings=JSON.stringify(mtgs);
+    // incidents
+    const incs=[];
+    document.getElementById('site-incidents-container').querySelectorAll('.relative').forEach(div=>{
+        const s=div.querySelector('input[name^="incSite-"]:checked');
+        const sel=div.querySelector('.inc-type');
+        incs.push({site:s?s.value:'1475',type:sel.value,typeOther:div.querySelector('.inc-type-other')?.value||'',comment:div.querySelector('.inc-comment').value});
+    });
+    d.incidents=JSON.stringify(incs);
+    // weekends
+    const wknds=[];
+    document.getElementById('weekend-work-container').querySelectorAll('.relative').forEach(div=>{
+        const s=div.querySelector('input[name^="wkndSite-"]:checked');
+        wknds.push({site:s?s.value:'1475',status:div.querySelector('.wknd-status').value,comment:div.querySelector('.wknd-comment').value});
+    });
+    d.weekends=JSON.stringify(wknds);
+    // observations
+    const obs=[];
+    document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(item=>{
+        const sel=item.querySelector('.obs-site-sel');
+        const siteVal=sel?sel.value:'1475';
+        const siteOther=item.querySelector('.obs-site-other')?.value||'';
+        const text=item.querySelector('.obs-text')?.value.trim()||'';
+        if(text) obs.push({site:siteVal,siteOther,text});
+    });
+    d.observations=JSON.stringify(obs);
+    localStorage.setItem('csoChecklist_v5',JSON.stringify(d));
+}
+
+// ══════════════════════════════════════════════════════
+// LOAD
+// ══════════════════════════════════════════════════════
+function loadData() {
+    const raw=localStorage.getItem('csoChecklist_v5');
+    const today=document.getElementById('checklistDate').value;
+    const data=raw?JSON.parse(raw):null;
+    if(data&&data.csoName) document.getElementById('csoName').value=data.csoName;
+
+    // Permits always loaded
+    document.getElementById('work-permits-container').innerHTML='';
+    if(data&&data.permits){
+        const p=JSON.parse(data.permits);
+        (p.length?p:DEFAULT_PERMITS).forEach(x=>addWorkPermitItem(x));
+    } else {
+        DEFAULT_PERMITS.forEach(x=>addWorkPermitItem(x));
+    }
+
+    if(!data||data.checklistDate!==today) {
+        // Different day: rebuild headcount/inspections fresh
+        rebuildHeadcount();
+        rebuildInspections();
+        return;
+    }
+
+    document.getElementById('waterUse').value=data.waterUse||'L1';
+    document.getElementById('fireDanger').value=data.fireDanger||'Low';
+
+    const savedHC = data.headcounts ? JSON.parse(data.headcounts) : {};
+    rebuildHeadcount(savedHC);
+
+    const savedWalks = data.morningWalks ? JSON.parse(data.morningWalks) : {};
+    rebuildInspections(savedWalks);
+
+    if(data.orientations){document.getElementById('orientations-container').innerHTML='';JSON.parse(data.orientations).forEach(o=>addOrientationItem(o));}
+    if(data.craneData){
+        const cd=JSON.parse(data.craneData);
+        if(Array.isArray(cd)){document.getElementById('crane-container').innerHTML='';cd.forEach(c=>addCraneCard(c));}
+    }
+    if(data.equipment){
+        document.getElementById('mobile-equipment-container').innerHTML='';
+        JSON.parse(data.equipment).forEach(eq=>{
+            const base=EQUIPMENT_LIST.find(e=>e.name===eq.name);
+            addEquipmentItem({...eq,inspectors:base?base.inspectors:[]});
+        });
+    }
+    if(data.meetings){document.getElementById('safety-meetings-container').innerHTML='';JSON.parse(data.meetings).forEach(m=>addMeetingItem(m));}
+    if(data.incidents){document.getElementById('site-incidents-container').innerHTML='';JSON.parse(data.incidents).forEach(i=>addIncidentItem(i));}
+    if(data.weekends){document.getElementById('weekend-work-container').innerHTML='';JSON.parse(data.weekends).forEach(w=>addWeekendItem(w));}
+    if(data.observations){document.getElementById('additional-observations-container').innerHTML='';JSON.parse(data.observations).forEach(o=>addObservationItem(o));}
+    updateHeadcounts();
+    checkHotwork();
+}
+
+// ══════════════════════════════════════════════════════
+// REPORT — per site
+// ══════════════════════════════════════════════════════
+function generateReport() {
+    const date=document.getElementById('checklistDate').value||'N/A';
+    const cso=document.getElementById('csoName').value||'N/A';
+    let r=`CSO DAILY LOG — FULL REPORT\n${'='.repeat(50)}\nDate:     ${date}\nCSO Name: ${cso}\n\nSITE CONDITIONS\n${'-'.repeat(40)}\nWater Use: ${document.getElementById('waterUse').value}  |  Fire Danger: ${document.getElementById('fireDanger').value}\nHot Work:  ${document.getElementById('hotwork-status').textContent}\n`;
+
+    // WDC is now per-site — included in hcBySite via headcount-input loop below
+
+    const allSites=getAllSites();
+    const hcBySite={},permitsBySite={},orisBySite={},walksBySite={},equipBySite={},craneBySite={},mtgsBySite={},incsBySite={},wkndsBySite={},obsBySite={};
+
+    // Headcount
+    document.querySelectorAll('.headcount-input').forEach(inp=>{
+        const v=parseInt(inp.value)||0; if(!v) return;
+        const site=inp.dataset.site;
+        if(!hcBySite[site]) hcBySite[site]=[];
+        hcBySite[site].push({trade:inp.dataset.trade,count:v});
+    });
+
+    // Permits
+    document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{
+        const s=item.querySelector('input[name^="permSite-"]:checked'); const site=s?s.value:'1475';
+        const sel=item.querySelector('.permit-type');
+        let type=sel.value; if(type==='Other'){const o=item.querySelector('.permit-type-other')?.value;if(o)type=`Other: ${o}`;}
+        const c=item.querySelector('.permit-contractor').value; if(!c) return;
+        if(!permitsBySite[site]) permitsBySite[site]=[];
+        permitsBySite[site].push({type,contractor:c});
+    });
+
+    // Orientations
+    document.getElementById('orientations-container').querySelectorAll('.orientation-item').forEach(item=>{
+        const s=item.querySelector('input[name^="oriSite-"]:checked'); const site=s?s.value:'1475';
+        const sel=item.querySelector('.orientation-type');
+        let type=sel.value; if(type==='Other'){const o=item.querySelector('.orientation-type-other')?.value;if(o)type=`Other: ${o}`;}
+        if(!orisBySite[site]) orisBySite[site]=[];
+        orisBySite[site].push({type,worker:item.querySelector('.orientation-worker').value});
+    });
+
+    // Walks — derive label from checkbox id: e.g. "safetywalk1475-completed" → "Safety Walk 1475"
+    document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{
+        const id = cb.id; // e.g. safetywalk1475-completed
+        allSites.forEach(s=>{
+            const sSlug=s.toLowerCase().replace(/[^a-z0-9]/g,'');
+            if(id.includes(sSlug)){
+                let label='';
+                if(id.startsWith('safetywalk')) label=`Safety Walk ${s}`;
+                else if(id.startsWith('weeklysafety')) label=`Weekly Safety Site Inspection ${s}`;
+                else label=id.replace('-completed','');
+                if(!walksBySite[s])walksBySite[s]=[];
+                walksBySite[s].push(label);
+            }
         });
     });
 
-    // ── INIT ──────────────────────────────────────────────
-    loadData();
+    // Equipment
+    document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{
+        const tog=div.querySelector('.equip-toggle'); if(!tog||!tog.checked) return;
+        const site=div.querySelector('.equip-site-val').value||'1475';
+        const name=div.querySelector('.equip-name').value;
+        const sel=div.querySelector('.equip-inspector-sel');
+        let insp=sel?sel.value:(div.querySelector('.equip-inspector-free')?.value||'');
+        if(insp==='Other') insp=div.querySelector('.equip-inspector-other')?.value||'Other';
+        if(!equipBySite[site]) equipBySite[site]=[];
+        equipBySite[site].push({name,inspector:insp});
+    });
+
+    // Crane
+    document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(div=>{
+        const site=div.querySelector('.crane-site-val')?.value||'1600';
+        const craneName=div.querySelector('.crane-name')?.value||'Crane';
+        if(!craneBySite[site]) craneBySite[site]=[];
+        const entry={craneName,tasks:[]};
+        const dailyTog=div.querySelector('.crane-daily-toggle');
+        if(dailyTog&&dailyTog.checked){
+            let insp=div.querySelector('.crane-insp-sel')?.value||'';
+            if(insp==='Other') insp=div.querySelector('.crane-insp-other')?.value||'Other';
+            entry.tasks.push({task:'Crane Daily Inspection',inspector:insp});
+        }
+        const riggTog=div.querySelector('.crane-rigging-toggle');
+        if(riggTog&&riggTog.checked){
+            let insp=div.querySelector('.crane-rigging-sel')?.value||'';
+            if(insp==='Other') insp=div.querySelector('.crane-rigging-other')?.value||'Other';
+            entry.tasks.push({task:'Rigging Daily Inspection',inspector:insp});
+        }
+        const cold=div.querySelector('.crane-cold-check');
+        if(cold&&cold.checked) entry.tasks.push({task:'Cold Weather Crane Inspection',inspector:''});
+        const companies=[];
+        div.querySelectorAll('.overlap-check:checked').forEach(cb=>companies.push(cb.value));
+        const o1c=div.querySelector('.overlap-other1-check'); if(o1c&&o1c.checked){const t=div.querySelector('.overlap-other1-text')?.value;if(t)companies.push(t);}
+        const o2c=div.querySelector('.overlap-other2-check'); if(o2c&&o2c.checked){const t=div.querySelector('.overlap-other2-text')?.value;if(t)companies.push(t);}
+        if(companies.length) entry.tasks.push({task:'Overlapping Procedure',companies});
+        if(entry.tasks.length) craneBySite[site].push(entry);
+    });
+
+    // Meetings / incidents / weekends / obs
+    document.getElementById('safety-meetings-container').querySelectorAll('.relative').forEach(div=>{
+        const s=div.querySelector('input[name^="mtgSite-"]:checked'); const site=s?s.value:'1475';
+        if(!mtgsBySite[site]) mtgsBySite[site]=[];
+        mtgsBySite[site].push({status:div.querySelector('.mtg-status').value,comment:div.querySelector('.mtg-comment').value});
+    });
+    document.getElementById('site-incidents-container').querySelectorAll('.relative').forEach(div=>{
+        const s=div.querySelector('input[name^="incSite-"]:checked'); const site=s?s.value:'1475';
+        const sel=div.querySelector('.inc-type');
+        let type=sel.value; if(type==='Other'){const o=div.querySelector('.inc-type-other')?.value;if(o)type=`Other: ${o}`;}
+        if(!incsBySite[site]) incsBySite[site]=[];
+        incsBySite[site].push({type,comment:div.querySelector('.inc-comment').value});
+    });
+    document.getElementById('weekend-work-container').querySelectorAll('.relative').forEach(div=>{
+        const s=div.querySelector('input[name^="wkndSite-"]:checked'); const site=s?s.value:'1475';
+        if(!wkndsBySite[site]) wkndsBySite[site]=[];
+        wkndsBySite[site].push({status:div.querySelector('.wknd-status').value,comment:div.querySelector('.wknd-comment').value});
+    });
+    // Separate "All Sites" observations — shown once, not repeated per site
+    const allSitesObs = [];
+    document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(item=>{
+        const sel=item.querySelector('.obs-site-sel');
+        let site=sel?sel.value:'1475';
+        if(site==='Other'){const o=item.querySelector('.obs-site-other')?.value;if(o)site=o;}
+        const text=item.querySelector('.obs-text')?.value.trim()||'';
+        if(!text) return;
+        if(site==='All Sites'){
+            allSitesObs.push(text); // collected separately — shown once before sites
+        } else {
+            if(!obsBySite[site]) obsBySite[site]=[];
+            obsBySite[site].push(text);
+        }
+    });
+
+    // ── Build HTML report — no emojis, classes for print page-break ──
+    const blocks = [];
+    let isFirstSite = true;
+    allSites.forEach(site=>{
+        const hasAny=hcBySite[site]||permitsBySite[site]||orisBySite[site]||walksBySite[site]||equipBySite[site]||craneBySite[site]||mtgsBySite[site]||incsBySite[site]||wkndsBySite[site]||obsBySite[site];
+        if(!hasAny) return;
+
+        // First site (1475) = no page break, stays after WDC section
+        // All subsequent sites = new page
+        const pageBreakClass = isFirstSite ? 'report-site-block report-first-site' : 'report-site-block';
+        isFirstSite = false;
+
+        let b=`<div class="${pageBreakClass}">`;
+
+        // Site header bar
+        b+=`<div class="report-site-header" style="margin:0 0 6pt;padding:5pt 8pt;background:#003D52;border-radius:3pt">`;
+        b+=`<span style="font-size:12pt;font-weight:800;color:#96C61C;letter-spacing:0.06em">SITE ${site}</span>`;
+        b+=`</div>`;
+
+        if(hcBySite[site]){
+            const t=hcBySite[site].reduce((s,x)=>s+x.count,0);
+            b+=sectionHtml('Headcount');
+            b+=`<div style="margin-left:10pt;margin-bottom:3pt">`;
+            b+=`<span style="font-weight:700;font-size:9pt;color:#003D52">${t} workers on site</span><br>`;
+            hcBySite[site].forEach(x=>{b+=`<span style="color:#374151;font-size:8.5pt">&nbsp;&nbsp;${x.trade}: <b>${x.count}</b></span><br>`;});
+            b+=`</div>`;
+        }
+        if(orisBySite[site]){
+            b+=sectionHtml('Orientations');
+            orisBySite[site].forEach(o=>{
+                let txt=o.type;if(o.worker)txt+=` <span style="color:#A5A5A5">— ${o.worker}</span>`;
+                b+=rowHtml(txt);
+            });
+        }
+        if(walksBySite[site]){
+            b+=sectionHtml('Inspections Completed');
+            walksBySite[site].forEach(w=>{b+=rowHtml(`<span style="color:#059669;font-weight:600">Completed</span> — ${w}`);});
+        }
+        if(craneBySite[site]){
+            b+=sectionHtml('Crane');
+            craneBySite[site].forEach(e=>{
+                b+=`<div style="margin-left:0.75rem;font-weight:700;color:#003D52;margin-top:0.2rem">${e.craneName}</div>`;
+                e.tasks.forEach(t=>{
+                    let txt=t.task;
+                    if(t.inspector)txt+=` <span style="color:#A5A5A5">— ${t.inspector}</span>`;
+                    if(t.companies&&t.companies.length)txt+=` <span style="color:#A5A5A5">| With: ${t.companies.join(', ')}</span>`;
+                    b+=rowHtml(txt, 1.5);
+                });
+            });
+        }
+        if(equipBySite[site]){
+            b+=sectionHtml('Mobile Equipment');
+            equipBySite[site].forEach(e=>{
+                let txt=e.name;if(e.inspector)txt+=` <span style="color:#A5A5A5">— ${e.inspector}</span>`;
+                b+=rowHtml(txt);
+            });
+        }
+        if(permitsBySite[site]){
+            b+=sectionHtml('Active Work Permits');
+            permitsBySite[site].forEach(p=>{b+=rowHtml(`<b>${p.type}</b>: ${p.contractor}`);});
+        }
+        if(mtgsBySite[site]){
+            b+=sectionHtml('Safety Meetings');
+            mtgsBySite[site].forEach(m=>{
+                let txt=`Weekly Safety Meeting: <b>${m.status}</b>`;
+                if(m.comment)txt+=`<br><span style="color:#A5A5A5;font-size:0.88em;padding-left:1rem">${m.comment}</span>`;
+                b+=rowHtml(txt);
+            });
+        }
+        b+=sectionHtml('Site Incidents');
+        if(incsBySite[site]&&incsBySite[site].length){
+            incsBySite[site].forEach(i=>{
+                let txt=`<span style="color:#dc2626;font-weight:700">${i.type}</span>`;
+                if(i.comment)txt+=`<br><span style="color:#A5A5A5;font-size:0.88em;padding-left:1rem">${i.comment}</span>`;
+                b+=rowHtml(txt);
+            });
+        } else {
+            b+=rowHtml(`<span style="color:#059669;font-weight:600">No incidents reported.</span>`);
+        }
+        if(wkndsBySite[site]){
+            b+=sectionHtml('Weekend Work');
+            wkndsBySite[site].forEach(w=>{
+                let txt=`Weekend: <b>${w.status}</b>`;
+                if(w.comment)txt+=`<br><span style="color:#A5A5A5;font-size:0.88em;padding-left:1rem">${w.comment}</span>`;
+                b+=rowHtml(txt);
+            });
+        }
+        if(obsBySite[site]){
+            b+=sectionHtml('Observations');
+            obsBySite[site].forEach(o=>{b+=rowHtml(`<span style="white-space:pre-wrap">${obsHtml(o)}</span>`);});
+        }
+
+        b+=`</div>`; // end report-site-block
+        blocks.push(b);
+    });
+    // All Sites Observations block — inserted between WDC and first site
+    let allSitesBlock = '';
+    if(allSitesObs.length > 0){
+        allSitesBlock += `<div style="margin:8pt 0;padding:6pt 8pt;background:#f0f7ff;border-left:4pt solid #003D52;border-radius:3pt">`;
+        allSitesBlock += `<div style="font-weight:700;font-size:7.5pt;color:#003D52;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4pt">All Sites — General Observations</div>`;
+        allSitesObs.forEach(o=>{
+            allSitesBlock += `<div style="font-size:9pt;color:#374151;margin-bottom:4pt;padding-left:6pt;white-space:pre-wrap">• ${obsHtml(o)}</div>`;
+        });
+        allSitesBlock += `</div>`;
+    }
+
+    return allSitesBlock + blocks.join('');
+}
+
+function sectionHtml(title){
+    return `<div class="report-section-header" style="margin:7pt 0 2pt;font-weight:700;font-size:7.5pt;color:#003D52;letter-spacing:0.05em;text-transform:uppercase;border-left:3px solid #96C61C;padding:2pt 0 2pt 6pt;background:#f4f6f8">${title}</div>`;
+}
+function rowHtml(txt, extraIndent){
+    const indPt = 10 + ((extraIndent||0)*10);
+    return `<div style="margin-left:${indPt}pt;margin-bottom:2pt;font-size:9pt;color:#374151;line-height:1.35">${txt}</div>`;
+}
+// Convert newlines in observation text to <br> for HTML rendering
+function obsHtml(text){
+    return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function generateReportHeader(){
+    const date=document.getElementById('checklistDate').value||'N/A';
+    const cso=document.getElementById('csoName').value||'N/A';
+    const water=document.getElementById('waterUse').value;
+    const fire=document.getElementById('fireDanger').value;
+    const hotwork=document.getElementById('hotwork-status').textContent;
+    let h=`<div style="background:#003D52;border-radius:4pt;padding:10pt 12pt;margin-bottom:10pt">`;
+    h+=`<div style="font-size:14pt;font-weight:800;color:#96C61C;letter-spacing:0.07em">CSO DAILY LOG</div>`;
+    h+=`<div style="color:#ffffff;font-size:9pt;margin-top:3pt;font-weight:500">Whistler 2020 Development Corporation</div>`;
+    h+=`<div style="color:#c0cdd4;font-size:8.5pt;margin-top:4pt">Date: <b style="color:#fff">${date}</b> &nbsp;|&nbsp; CSO: <b style="color:#fff">${cso}</b></div>`;
+    h+=`</div>`;
+    h+=`<div style="background:#f0fdf4;border:1pt solid #bbf7d0;border-radius:3pt;padding:5pt 8pt;margin-bottom:8pt;font-size:8.5pt">`;
+    h+=`<span style="color:#374151">Water Use: <b>${water}</b> &nbsp;|&nbsp; Fire Danger: <b>${fire}</b></span><br>`;
+    h+=`<span style="${hotwork.includes('NOT')?'color:#dc2626':'color:#059669'};font-weight:600">${hotwork}</span>`;
+    h+=`</div>`;
+    return h;
+}
+
+document.getElementById('generateFullReport').addEventListener('click',()=>{
+    const el = document.getElementById('report-content');
+    el.style.whiteSpace = 'normal';
+    el.innerHTML = generateReportHeader() + generateReport();
+    document.getElementById('report-output').classList.remove('hidden');
+    document.getElementById('report-output').scrollIntoView({behavior:'smooth'});
 });
+
+// ══════════════════════════════════════════════════════
+// RESET
+// ══════════════════════════════════════════════════════
+document.getElementById('resetForm').addEventListener('click',()=>{
+    if(!confirm('Reset form? Work Permits will be preserved.')) return;
+    const savedPermits=[];
+    document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{
+        const s=item.querySelector('input[name^="permSite-"]:checked');
+        const sel=item.querySelector('.permit-type');
+        savedPermits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?.value||'',site:s?s.value:'1475',contractor:item.querySelector('.permit-contractor').value});
+    });
+    document.getElementById('waterUse').selectedIndex=0;
+    document.getElementById('fireDanger').selectedIndex=0;
+    document.getElementById('checklistDate').valueAsDate=new Date();
+    rebuildHeadcount();
+    rebuildInspections();
+    document.getElementById('orientations-container').innerHTML='';
+    document.getElementById('safety-meetings-container').innerHTML='';
+    document.getElementById('site-incidents-container').innerHTML='';
+    document.getElementById('weekend-work-container').innerHTML='';
+    document.getElementById('additional-observations-container').innerHTML='';
+    document.getElementById('crane-container').innerHTML='';
+    buildCrane();
+    buildMobileEquipment();
+    document.getElementById('work-permits-container').innerHTML='';
+    savedPermits.forEach(p=>addWorkPermitItem(p));
+    document.getElementById('report-output').classList.add('hidden');
+    checkHotwork();
+    saveData();
+});
+
+// ══════════════════════════════════════════════════════
+// COPY / PDF
+// ══════════════════════════════════════════════════════
+document.getElementById('copyReport').addEventListener('click',()=>{
+    const el=document.getElementById('report-content');
+    const ta=document.createElement('textarea');
+    ta.value=el.innerText; // plain text from HTML
+    ta.style.position='fixed';ta.style.top='-9999px';document.body.appendChild(ta);ta.focus();ta.select();
+    try{document.execCommand('copy');document.getElementById('copyReport').textContent='Copied!';}catch{}
+    document.body.removeChild(ta);
+    setTimeout(()=>document.getElementById('copyReport').textContent='Copy Report',2000);
+});
+
+document.getElementById('exportPdf').addEventListener('click',()=>{
+    const cso = document.getElementById('csoName').value || 'CSO';
+    const dt  = document.getElementById('checklistDate').value || 'date';
+    const reportHTML = document.getElementById('report-content').innerHTML;
+
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CSO Report ${cso} ${dt}</title>
+<style>
+  @page { size: A4; margin: 12mm 14mm 14mm 14mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    line-height: 1.4;
+    color: #1a1a1a;
+    background: white;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .report-site-block { page-break-before: always; }
+  .report-first-site { page-break-before: avoid; }
+  .report-section-header { page-break-after: avoid; }
+  .report-site-header { page-break-after: avoid; }
+  b { font-weight: 700; }
+  span { font-size: inherit; }
+</style>
+</head>
+<body>${reportHTML}</body>
+</html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => { win.print(); }, 400);
+});
+
+// ══════════════════════════════════════════════════════
+// SIMPLE INPUT EVENTS
+// ══════════════════════════════════════════════════════
+document.getElementById('waterUse').addEventListener('change',()=>{checkHotwork();saveData();});
+document.getElementById('fireDanger').addEventListener('change',()=>{checkHotwork();saveData();});
+document.getElementById('checklistDate').addEventListener('input',saveData);
+document.getElementById('csoName').addEventListener('input',saveData);
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+// Clean up test data
+(function(){
+    const customSites = getCustomSites().filter(s => s !== '2050');
+    saveCustomSites(customSites);
+    const customTrades = getCustomTrades().filter(t => t.toLowerCase() !== 'cursing');
+    saveCustomTrades(customTrades);
+})();
+renderSiteDisplay();
+buildCrane();
+buildMobileEquipment();
+loadData();
+checkHotwork();
+
+}); // end DOMContentLoaded
 </script>
 </body>
 </html>
