@@ -43,6 +43,14 @@
         /* Permit / orientation / obs items */
         .observation-item,.permit-item,.orientation-item{ background:#f9fafb; border:1px solid #e5e7eb; border-radius:0.5rem; padding:0.85rem; margin-top:0.65rem; }
         .orientation-item{ background:#f0fdf4; border-color:#bbf7d0; }
+        /* Observation status styles */
+        .obs-status-bar{ background:#f0f4f8; border:1px solid #e2e8f0; border-radius:0.4rem; padding:0.6rem 0.75rem; margin-top:0.5rem; }
+        .obs-status-resolved{ border-color:#bbf7d0; background:#f0fdf4; }
+        .obs-status-pending{ border-color:#fde68a; background:#fffbeb; }
+        .obs-status-chip{ display:inline-flex; align-items:center; gap:4px; font-size:0.68rem; font-weight:700; padding:0.18rem 0.55rem; border-radius:9999px; }
+        .chip-pending{ background:#fde68a; color:#92400e; }
+        .chip-resolved{ background:#bbf7d0; color:#065f46; }
+        .chip-new{ background:#e0e7ef; color:#374151; }
         /* Toggle */
         .toggle-bg{ transition:background-color 0.2s; }
         .toggle-dot{ transition:transform 0.2s; }
@@ -72,12 +80,10 @@
 </head>
 <body class="p-3 md:p-5">
 <div class="max-w-4xl mx-auto">
-
 <header class="text-center mb-4">
     <h1 class="text-2xl font-bold" style="color:#003D52">Smart Safety Checklist</h1>
     <p class="text-xs text-gray-500">CSO Daily Log — Whistler 2020 Development</p>
 </header>
-
 <div class="card">
     <div class="grid grid-cols-2 gap-3 mb-3">
         <div>
@@ -105,7 +111,6 @@
         </div>
     </div>
 </div>
-
 <div class="card mb-3 p-3">
     <div class="flex items-center justify-between">
         <span class="text-sm font-semibold" style="color:#003D52">Active Sites</span>
@@ -121,7 +126,6 @@
         <div id="site-delete-list" class="mt-3 space-y-1"></div>
     </div>
 </div>
-
 <div class="mb-3 border-b border-gray-200" id="section-tabs">
     <nav class="flex -mb-px">
         <button class="tab-btn tab-active" data-tab="headcount">Headcount</button>
@@ -136,7 +140,6 @@
         <button class="tab-btn" data-tab="observations">Observations</button>
     </nav>
 </div>
-
 <div id="tab-headcount" class="tab-content">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Site Headcount</h2>
@@ -151,14 +154,12 @@
         <div class="mt-1 text-right font-bold text-gray-700 text-sm">Grand Total: <span id="grand-total">0</span></div>
     </div>
 </div>
-
 <div id="tab-inspections" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-3" style="color:#003D52">Site Inspections</h2>
         <div id="morning-tasks" class="space-y-2"></div>
     </div>
 </div>
-
 <div id="tab-orientations" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Orientations</h2>
@@ -166,7 +167,6 @@
         <button id="add-orientation-btn" class="btn btn-green mt-3 w-full md:w-auto">+ Add Orientation</button>
     </div>
 </div>
-
 <div id="tab-permits" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Active Work Permits</h2>
@@ -175,7 +175,6 @@
         <button id="add-permit-btn" class="btn btn-green mt-3 w-full md:w-auto">+ Add Work Permit</button>
     </div>
 </div>
-
 <div id="tab-crane" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Crane</h2>
@@ -184,7 +183,6 @@
         <button id="add-crane-btn" class="btn btn-green mt-3 w-full md:w-auto">+ Add Crane</button>
     </div>
 </div>
-
 <div id="tab-equipment" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Mobile Equipment</h2>
@@ -192,7 +190,6 @@
         <button id="add-equipment-btn" class="btn btn-green mt-3 w-full md:w-auto">+ Add Equipment</button>
     </div>
 </div>
-
 <div id="tab-meetings" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Safety Meetings</h2>
@@ -200,7 +197,6 @@
         <button id="add-meeting-btn" class="btn btn-green mt-3 w-full md:w-auto">+ Add Safety Meeting</button>
     </div>
 </div>
-
 <div id="tab-incidents" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Site Incidents</h2>
@@ -208,7 +204,6 @@
         <button id="add-incident-btn" class="btn btn-danger mt-3 w-full md:w-auto">+ Add Incident</button>
     </div>
 </div>
-
 <div id="tab-weekend" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-3" style="color:#003D52">Weekend Work</h2>
@@ -216,28 +211,26 @@
         <button id="add-weekend-btn" class="btn btn-purple mt-3 w-full md:w-auto">+ Add Weekend Work</button>
     </div>
 </div>
-
 <div id="tab-observations" class="tab-content hidden">
     <div class="card">
-        <h2 class="text-base font-semibold mb-3" style="color:#003D52">Additional Observations</h2>
+        <h2 class="text-base font-semibold mb-1" style="color:#003D52">Additional Observations</h2>
+        <p class="text-xs text-gray-500 mb-3">Pending observations are preserved on reset until resolved.</p>
         <div id="additional-observations-container"></div>
         <button id="add-observation-btn" class="btn btn-primary mt-3">Add Observation</button>
     </div>
 </div>
-
 <div class="mt-5 space-y-2">
     <button id="generateFullReport" class="btn btn-primary w-full">Generate Full Report (by Site)</button>
     <button id="resetForm" class="btn btn-danger w-full">Reset Form</button>
     <div id="reset-confirm-bar" class="hidden mt-2 p-3 bg-red-50 border border-red-200 rounded-lg text-center">
-        <p class="text-sm font-semibold text-red-700 mb-2">Are you sure? This clears all data except Work Permits.</p>
+        <p class="text-sm font-semibold text-red-700 mb-2">Are you sure? This clears all data except Work Permits and Pending Observations.</p>
         <div class="flex gap-2 justify-center">
             <button id="reset-yes" class="btn btn-danger btn-sm px-4">Yes, Reset</button>
             <button id="reset-no" class="btn btn-gray btn-sm px-4">Cancel</button>
         </div>
     </div>
-    <p class="text-xs text-center text-gray-400 italic">*Reset clears all data EXCEPT Work Permits.</p>
+    <p class="text-xs text-center text-gray-400 italic">*Reset clears all data EXCEPT Work Permits and Pending Observations.</p>
 </div>
-
 <div id="report-output" class="card mt-5 hidden" style="border-top:4px solid #96C61C">
     <div class="flex items-center gap-3 mb-3">
         <div style="width:6px;height:28px;background:#96C61C;border-radius:3px"></div>
@@ -260,15 +253,12 @@
         <button id="copyReport" class="btn btn-gray flex-1" style="font-family:'Raleway',sans-serif">Copy Report</button>
     </div>
 </div>
-
 </div><script>
 document.addEventListener('DOMContentLoaded', function () {
-
 // ══════════════════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════════════════
 const BASE_SITES = ['1475','1600','1825'];
-
 const BASE_TRADES = [
     { name:'WDC', wdc:true },
     { name:'Labour' },{ name:'Plumbing' },{ name:'Electrical' },{ name:'HVAC' },{ name:'Masonry' },
@@ -279,10 +269,8 @@ const BASE_TRADES = [
     { name:'Tree Removal' },{ name:'Blasting' },{ name:'Surveying' },
     { name:'Environmental Monitoring' },{ name:'Erosion Control' },
 ];
-
 const CRANE_INSPECTORS   = ['Noah C.','Eric J.','Miguel M.','Mahlon Taylor','Mike Butcher','Dan Hirst','Tim C.'];
 const BJORDAL_INSPECTORS = ['Mike Butcher','Mahlon Taylor','Tim C.'];
-
 const EQUIPMENT_LIST = [
     { name:'Lemyre Boom Lift (Green)',    site:'1475', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
     { name:'Lemyre Boom Lift (Blue)',     site:'1475', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
@@ -295,12 +283,10 @@ const EQUIPMENT_LIST = [
     { name:'Bjordal Boom Lift',           site:'1600', inspectors:BJORDAL_INSPECTORS },
     { name:'Painter Boomlift Blue',       site:'1475', inspectors:['Mathieu L.','Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
 ];
-
 const OVERLAP_COMPANIES = ['Jensen Construction','Corona Excavations','Blacktail Reinforcing','Astra Concrete','Cardinal Concrete','Corridor Concrete','Bjordal'];
 const ORIENTATION_TYPES = ['Young Worker Orientation','New Worker Orientation','Site-Specific Orientation','Visitor Orientation'];
 const PERMIT_TYPES      = ['Silica Dust Exposure Plan','Hot Work Permit','Fall Protection Plan','Critical Lift Plan','Confined Space Entry Permit'];
 const INCIDENT_TYPES    = ['First Aid','Near Miss','Incident Investigation Report','Claim Management'];
-
 const DEFAULT_PERMITS = [
     { type:'Silica Dust Exposure Plan', site:'1475', contractor:'Lemyre (Cladding assembly)' },
     { type:'Silica Dust Exposure Plan', site:'1475', contractor:'CMO Flooring (Mixing and pouring cement)' },
@@ -314,8 +300,13 @@ const DEFAULT_PERMITS = [
     { type:'Fall Protection Plan', site:'1475', contractor:'Linton Painting (receiving materials)' },
     { type:'Fall Protection Plan', site:'1475', contractor:'Coastal Mountain Mechanical (receiving Materials)' },
     { type:'Fall Protection Plan', site:'1475', contractor:'AMC (Receiving materials from balcony L3&L4 B1&B2)' },
+    { type:'Hot Work Permit', site:'1600', contractor:'Raven (Torch-on roofing)' },
+    { type:'Hot Work Permit', site:'1475', contractor:'AWSE (Cutting metal on underground parking)' },
+    { type:'Hot Work Permit', site:'1600', contractor:'True North Masonry (Cutting Rebar)' },
+    { type:'Hot Work Permit', site:'1600', contractor:'True Air System (Cutting Metal on underground parking)' },
+    { type:'Hot Work Permit', site:'1600', contractor:'Jensen (Cutting rebar)' },
+    { type:'Hot Work Permit', site:'1475', contractor:'Jensen (Cutting rebar)' },
 ];
-
 // ══════════════════════════════════════════════════════
 // SITE MANAGEMENT (persisted in localStorage)
 // ══════════════════════════════════════════════════════
@@ -328,14 +319,12 @@ function getAllTrades() {
 }
 function saveCustomTrades(arr) { localStorage.setItem('customTrades_v5', JSON.stringify(arr)); }
 function getCustomTrades() { return JSON.parse(localStorage.getItem('customTrades_v5')||'[]'); }
-
 function siteColor(s) {
     if(s==='1475') return '#2563eb';
     if(s==='1600') return '#7c3aed';
     if(s==='1825') return '#059669';
     return '#d97706';
 }
-
 // Render site pill badges in top display
 function renderSiteDisplay() {
     const cont = document.getElementById('site-pills-display');
@@ -348,7 +337,6 @@ function renderSiteDisplay() {
     });
     renderSiteDeleteList();
 }
-
 function renderSiteDeleteList() {
     const list = document.getElementById('site-delete-list');
     const custom = getCustomSites();
@@ -372,11 +360,9 @@ function renderSiteDeleteList() {
         list.appendChild(row);
     });
 }
-
 document.getElementById('toggle-site-manager').addEventListener('click', () => {
     document.getElementById('manage-sites-panel').classList.toggle('open');
 });
-
 document.getElementById('add-site-btn').addEventListener('click', () => {
     const inp = document.getElementById('new-site-input');
     const name = inp.value.trim();
@@ -392,12 +378,10 @@ document.getElementById('add-site-btn').addEventListener('click', () => {
     refreshAllSitePills();
     saveData();
 });
-
 // ══════════════════════════════════════════════════════
 // HELPERS
 // ══════════════════════════════════════════════════════
 function uid() { return Date.now()+'-'+Math.floor(Math.random()*9999); }
-
 function buildSiteRadiosHtml(nameAttr, selected) {
     return getAllSites().map(s =>
         `<label class="inline-flex items-center mr-3 mb-1 text-sm">
@@ -406,7 +390,6 @@ function buildSiteRadiosHtml(nameAttr, selected) {
         </label>`
     ).join('');
 }
-
 // Build site selector pills (for crane / equipment)
 function buildSitePillsInto(container, currentSite) {
     container.innerHTML = '';
@@ -429,13 +412,11 @@ function buildSitePillsInto(container, currentSite) {
         container.appendChild(btn);
     });
 }
-
 // Refresh all existing crane + equipment site pills when sites change
 function refreshAllSitePills() {
     document.querySelectorAll('.crane-site-pills').forEach(container => {
         const hiddenInp = container.nextElementSibling;
         const currentSite = (hiddenInp && hiddenInp.type==='hidden') ? hiddenInp.value : getAllSites()[0];
-        // If the current site was deleted, fall back to first available
         const validSite = getAllSites().includes(currentSite) ? currentSite : getAllSites()[0];
         if(hiddenInp) hiddenInp.value = validSite;
         buildSitePillsInto(container, validSite);
@@ -448,15 +429,6 @@ function refreshAllSitePills() {
         buildSitePillsInto(container, validSite);
     });
 }
-
-// "Other (specify)" row for any dropdown that has an "Other" option
-function otherFieldHtml(id, val) {
-    return `<div class="other-specify-row mt-1 flex items-center gap-1">
-        <span class="text-xs text-gray-500">Specify:</span>
-        <input type="text" id="${id}" class="form-input text-xs other-specify-input" style="max-width:220px" placeholder="Describe…" value="${val||''}">
-    </div>`;
-}
-
 // ══════════════════════════════════════════════════════
 // TABS
 // ══════════════════════════════════════════════════════
@@ -469,15 +441,10 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         document.getElementById('tab-'+btn.dataset.tab).classList.remove('hidden');
     });
 });
-
 // ══════════════════════════════════════════════════════
-// HEADCOUNT TABLE  — dynamic: columns = all active sites
-// WDC = single row spanning all columns
-// Each normal trade = one input per site
-// + Add Trade button at bottom
+// HEADCOUNT TABLE
 // ══════════════════════════════════════════════════════
 const hcTbody = document.getElementById('hc-tbody');
-
 function captureCurrentHC() {
     const hc={};
     document.querySelectorAll('.headcount-input').forEach(inp=>{hc[inp.id]=parseInt(inp.value)||0;});
@@ -488,7 +455,6 @@ function captureCurrentWalks() {
     document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]').forEach(cb=>{walks[cb.id]=cb.checked;});
     return walks;
 }
-
 function rebuildHeadcount(savedHC) {
     if(!savedHC) savedHC = captureCurrentHC();
     const hcTheadRow = document.getElementById('hc-thead-row');
@@ -496,7 +462,6 @@ function rebuildHeadcount(savedHC) {
     getAllSites().forEach(s => {
         hcTheadRow.innerHTML += `<th class="th-trade" style="color:${siteColor(s)};background:${siteColor(s)}18">${s}</th>`;
     });
-
     hcTbody.innerHTML = '';
     const trades = getAllTrades();
     trades.forEach(trade => {
@@ -543,7 +508,6 @@ function rebuildHeadcount(savedHC) {
             });
         }
     });
-
     // + Add Trade row
     const addTr = document.createElement('tr');
     addTr.className = 'add-trade-row';
@@ -568,7 +532,6 @@ function rebuildHeadcount(savedHC) {
         rebuildHeadcount();
         saveData();
     });
-
     // Totals
     const totalsRow = document.getElementById('hc-totals-row');
     totalsRow.innerHTML = `<div></div>`;
@@ -578,10 +541,8 @@ function rebuildHeadcount(savedHC) {
             <div id="total-${s}" class="text-lg font-bold" style="color:${siteColor(s)}">0</div>
         </div>`;
     });
-
     updateHeadcounts();
 }
-
 function updateHeadcounts() {
     const sums = {};
     getAllSites().forEach(s=>sums[s]=0);
@@ -597,7 +558,6 @@ function updateHeadcounts() {
     });
     document.getElementById('grand-total').textContent = grand;
 }
-
 // ══════════════════════════════════════════════════════
 // HOT WORK
 // ══════════════════════════════════════════════════════
@@ -609,9 +569,8 @@ function checkHotwork() {
     el.textContent = restricted ? '⚠ Hot work NOT permitted within 10m of the forest interface.' : '✓ Hot work is safe to do.';
     el.className = `text-sm font-bold text-center ${restricted?'text-red-600':'text-green-600'}`;
 }
-
 // ══════════════════════════════════════════════════════
-// INSPECTIONS — dynamic per active site
+// INSPECTIONS
 // ══════════════════════════════════════════════════════
 function rebuildInspections(savedWalks) {
     if(!savedWalks) savedWalks = captureCurrentWalks();
@@ -619,12 +578,8 @@ function rebuildInspections(savedWalks) {
     cont.innerHTML = '';
     const walkTypes = ['Safety Walk','Weekly Safety Site Inspection'];
     const sites = getAllSites();
-
-    // Build table: rows = inspection types, cols = sites
     const table = document.createElement('table');
     table.style.cssText = 'width:100%;border-collapse:collapse;';
-
-    // Header row
     const thead = document.createElement('thead');
     let thHtml = `<tr>
         <th style="text-align:left;padding:0.45rem 0.6rem;font-size:0.75rem;font-weight:700;color:#374151;background:#f9fafb;border-bottom:2px solid #e5e7eb;min-width:160px">Inspection Type</th>`;
@@ -634,8 +589,6 @@ function rebuildInspections(savedWalks) {
     thHtml += '</tr>';
     thead.innerHTML = thHtml;
     table.appendChild(thead);
-
-    // Body rows
     const tbody = document.createElement('tbody');
     walkTypes.forEach((wt, rowIdx) => {
         const tr = document.createElement('tr');
@@ -654,20 +607,13 @@ function rebuildInspections(savedWalks) {
         tr.querySelectorAll('.insp-check').forEach(cb => cb.addEventListener('change', saveData));
     });
     table.appendChild(tbody);
-
     const wrapper = document.createElement('div');
     wrapper.style.overflowX = 'auto';
     wrapper.appendChild(table);
     cont.appendChild(wrapper);
 }
-
 // ══════════════════════════════════════════════════════
-// SITE RADIO ROWS (orientations, permits, meetings, etc.)
-// These are created inline with a data-site-radios attr
-// ══════════════════════════════════════════════════════
-
-// ══════════════════════════════════════════════════════
-// CRANE — dynamic cards
+// CRANE
 // ══════════════════════════════════════════════════════
 function buildCrane() {
     document.getElementById('crane-container').innerHTML = '';
@@ -676,20 +622,16 @@ function buildCrane() {
         overlap:[], overlapOtherChecked:false, overlapOtherText:'',
         overlapOther2Checked:false, overlapOther2Text:'' });
 }
-
 function addCraneCard(data) {
     data = data||{};
     const id = uid();
     const inspOpts  = [...CRANE_INSPECTORS,'Other'].map(i=>`<option ${i===(data.inspector||'')?'selected':''}>${i}</option>`).join('');
     const rinspOpts = [...CRANE_INSPECTORS,'Other'].map(i=>`<option ${i===(data.riggingInspector||'')?'selected':''}>${i}</option>`).join('');
-
-    // Build overlap company checkboxes
     const overlapChecks = OVERLAP_COMPANIES.map(c => {
         const chk = data.overlap && data.overlap.includes(c) ? 'checked' : '';
         return `<label class="flex items-center gap-1 p-1 bg-white rounded border border-gray-200 text-xs">
             <input type="checkbox" value="${c}" class="h-3 w-3 overlap-check" ${chk}><span>${c}</span></label>`;
     }).join('');
-
     const div = document.createElement('div');
     div.className = 'equipment-card crane-card border-2 border-sky-100';
     div.innerHTML = `
@@ -758,39 +700,28 @@ function addCraneCard(data) {
                 <input type="text" class="form-input text-xs mt-1 overlap-other2-text ${data.overlapOther2Checked?'':'hidden'}" placeholder="Company name…" value="${data.overlapOther2Text||''}">
             </div>
         </div>`;
-
-    // Site pills
     buildSitePillsInto(div.querySelector('.crane-site-pills'), data.site||'1600');
-
-    // Toggle listeners
     const dailyTog = div.querySelector('.crane-daily-toggle');
     const dailyDet = div.querySelector('.crane-daily-det');
     dailyTog.addEventListener('change',()=>{dailyDet.classList.toggle('hidden',!dailyTog.checked);saveData();});
     const riggTog = div.querySelector('.crane-rigging-toggle');
     const riggDet = div.querySelector('.crane-rigging-det');
     riggTog.addEventListener('change',()=>{riggDet.classList.toggle('hidden',!riggTog.checked);saveData();});
-
-    // Inspector other
     const insSel=div.querySelector('.crane-insp-sel'), insOth=div.querySelector('.crane-insp-other');
     insSel.addEventListener('change',()=>{insOth.classList.toggle('hidden',insSel.value!=='Other');saveData();});
     const rigSel=div.querySelector('.crane-rigging-sel'), rigOth=div.querySelector('.crane-rigging-other');
     rigSel.addEventListener('change',()=>{rigOth.classList.toggle('hidden',rigSel.value!=='Other');saveData();});
-
-    // Overlap other toggles
     div.querySelector('.overlap-other1-check').addEventListener('change',e=>{div.querySelector('.overlap-other1-text').classList.toggle('hidden',!e.target.checked);saveData();});
     div.querySelector('.overlap-other2-check').addEventListener('change',e=>{div.querySelector('.overlap-other2-text').classList.toggle('hidden',!e.target.checked);saveData();});
-
     div.querySelector('.remove-crane-btn').addEventListener('click',()=>{div.remove();saveData();});
     div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
     document.getElementById('crane-container').appendChild(div);
 }
-
 document.getElementById('add-crane-btn').addEventListener('click',()=>{
     const n = document.getElementById('crane-container').querySelectorAll('.crane-card').length+1;
     addCraneCard({name:`Crane #${n}`,site:'1600',done:false,inspector:'',rigging:false,riggingInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''});
     saveData();
 });
-
 // ══════════════════════════════════════════════════════
 // MOBILE EQUIPMENT
 // ══════════════════════════════════════════════════════
@@ -798,7 +729,6 @@ function buildMobileEquipment() {
     document.getElementById('mobile-equipment-container').innerHTML='';
     EQUIPMENT_LIST.forEach(eq=>addEquipmentItem({name:eq.name,site:eq.site,done:false,inspector:'',otherInspector:'',inspectors:eq.inspectors}));
 }
-
 function addEquipmentItem(data) {
     const inspList = data.inspectors||[];
     const hasNamed = inspList.length > 0;
@@ -829,9 +759,7 @@ function addEquipmentItem(data) {
             </div>
         </div>
         <button type="button" class="btn btn-danger btn-sm mt-2 remove-equip-btn">Remove</button>`;
-
     buildSitePillsInto(div.querySelector('.equip-site-pills'), data.site||'1475');
-
     const tog=div.querySelector('.equip-toggle');
     const det=div.querySelector('.equip-details');
     tog.addEventListener('change',()=>{det.classList.toggle('hidden',!tog.checked);saveData();});
@@ -842,7 +770,6 @@ function addEquipmentItem(data) {
     document.getElementById('mobile-equipment-container').appendChild(div);
 }
 document.getElementById('add-equipment-btn').addEventListener('click',()=>{addEquipmentItem({name:'',site:'1475',done:false,inspector:'',otherInspector:'',inspectors:[]});saveData();});
-
 // ══════════════════════════════════════════════════════
 // ORIENTATIONS
 // ══════════════════════════════════════════════════════
@@ -876,7 +803,6 @@ function addOrientationItem(data={type:'New Worker Orientation',site:'1475',type
     document.getElementById('orientations-container').appendChild(div);
 }
 document.getElementById('add-orientation-btn').addEventListener('click',()=>{addOrientationItem();saveData();});
-
 // ══════════════════════════════════════════════════════
 // WORK PERMITS
 // ══════════════════════════════════════════════════════
@@ -910,7 +836,6 @@ function addWorkPermitItem(data={type:'Fall Protection Plan',site:'1475',typeOth
     document.getElementById('work-permits-container').appendChild(div);
 }
 document.getElementById('add-permit-btn').addEventListener('click',()=>{addWorkPermitItem();saveData();});
-
 // ══════════════════════════════════════════════════════
 // SAFETY MEETINGS
 // ══════════════════════════════════════════════════════
@@ -936,7 +861,6 @@ function addMeetingItem(data={site:'1475',status:'Yes',comment:''}) {
     document.getElementById('safety-meetings-container').appendChild(div);
 }
 document.getElementById('add-meeting-btn').addEventListener('click',()=>{addMeetingItem();saveData();});
-
 // ══════════════════════════════════════════════════════
 // SITE INCIDENTS
 // ══════════════════════════════════════════════════════
@@ -964,7 +888,6 @@ function addIncidentItem(data={site:'1475',type:'First Aid',typeOther:'',comment
     document.getElementById('site-incidents-container').appendChild(div);
 }
 document.getElementById('add-incident-btn').addEventListener('click',()=>{addIncidentItem();saveData();});
-
 // ══════════════════════════════════════════════════════
 // WEEKEND WORK
 // ══════════════════════════════════════════════════════
@@ -992,18 +915,33 @@ function addWeekendItem(data={site:'1475',status:'Yes',comment:''}) {
 document.getElementById('add-weekend-btn').addEventListener('click',()=>{addWeekendItem();saveData();});
 
 // ══════════════════════════════════════════════════════
-// OBSERVATIONS
+// OBSERVATIONS  ← MODIFIED: status checklist added
 // ══════════════════════════════════════════════════════
 function buildObsSiteOptions(selected) {
     const opts = [...getAllSites(), 'All Sites', 'Other'];
     return opts.map(s=>`<option value="${s}" ${s===selected?'selected':''}>${s}</option>`).join('');
 }
 
-function addObservationItem(data={site:'1475',siteOther:'',text:''}) {
-    const div=document.createElement('div');
-    div.className='observation-item relative';
-    const siteVal = data.site||'1475';
-    div.innerHTML=`
+/**
+ * Status values: 'new' | 'pending' | 'resolved'
+ * foremanInformed: true/false
+ * resolvedDate: 'YYYY-MM-DD' or ''
+ */
+function addObservationItem(data) {
+    data = data || {};
+    const siteVal    = data.site || '1475';
+    const obsStatus  = data.obsStatus  || 'new';       // 'new' | 'pending' | 'resolved'
+    const foremanInf = data.foremanInformed || false;
+    const resolvedDate = data.resolvedDate || '';
+
+    const div = document.createElement('div');
+    div.className = 'observation-item relative';
+
+    // Determine status bar style
+    const barClass = obsStatus === 'resolved' ? 'obs-status-resolved' :
+                     obsStatus === 'pending'   ? 'obs-status-pending'  : '';
+
+    div.innerHTML = `
         <div class="flex flex-wrap items-center gap-2 mb-2">
             <span class="text-xs font-semibold text-gray-600">Site:</span>
             <select class="form-select text-sm obs-site-sel" style="max-width:160px">
@@ -1013,16 +951,98 @@ function addObservationItem(data={site:'1475',siteOther:'',text:''}) {
             <span class="obs-allsites-badge ${siteVal==='All Sites'?'':'hidden'}" style="font-size:0.7rem;background:#003D5218;color:#003D52;font-weight:700;padding:0.15rem 0.5rem;border-radius:9999px">All Sites</span>
         </div>
         <textarea class="form-textarea obs-text" rows="3" placeholder="Enter observation…">${data.text||''}</textarea>
+
+        <!-- STATUS CHECKLIST -->
+        <div class="obs-status-bar ${barClass} mt-2">
+            <div class="flex flex-wrap items-center gap-3 mb-1">
+                <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Follow-up Status</span>
+                <span class="obs-status-chip ${obsStatus==='resolved'?'chip-resolved':obsStatus==='pending'?'chip-pending':'chip-new'} obs-status-badge">
+                    ${obsStatus==='resolved'?'✓ Resolved':obsStatus==='pending'?'⏳ Pending':'◦ New'}
+                </span>
+            </div>
+            <div class="flex flex-wrap gap-4 items-start">
+                <!-- 1. Foreman Informed -->
+                <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" class="h-4 w-4 obs-foreman-check" style="accent-color:#003D52" ${foremanInf?'checked':''}>
+                    <span class="text-xs font-semibold text-gray-700">Foreman Informed</span>
+                </label>
+                <!-- 2. Pending -->
+                <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" class="h-4 w-4 obs-pending-check" style="accent-color:#d97706" ${obsStatus==='pending'||obsStatus==='resolved'?'checked':''}>
+                    <span class="text-xs font-semibold text-gray-700">Pending Resolution</span>
+                </label>
+                <!-- 3. Resolved -->
+                <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" class="h-4 w-4 obs-resolved-check" style="accent-color:#059669" ${obsStatus==='resolved'?'checked':''}>
+                    <span class="text-xs font-semibold text-gray-700">Resolved</span>
+                </label>
+            </div>
+            <!-- Resolved date row -->
+            <div class="obs-resolved-date-row flex items-center gap-2 mt-2 ${obsStatus==='resolved'?'':'hidden'}">
+                <span class="text-xs text-gray-500 font-semibold">Date Resolved:</span>
+                <input type="date" class="form-input text-xs obs-resolved-date" style="max-width:170px" value="${resolvedDate}">
+            </div>
+        </div>
+
         <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-obs-btn">X</button>`;
 
-    const sel = div.querySelector('.obs-site-sel');
-    const oth = div.querySelector('.obs-site-other');
+    // Site selector logic
+    const sel   = div.querySelector('.obs-site-sel');
+    const oth   = div.querySelector('.obs-site-other');
     const badge = div.querySelector('.obs-allsites-badge');
     sel.addEventListener('change', ()=>{
         oth.classList.toggle('hidden', sel.value !== 'Other');
         badge.classList.toggle('hidden', sel.value !== 'All Sites');
         saveData();
     });
+
+    // Status checklist logic
+    const foremanChk  = div.querySelector('.obs-foreman-check');
+    const pendingChk  = div.querySelector('.obs-pending-check');
+    const resolvedChk = div.querySelector('.obs-resolved-check');
+    const dateRow     = div.querySelector('.obs-resolved-date-row');
+    const statusBar   = div.querySelector('.obs-status-bar');
+    const statusBadge = div.querySelector('.obs-status-badge');
+
+    function updateObsStatus() {
+        // If resolved is checked → resolved
+        // Else if pending is checked → pending
+        // Else → new
+        const isResolved = resolvedChk.checked;
+        const isPending  = pendingChk.checked;
+
+        dateRow.classList.toggle('hidden', !isResolved);
+
+        // If marking resolved, auto-set today's date if empty
+        if (isResolved && !div.querySelector('.obs-resolved-date').value) {
+            div.querySelector('.obs-resolved-date').value = new Date().toISOString().slice(0,10);
+        }
+
+        // If resolved unchecked, keep pending checked as-is
+        if (!isResolved && resolvedChk.checked === false) {
+            // do nothing to pending
+        }
+
+        let currentStatus = 'new';
+        if (isResolved)      currentStatus = 'resolved';
+        else if (isPending)  currentStatus = 'pending';
+
+        // Update badge
+        statusBadge.className = `obs-status-chip ${currentStatus==='resolved'?'chip-resolved':currentStatus==='pending'?'chip-pending':'chip-new'} obs-status-badge`;
+        statusBadge.textContent = currentStatus==='resolved' ? '✓ Resolved' : currentStatus==='pending' ? '⏳ Pending' : '◦ New';
+
+        // Update bar border/bg
+        statusBar.classList.remove('obs-status-resolved','obs-status-pending');
+        if (currentStatus==='resolved') statusBar.classList.add('obs-status-resolved');
+        else if (currentStatus==='pending') statusBar.classList.add('obs-status-pending');
+
+        saveData();
+    }
+
+    resolvedChk.addEventListener('change', updateObsStatus);
+    pendingChk.addEventListener('change', updateObsStatus);
+    foremanChk.addEventListener('change', saveData);
+
     div.querySelectorAll('input,textarea,select').forEach(el=>el.addEventListener('input',saveData));
     div.querySelector('.remove-obs-btn').addEventListener('click',()=>{div.remove();saveData();});
     document.getElementById('additional-observations-container').appendChild(div);
@@ -1122,19 +1142,25 @@ function saveData() {
         wknds.push({site:s?s.value:'1475',status:div.querySelector('.wknd-status').value,comment:div.querySelector('.wknd-comment').value});
     });
     d.weekends=JSON.stringify(wknds);
-    // observations
+    // observations — now with status fields
     const obs=[];
     document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(item=>{
         const sel=item.querySelector('.obs-site-sel');
         const siteVal=sel?sel.value:'1475';
         const siteOther=item.querySelector('.obs-site-other')?.value||'';
         const text=item.querySelector('.obs-text')?.value.trim()||'';
-        if(text) obs.push({site:siteVal,siteOther,text});
+        const foremanInformed = item.querySelector('.obs-foreman-check')?.checked || false;
+        const isPending  = item.querySelector('.obs-pending-check')?.checked  || false;
+        const isResolved = item.querySelector('.obs-resolved-check')?.checked || false;
+        const resolvedDate = item.querySelector('.obs-resolved-date')?.value || '';
+        let obsStatus = 'new';
+        if (isResolved)     obsStatus = 'resolved';
+        else if (isPending) obsStatus = 'pending';
+        if(text) obs.push({site:siteVal, siteOther, text, foremanInformed, obsStatus, resolvedDate});
     });
     d.observations=JSON.stringify(obs);
     localStorage.setItem('csoChecklist_v5',JSON.stringify(d));
 }
-
 // ══════════════════════════════════════════════════════
 // LOAD
 // ══════════════════════════════════════════════════════
@@ -1143,32 +1169,44 @@ function loadData() {
     const today=document.getElementById('checklistDate').value;
     const data=raw?JSON.parse(raw):null;
     if(data&&data.csoName) document.getElementById('csoName').value=data.csoName;
-
-    // Permits always loaded
+    // Permits always loaded — merge saved + any missing defaults
     document.getElementById('work-permits-container').innerHTML='';
-    if(data&&data.permits){
-        const p=JSON.parse(data.permits);
-        (p.length?p:DEFAULT_PERMITS).forEach(x=>addWorkPermitItem(x));
+    let permitsToLoad = [];
+    if(data && data.permits) {
+        const saved = JSON.parse(data.permits);
+        if(saved.length) {
+            permitsToLoad = saved;
+            // Add any DEFAULT_PERMITS not already present (matched by contractor+type)
+            DEFAULT_PERMITS.forEach(def => {
+                const alreadyExists = saved.some(s =>
+                    s.type === def.type &&
+                    s.contractor.trim().toLowerCase() === def.contractor.trim().toLowerCase()
+                );
+                if (!alreadyExists) permitsToLoad.push(def);
+            });
+        } else {
+            permitsToLoad = DEFAULT_PERMITS;
+        }
     } else {
-        DEFAULT_PERMITS.forEach(x=>addWorkPermitItem(x));
+        permitsToLoad = DEFAULT_PERMITS;
     }
-
+    permitsToLoad.forEach(x => addWorkPermitItem(x));
+    // Observations: always load all (pending ones persist across days)
+    if(data&&data.observations){
+        document.getElementById('additional-observations-container').innerHTML='';
+        JSON.parse(data.observations).forEach(o=>addObservationItem(o));
+    }
     if(!data||data.checklistDate!==today) {
-        // Different day: rebuild headcount/inspections fresh
         rebuildHeadcount();
         rebuildInspections();
         return;
     }
-
     document.getElementById('waterUse').value=data.waterUse||'L1';
     document.getElementById('fireDanger').value=data.fireDanger||'Low';
-
     const savedHC = data.headcounts ? JSON.parse(data.headcounts) : {};
     rebuildHeadcount(savedHC);
-
     const savedWalks = data.morningWalks ? JSON.parse(data.morningWalks) : {};
     rebuildInspections(savedWalks);
-
     if(data.orientations){document.getElementById('orientations-container').innerHTML='';JSON.parse(data.orientations).forEach(o=>addOrientationItem(o));}
     if(data.craneData){
         const cd=JSON.parse(data.craneData);
@@ -1184,24 +1222,17 @@ function loadData() {
     if(data.meetings){document.getElementById('safety-meetings-container').innerHTML='';JSON.parse(data.meetings).forEach(m=>addMeetingItem(m));}
     if(data.incidents){document.getElementById('site-incidents-container').innerHTML='';JSON.parse(data.incidents).forEach(i=>addIncidentItem(i));}
     if(data.weekends){document.getElementById('weekend-work-container').innerHTML='';JSON.parse(data.weekends).forEach(w=>addWeekendItem(w));}
-    if(data.observations){document.getElementById('additional-observations-container').innerHTML='';JSON.parse(data.observations).forEach(o=>addObservationItem(o));}
     updateHeadcounts();
     checkHotwork();
 }
-
 // ══════════════════════════════════════════════════════
 // REPORT — per site
 // ══════════════════════════════════════════════════════
 function generateReport() {
     const date=document.getElementById('checklistDate').value||'N/A';
     const cso=document.getElementById('csoName').value||'N/A';
-    let r=`CSO DAILY LOG — FULL REPORT\n${'='.repeat(50)}\nDate:     ${date}\nCSO Name: ${cso}\n\nSITE CONDITIONS\n${'-'.repeat(40)}\nWater Use: ${document.getElementById('waterUse').value}  |  Fire Danger: ${document.getElementById('fireDanger').value}\nHot Work:  ${document.getElementById('hotwork-status').textContent}\n`;
-
-    // WDC is now per-site — included in hcBySite via headcount-input loop below
-
     const allSites=getAllSites();
     const hcBySite={},permitsBySite={},orisBySite={},walksBySite={},equipBySite={},craneBySite={},mtgsBySite={},incsBySite={},wkndsBySite={},obsBySite={};
-
     // Headcount
     document.querySelectorAll('.headcount-input').forEach(inp=>{
         const v=parseInt(inp.value)||0; if(!v) return;
@@ -1209,7 +1240,6 @@ function generateReport() {
         if(!hcBySite[site]) hcBySite[site]=[];
         hcBySite[site].push({trade:inp.dataset.trade,count:v});
     });
-
     // Permits
     document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{
         const s=item.querySelector('input[name^="permSite-"]:checked'); const site=s?s.value:'1475';
@@ -1219,7 +1249,6 @@ function generateReport() {
         if(!permitsBySite[site]) permitsBySite[site]=[];
         permitsBySite[site].push({type,contractor:c});
     });
-
     // Orientations
     document.getElementById('orientations-container').querySelectorAll('.orientation-item').forEach(item=>{
         const s=item.querySelector('input[name^="oriSite-"]:checked'); const site=s?s.value:'1475';
@@ -1228,10 +1257,9 @@ function generateReport() {
         if(!orisBySite[site]) orisBySite[site]=[];
         orisBySite[site].push({type,worker:item.querySelector('.orientation-worker').value});
     });
-
-    // Walks — derive label from checkbox id: e.g. "safetywalk1475-completed" → "Safety Walk 1475"
+    // Walks
     document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{
-        const id = cb.id; // e.g. safetywalk1475-completed
+        const id = cb.id;
         allSites.forEach(s=>{
             const sSlug=s.toLowerCase().replace(/[^a-z0-9]/g,'');
             if(id.includes(sSlug)){
@@ -1244,7 +1272,6 @@ function generateReport() {
             }
         });
     });
-
     // Equipment
     document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{
         const tog=div.querySelector('.equip-toggle'); if(!tog||!tog.checked) return;
@@ -1256,7 +1283,6 @@ function generateReport() {
         if(!equipBySite[site]) equipBySite[site]=[];
         equipBySite[site].push({name,inspector:insp});
     });
-
     // Crane
     document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(div=>{
         const site=div.querySelector('.crane-site-val')?.value||'1600';
@@ -1284,8 +1310,7 @@ function generateReport() {
         if(companies.length) entry.tasks.push({task:'Overlapping Procedure',companies});
         if(entry.tasks.length) craneBySite[site].push(entry);
     });
-
-    // Meetings / incidents / weekends / obs
+    // Meetings / incidents / weekends
     document.getElementById('safety-meetings-container').querySelectorAll('.relative').forEach(div=>{
         const s=div.querySelector('input[name^="mtgSite-"]:checked'); const site=s?s.value:'1475';
         if(!mtgsBySite[site]) mtgsBySite[site]=[];
@@ -1303,7 +1328,7 @@ function generateReport() {
         if(!wkndsBySite[site]) wkndsBySite[site]=[];
         wkndsBySite[site].push({status:div.querySelector('.wknd-status').value,comment:div.querySelector('.wknd-comment').value});
     });
-    // Separate "All Sites" observations — shown once, not repeated per site
+    // Observations — with status
     const allSitesObs = [];
     document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(item=>{
         const sel=item.querySelector('.obs-site-sel');
@@ -1311,33 +1336,33 @@ function generateReport() {
         if(site==='Other'){const o=item.querySelector('.obs-site-other')?.value;if(o)site=o;}
         const text=item.querySelector('.obs-text')?.value.trim()||'';
         if(!text) return;
+        const foremanInformed = item.querySelector('.obs-foreman-check')?.checked || false;
+        const isPending  = item.querySelector('.obs-pending-check')?.checked  || false;
+        const isResolved = item.querySelector('.obs-resolved-check')?.checked || false;
+        const resolvedDate = item.querySelector('.obs-resolved-date')?.value || '';
+        let obsStatus = 'new';
+        if (isResolved)     obsStatus = 'resolved';
+        else if (isPending) obsStatus = 'pending';
+        const obsObj = {text, foremanInformed, obsStatus, resolvedDate};
         if(site==='All Sites'){
-            allSitesObs.push(text); // collected separately — shown once before sites
+            allSitesObs.push(obsObj);
         } else {
             if(!obsBySite[site]) obsBySite[site]=[];
-            obsBySite[site].push(text);
+            obsBySite[site].push(obsObj);
         }
     });
 
-    // ── Build HTML report — no emojis, classes for print page-break ──
     const blocks = [];
     let isFirstSite = true;
     allSites.forEach(site=>{
         const hasAny=hcBySite[site]||permitsBySite[site]||orisBySite[site]||walksBySite[site]||equipBySite[site]||craneBySite[site]||mtgsBySite[site]||incsBySite[site]||wkndsBySite[site]||obsBySite[site];
         if(!hasAny) return;
-
-        // First site (1475) = no page break, stays after WDC section
-        // All subsequent sites = new page
         const pageBreakClass = isFirstSite ? 'report-site-block report-first-site' : 'report-site-block';
         isFirstSite = false;
-
         let b=`<div class="${pageBreakClass}">`;
-
-        // Site header bar
         b+=`<div class="report-site-header" style="margin:0 0 6pt;padding:5pt 8pt;background:#003D52;border-radius:3pt">`;
         b+=`<span style="font-size:12pt;font-weight:800;color:#96C61C;letter-spacing:0.06em">SITE ${site}</span>`;
         b+=`</div>`;
-
         if(hcBySite[site]){
             const t=hcBySite[site].reduce((s,x)=>s+x.count,0);
             b+=sectionHtml('Headcount');
@@ -1408,26 +1433,35 @@ function generateReport() {
         }
         if(obsBySite[site]){
             b+=sectionHtml('Observations');
-            obsBySite[site].forEach(o=>{b+=rowHtml(`<span style="white-space:pre-wrap">${obsHtml(o)}</span>`);});
+            obsBySite[site].forEach(o=>{
+                const statusColor = o.obsStatus==='resolved' ? '#059669' : o.obsStatus==='pending' ? '#d97706' : '#6b7280';
+                const statusLabel = o.obsStatus==='resolved' ? 'Resolved' : o.obsStatus==='pending' ? 'Pending' : 'New';
+                let statusLine = `<span style="font-size:8pt;font-weight:700;color:${statusColor}">[${statusLabel}]</span>`;
+                if(o.foremanInformed) statusLine += ` <span style="font-size:8pt;color:#003D52;font-weight:600">Foreman Informed</span>`;
+                if(o.obsStatus==='resolved'&&o.resolvedDate) statusLine += ` <span style="font-size:8pt;color:#059669"> — Resolved: ${o.resolvedDate}</span>`;
+                b+=rowHtml(`${statusLine}<br><span style="white-space:pre-wrap">${obsHtml(o.text)}</span>`);
+            });
         }
-
-        b+=`</div>`; // end report-site-block
+        b+=`</div>`;
         blocks.push(b);
     });
-    // All Sites Observations block — inserted between WDC and first site
+    // All Sites Observations block
     let allSitesBlock = '';
     if(allSitesObs.length > 0){
         allSitesBlock += `<div style="margin:8pt 0;padding:6pt 8pt;background:#f0f7ff;border-left:4pt solid #003D52;border-radius:3pt">`;
         allSitesBlock += `<div style="font-weight:700;font-size:7.5pt;color:#003D52;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4pt">All Sites — General Observations</div>`;
         allSitesObs.forEach(o=>{
-            allSitesBlock += `<div style="font-size:9pt;color:#374151;margin-bottom:4pt;padding-left:6pt;white-space:pre-wrap">• ${obsHtml(o)}</div>`;
+            const statusColor = o.obsStatus==='resolved' ? '#059669' : o.obsStatus==='pending' ? '#d97706' : '#6b7280';
+            const statusLabel = o.obsStatus==='resolved' ? 'Resolved' : o.obsStatus==='pending' ? 'Pending' : 'New';
+            let statusLine = `<span style="font-size:8pt;font-weight:700;color:${statusColor}">[${statusLabel}]</span>`;
+            if(o.foremanInformed) statusLine += ` <span style="font-size:8pt;color:#003D52;font-weight:600">Foreman Informed</span>`;
+            if(o.obsStatus==='resolved'&&o.resolvedDate) statusLine += ` <span style="font-size:8pt;color:#059669"> — Resolved: ${o.resolvedDate}</span>`;
+            allSitesBlock += `<div style="font-size:9pt;color:#374151;margin-bottom:6pt;padding-left:6pt">• ${statusLine}<br><span style="white-space:pre-wrap">${obsHtml(o.text)}</span></div>`;
         });
         allSitesBlock += `</div>`;
     }
-
     return allSitesBlock + blocks.join('');
 }
-
 function sectionHtml(title){
     return `<div class="report-section-header" style="margin:7pt 0 2pt;font-weight:700;font-size:7.5pt;color:#003D52;letter-spacing:0.05em;text-transform:uppercase;border-left:3px solid #96C61C;padding:2pt 0 2pt 6pt;background:#f4f6f8">${title}</div>`;
 }
@@ -1435,11 +1469,9 @@ function rowHtml(txt, extraIndent){
     const indPt = 10 + ((extraIndent||0)*10);
     return `<div style="margin-left:${indPt}pt;margin-bottom:2pt;font-size:9pt;color:#374151;line-height:1.35">${txt}</div>`;
 }
-// Convert newlines in observation text to <br> for HTML rendering
 function obsHtml(text){
     return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
 }
-
 function generateReportHeader(){
     const date=document.getElementById('checklistDate').value||'N/A';
     const cso=document.getElementById('csoName').value||'N/A';
@@ -1457,7 +1489,6 @@ function generateReportHeader(){
     h+=`</div>`;
     return h;
 }
-
 document.getElementById('generateFullReport').addEventListener('click',()=>{
     const el = document.getElementById('report-content');
     el.style.whiteSpace = 'normal';
@@ -1465,9 +1496,8 @@ document.getElementById('generateFullReport').addEventListener('click',()=>{
     document.getElementById('report-output').classList.remove('hidden');
     document.getElementById('report-output').scrollIntoView({behavior:'smooth'});
 });
-
 // ══════════════════════════════════════════════════════
-// RESET
+// RESET — preserves Work Permits AND pending observations
 // ══════════════════════════════════════════════════════
 document.getElementById('resetForm').addEventListener('click',function(){
     document.getElementById('reset-confirm-bar').classList.remove('hidden');
@@ -1484,6 +1514,25 @@ document.getElementById('reset-yes').addEventListener('click',function(){
         var s=item.querySelector('input[name^="permSite-"]:checked');
         var sel=item.querySelector('.permit-type');
         savedPermits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?item.querySelector('.permit-type-other').value:'',site:s?s.value:'1475',contractor:item.querySelector('.permit-contractor').value});
+    });
+    // Save PENDING observations (not resolved, not new-only)
+    var savedObs = [];
+    document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(function(item){
+        var isPending  = item.querySelector('.obs-pending-check')?.checked  || false;
+        var isResolved = item.querySelector('.obs-resolved-check')?.checked || false;
+        var obsStatus  = isResolved ? 'resolved' : isPending ? 'pending' : 'new';
+        // Keep pending AND resolved for history — only drop 'new' ones without text on reset
+        if(obsStatus === 'pending' || obsStatus === 'resolved') {
+            var selEl = item.querySelector('.obs-site-sel');
+            savedObs.push({
+                site: selEl ? selEl.value : '1475',
+                siteOther: item.querySelector('.obs-site-other')?.value || '',
+                text: item.querySelector('.obs-text')?.value.trim() || '',
+                foremanInformed: item.querySelector('.obs-foreman-check')?.checked || false,
+                obsStatus: obsStatus,
+                resolvedDate: item.querySelector('.obs-resolved-date')?.value || ''
+            });
+        }
     });
     // Preserve crane names and sites
     var savedCranes=[];
@@ -1511,7 +1560,6 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     document.getElementById('safety-meetings-container').innerHTML='';
     document.getElementById('site-incidents-container').innerHTML='';
     document.getElementById('weekend-work-container').innerHTML='';
-    document.getElementById('additional-observations-container').innerHTML='';
     document.getElementById('crane-container').innerHTML='';
     if(savedCranes.length>0){
         savedCranes.forEach(function(c){addCraneCard({name:c.name,site:c.site,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''});});
@@ -1522,31 +1570,31 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     } else { buildMobileEquipment(); }
     document.getElementById('work-permits-container').innerHTML='';
     savedPermits.forEach(function(p){addWorkPermitItem(p);});
+    // Restore pending/resolved observations
+    document.getElementById('additional-observations-container').innerHTML='';
+    savedObs.forEach(function(o){addObservationItem(o);});
     document.getElementById('report-output').classList.add('hidden');
     checkHotwork();
     saveData();
-    alert('Form reset complete!');
+    alert('Form reset complete! Pending observations have been preserved.');
     }catch(e){ alert('Reset error: '+e.message+' at line: '+e.stack); }
 });
-
 // ══════════════════════════════════════════════════════
 // COPY / PDF
 // ══════════════════════════════════════════════════════
 document.getElementById('copyReport').addEventListener('click',()=>{
     const el=document.getElementById('report-content');
     const ta=document.createElement('textarea');
-    ta.value=el.innerText; // plain text from HTML
+    ta.value=el.innerText;
     ta.style.position='fixed';ta.style.top='-9999px';document.body.appendChild(ta);ta.focus();ta.select();
     try{document.execCommand('copy');document.getElementById('copyReport').textContent='Copied!';}catch{}
     document.body.removeChild(ta);
     setTimeout(()=>document.getElementById('copyReport').textContent='Copy Report',2000);
 });
-
 document.getElementById('exportPdf').addEventListener('click',()=>{
     const cso = document.getElementById('csoName').value || 'CSO';
     const dt  = document.getElementById('checklistDate').value || 'date';
     const reportHTML = document.getElementById('report-content').innerHTML;
-
     const win = window.open('', '_blank');
     win.document.write(`<!DOCTYPE html>
 <html>
@@ -1579,7 +1627,6 @@ document.getElementById('exportPdf').addEventListener('click',()=>{
     win.focus();
     setTimeout(() => { win.print(); }, 400);
 });
-
 // ══════════════════════════════════════════════════════
 // SIMPLE INPUT EVENTS
 // ══════════════════════════════════════════════════════
@@ -1587,11 +1634,9 @@ document.getElementById('waterUse').addEventListener('change',()=>{checkHotwork(
 document.getElementById('fireDanger').addEventListener('change',()=>{checkHotwork();saveData();});
 document.getElementById('checklistDate').addEventListener('input',saveData);
 document.getElementById('csoName').addEventListener('input',saveData);
-
 // ══════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════
-// Clean up test data
 (function(){
     const customSites = getCustomSites().filter(s => s !== '2050');
     saveCustomSites(customSites);
@@ -1603,7 +1648,6 @@ buildCrane();
 buildMobileEquipment();
 loadData();
 checkHotwork();
-
 }); // end DOMContentLoaded
 </script>
 </body>
