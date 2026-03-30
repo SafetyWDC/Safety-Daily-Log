@@ -78,7 +78,6 @@
     <p class="text-xs text-gray-500">CSO Daily Log — Whistler 2020 Development</p>
 </header>
 
-<!-- ═══ TOP CARD: Date / CSO / Conditions ═══ -->
 <div class="card">
     <div class="grid grid-cols-2 gap-3 mb-3">
         <div>
@@ -107,7 +106,6 @@
     </div>
 </div>
 
-<!-- ═══ SITE MANAGER ═══ -->
 <div class="card mb-3 p-3">
     <div class="flex items-center justify-between">
         <span class="text-sm font-semibold" style="color:#003D52">Active Sites</span>
@@ -124,7 +122,6 @@
     </div>
 </div>
 
-<!-- ═══ TABS ═══ -->
 <div class="mb-3 border-b border-gray-200" id="section-tabs">
     <nav class="flex -mb-px">
         <button class="tab-btn tab-active" data-tab="headcount">Headcount</button>
@@ -140,7 +137,6 @@
     </nav>
 </div>
 
-<!-- ═══ TAB: HEADCOUNT ═══ -->
 <div id="tab-headcount" class="tab-content">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Site Headcount</h2>
@@ -156,7 +152,6 @@
     </div>
 </div>
 
-<!-- ═══ TAB: INSPECTIONS ═══ -->
 <div id="tab-inspections" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-3" style="color:#003D52">Site Inspections</h2>
@@ -164,7 +159,6 @@
     </div>
 </div>
 
-<!-- ═══ TAB: ORIENTATIONS ═══ -->
 <div id="tab-orientations" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Orientations</h2>
@@ -173,7 +167,6 @@
     </div>
 </div>
 
-<!-- ═══ TAB: PERMITS ═══ -->
 <div id="tab-permits" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Active Work Permits</h2>
@@ -183,7 +176,6 @@
     </div>
 </div>
 
-<!-- ═══ TAB: CRANE ═══ -->
 <div id="tab-crane" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Crane</h2>
@@ -193,7 +185,6 @@
     </div>
 </div>
 
-<!-- ═══ TAB: EQUIPMENT ═══ -->
 <div id="tab-equipment" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Mobile Equipment</h2>
@@ -202,7 +193,6 @@
     </div>
 </div>
 
-<!-- ═══ TAB: MEETINGS ═══ -->
 <div id="tab-meetings" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Safety Meetings</h2>
@@ -211,7 +201,6 @@
     </div>
 </div>
 
-<!-- ═══ TAB: INCIDENTS ═══ -->
 <div id="tab-incidents" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Site Incidents</h2>
@@ -220,7 +209,6 @@
     </div>
 </div>
 
-<!-- ═══ TAB: WEEKEND ═══ -->
 <div id="tab-weekend" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-3" style="color:#003D52">Weekend Work</h2>
@@ -229,7 +217,6 @@
     </div>
 </div>
 
-<!-- ═══ TAB: OBSERVATIONS ═══ -->
 <div id="tab-observations" class="tab-content hidden">
     <div class="card">
         <h2 class="text-base font-semibold mb-3" style="color:#003D52">Additional Observations</h2>
@@ -238,14 +225,19 @@
     </div>
 </div>
 
-<!-- ═══ ACTIONS ═══ -->
 <div class="mt-5 space-y-2">
     <button id="generateFullReport" class="btn btn-primary w-full">Generate Full Report (by Site)</button>
     <button id="resetForm" class="btn btn-danger w-full">Reset Form</button>
+    <div id="reset-confirm-bar" class="hidden mt-2 p-3 bg-red-50 border border-red-200 rounded-lg text-center">
+        <p class="text-sm font-semibold text-red-700 mb-2">Are you sure? This clears all data except Work Permits.</p>
+        <div class="flex gap-2 justify-center">
+            <button id="reset-yes" class="btn btn-danger btn-sm px-4">Yes, Reset</button>
+            <button id="reset-no" class="btn btn-gray btn-sm px-4">Cancel</button>
+        </div>
+    </div>
     <p class="text-xs text-center text-gray-400 italic">*Reset clears all data EXCEPT Work Permits.</p>
 </div>
 
-<!-- ═══ REPORT ═══ -->
 <div id="report-output" class="card mt-5 hidden" style="border-top:4px solid #96C61C">
     <div class="flex items-center gap-3 mb-3">
         <div style="width:6px;height:28px;background:#96C61C;border-radius:3px"></div>
@@ -269,8 +261,7 @@
     </div>
 </div>
 
-</div><!-- /max-w -->
-<script>
+</div><script>
 document.addEventListener('DOMContentLoaded', function () {
 
 // ══════════════════════════════════════════════════════
@@ -711,7 +702,6 @@ function addCraneCard(data) {
             <div class="flex flex-wrap gap-1 mt-1 crane-site-pills"></div>
             <input type="hidden" class="crane-site-val" value="${data.site||'1600'}">
         </div>
-        <!-- Crane Daily Inspection -->
         <div class="border rounded-lg p-2 mb-2 bg-white">
             <div class="flex items-center justify-between gap-2">
                 <span class="text-sm font-semibold text-gray-700">Crane Daily Inspection</span>
@@ -728,7 +718,6 @@ function addCraneCard(data) {
                 </div>
             </div>
         </div>
-        <!-- Rigging Daily Inspection -->
         <div class="border rounded-lg p-2 mb-2 bg-white">
             <div class="flex items-center justify-between gap-2">
                 <span class="text-sm font-semibold text-gray-700">Rigging Daily Inspection</span>
@@ -745,18 +734,15 @@ function addCraneCard(data) {
                 </div>
             </div>
         </div>
-        <!-- Cold Weather -->
         <div class="border rounded-lg p-2 mb-2 bg-white flex items-center justify-between">
             <span class="text-sm font-semibold text-gray-700">Cold Weather Crane Inspection</span>
             <label class="flex items-center gap-1 cursor-pointer">
                 <input type="checkbox" class="h-4 w-4 crane-cold-check" style="accent-color:#003D52" ${data.coldWeather?'checked':''}><span class="text-xs">Done</span>
             </label>
         </div>
-        <!-- Overlapping Procedure -->
         <div class="border rounded-lg p-2 bg-white">
             <span class="text-sm font-semibold text-gray-700">Overlapping Procedure</span>
             <div class="grid grid-cols-2 gap-1 mt-2">${overlapChecks}</div>
-            <!-- Other 1 -->
             <div class="mt-1">
                 <label class="flex items-center gap-1 text-xs p-1 bg-gray-50 rounded border border-gray-200 cursor-pointer">
                     <input type="checkbox" class="h-3 w-3 overlap-other1-check" ${data.overlapOtherChecked?'checked':''}>
@@ -764,7 +750,6 @@ function addCraneCard(data) {
                 </label>
                 <input type="text" class="form-input text-xs mt-1 overlap-other1-text ${data.overlapOtherChecked?'':'hidden'}" placeholder="Company name…" value="${data.overlapOtherText||''}">
             </div>
-            <!-- Other 2 -->
             <div class="mt-1">
                 <label class="flex items-center gap-1 text-xs p-1 bg-gray-50 rounded border border-gray-200 cursor-pointer">
                     <input type="checkbox" class="h-3 w-3 overlap-other2-check" ${data.overlapOther2Checked?'checked':''}>
@@ -1484,32 +1469,64 @@ document.getElementById('generateFullReport').addEventListener('click',()=>{
 // ══════════════════════════════════════════════════════
 // RESET
 // ══════════════════════════════════════════════════════
-document.getElementById('resetForm').addEventListener('click',()=>{
-    if(!confirm('Reset form? Work Permits will be preserved.')) return;
-    const savedPermits=[];
-    document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{
-        const s=item.querySelector('input[name^="permSite-"]:checked');
-        const sel=item.querySelector('.permit-type');
-        savedPermits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?.value||'',site:s?s.value:'1475',contractor:item.querySelector('.permit-contractor').value});
+document.getElementById('resetForm').addEventListener('click',function(){
+    document.getElementById('reset-confirm-bar').classList.remove('hidden');
+});
+document.getElementById('reset-no').addEventListener('click',function(){
+    document.getElementById('reset-confirm-bar').classList.add('hidden');
+});
+document.getElementById('reset-yes').addEventListener('click',function(){
+    try{
+    document.getElementById('reset-confirm-bar').classList.add('hidden');
+    // Save permits
+    var savedPermits=[];
+    document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(function(item){
+        var s=item.querySelector('input[name^="permSite-"]:checked');
+        var sel=item.querySelector('.permit-type');
+        savedPermits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?item.querySelector('.permit-type-other').value:'',site:s?s.value:'1475',contractor:item.querySelector('.permit-contractor').value});
+    });
+    // Preserve crane names and sites
+    var savedCranes=[];
+    document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(function(div){
+        savedCranes.push({
+            name:div.querySelector('.crane-name')?div.querySelector('.crane-name').value:'Crane',
+            site:div.querySelector('.crane-site-val')?div.querySelector('.crane-site-val').value:getAllSites()[0]
+        });
+    });
+    // Preserve equipment names and sites
+    var savedEquip=[];
+    document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(function(div){
+        savedEquip.push({
+            name:div.querySelector('.equip-name')?div.querySelector('.equip-name').value:'Equipment',
+            site:div.querySelector('.equip-site-val')?div.querySelector('.equip-site-val').value:getAllSites()[0]
+        });
     });
     document.getElementById('waterUse').selectedIndex=0;
     document.getElementById('fireDanger').selectedIndex=0;
     document.getElementById('checklistDate').valueAsDate=new Date();
-    rebuildHeadcount();
-    rebuildInspections();
+    document.getElementById('csoName').value='';
+    rebuildHeadcount({});
+    rebuildInspections({});
     document.getElementById('orientations-container').innerHTML='';
     document.getElementById('safety-meetings-container').innerHTML='';
     document.getElementById('site-incidents-container').innerHTML='';
     document.getElementById('weekend-work-container').innerHTML='';
     document.getElementById('additional-observations-container').innerHTML='';
     document.getElementById('crane-container').innerHTML='';
-    buildCrane();
-    buildMobileEquipment();
+    if(savedCranes.length>0){
+        savedCranes.forEach(function(c){addCraneCard({name:c.name,site:c.site,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''});});
+    } else { buildCrane(); }
+    document.getElementById('mobile-equipment-container').innerHTML='';
+    if(savedEquip.length>0){
+        savedEquip.forEach(function(e){addEquipmentItem({name:e.name,site:e.site,done:false,inspector:'',otherInspector:''});});
+    } else { buildMobileEquipment(); }
     document.getElementById('work-permits-container').innerHTML='';
-    savedPermits.forEach(p=>addWorkPermitItem(p));
+    savedPermits.forEach(function(p){addWorkPermitItem(p);});
     document.getElementById('report-output').classList.add('hidden');
     checkHotwork();
     saveData();
+    alert('Form reset complete!');
+    }catch(e){ alert('Reset error: '+e.message+' at line: '+e.stack); }
 });
 
 // ══════════════════════════════════════════════════════
