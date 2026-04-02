@@ -23,7 +23,6 @@
         .btn-purple{ background:#8b5cf6; color:white; } .btn-purple:hover{ background:#7c3aed; }
         .btn-danger{ background:#ef4444; color:white; padding:0.4rem 0.85rem; } .btn-danger:hover{ background:#dc2626; }
         .btn-sm{ padding:0.28rem 0.6rem; font-size:0.7rem; border-radius:0.35rem; font-weight:600; cursor:pointer; }
-        /* Headcount table */
         .hc-table{ width:100%; border-collapse:collapse; }
         .hc-table th{ font-size:0.72rem; font-weight:700; padding:0.45rem 0.6rem; text-align:center; }
         .hc-table th.th-trade{ text-align:left; color:#374151; }
@@ -40,10 +39,8 @@
         .hc-num-input{ width:52px; text-align:center; border:1px solid #d1d5db; border-radius:0.35rem; padding:0.28rem 0.15rem; font-size:0.82rem; }
         .hc-num-input:focus{ outline:none; border-color:#003D52; }
         .totals-row td{ font-weight:700; font-size:0.82rem; border-top:2px solid #e5e7eb; background:#f9fafb!important; }
-        /* Permit / orientation / obs items */
         .observation-item,.permit-item,.orientation-item{ background:#f9fafb; border:1px solid #e5e7eb; border-radius:0.5rem; padding:0.85rem; margin-top:0.65rem; }
         .orientation-item{ background:#f0fdf4; border-color:#bbf7d0; }
-        /* Observation status styles */
         .obs-status-bar{ background:#f0f4f8; border:1px solid #e2e8f0; border-radius:0.4rem; padding:0.6rem 0.75rem; margin-top:0.5rem; }
         .obs-status-resolved{ border-color:#bbf7d0; background:#f0fdf4; }
         .obs-status-pending{ border-color:#fde68a; background:#fffbeb; }
@@ -51,14 +48,11 @@
         .chip-pending{ background:#fde68a; color:#92400e; }
         .chip-resolved{ background:#bbf7d0; color:#065f46; }
         .chip-new{ background:#e0e7ef; color:#374151; }
-        /* Toggle */
         .toggle-bg{ transition:background-color 0.2s; }
         .toggle-dot{ transition:transform 0.2s; }
         input:checked~.toggle-bg{ background:#003D52; }
         input:checked~.toggle-dot{ transform:translateX(100%); }
-        /* Equipment / crane cards */
         .equipment-card{ background:#f9fafb; border:1px solid #e5e7eb; border-radius:0.5rem; padding:0.85rem; }
-        /* Site pills */
         .site-pill{ font-size:0.68rem; padding:0.18rem 0.55rem; border-radius:9999px; border:1.5px solid; cursor:pointer; font-weight:600; transition:all 0.15s; display:inline-flex; align-items:center; gap:3px; }
         .site-pill:not([class*="active-"]),.site-pill.inactive{ background:white; color:#6b7280; border-color:#d1d5db; }
         .site-pill.active-1475{ background:#2563eb; color:white; border-color:#2563eb; }
@@ -67,15 +61,11 @@
         .site-pill.active-Other{ background:#d97706; color:white; border-color:#d97706; }
         .site-pill.add-site-pill{ border-style:dashed; color:#003D52; border-color:#003D52; }
         .site-pill.delete-site-pill{ background:#fee2e2; color:#dc2626; border-color:#fca5a5; font-size:0.6rem; }
-        /* Section tabs */
         #section-tabs{ overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
         #section-tabs::-webkit-scrollbar{ display:none; }
-        /* Manage sites panel */
         #manage-sites-panel{ display:none; }
         #manage-sites-panel.open{ display:block; }
-        /* Tag pill for "other" label inline */
         .tag-chip{ display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; background:#e0f2fe; color:#0369a1; border-radius:9999px; padding:0.1rem 0.5rem; font-weight:600; }
-        /* Print handled via popup window — no @media print needed here */
     </style>
 </head>
 <body class="p-3 md:p-5">
@@ -118,7 +108,7 @@
     </div>
     <div id="site-pills-display" class="flex flex-wrap gap-2 mt-2"></div>
     <div id="manage-sites-panel" class="mt-3 border-t pt-3">
-        <p class="text-xs text-gray-500 mb-2">Add or remove project sites. Sites are used everywhere (headcount columns, site selectors, inspections).</p>
+        <p class="text-xs text-gray-500 mb-2">Add or remove project sites.</p>
         <div class="flex gap-2">
             <input type="text" id="new-site-input" class="form-input text-sm" placeholder="New site name (e.g. 2050)..." style="max-width:200px">
             <button id="add-site-btn" class="btn btn-green btn-sm">+ Add</button>
@@ -236,18 +226,7 @@
         <div style="width:6px;height:28px;background:#96C61C;border-radius:3px"></div>
         <h2 class="text-base font-bold" style="color:#003D52;font-family:'Raleway',sans-serif;letter-spacing:0.04em">Generated Report</h2>
     </div>
-    <div id="report-content" style="
-        background:#f8fafc;
-        border:1px solid #e2e8f0;
-        border-left:4px solid #003D52;
-        border-radius:0.5rem;
-        padding:1.25rem 1.5rem;
-        white-space:pre-wrap;
-        font-family:'Raleway',sans-serif;
-        font-size:0.78rem;
-        line-height:1.7;
-        color:#1e293b;
-    "></div>
+    <div id="report-content" style="background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #003D52;border-radius:0.5rem;padding:1.25rem 1.5rem;white-space:pre-wrap;font-family:'Raleway',sans-serif;font-size:0.78rem;line-height:1.7;color:#1e293b;"></div>
     <div class="flex gap-3 mt-3">
         <button id="exportPdf" class="btn btn-primary flex-1" style="font-family:'Raleway',sans-serif;letter-spacing:0.03em">Print / Save PDF</button>
         <button id="copyReport" class="btn btn-gray flex-1" style="font-family:'Raleway',sans-serif">Copy Report</button>
@@ -255,9 +234,6 @@
 </div>
 </div><script>
 document.addEventListener('DOMContentLoaded', function () {
-// ══════════════════════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════════════════════
 const BASE_SITES = ['1475','1600','1825'];
 const BASE_TRADES = [
     { name:'WDC', wdc:true },
@@ -307,9 +283,6 @@ const DEFAULT_PERMITS = [
     { type:'Hot Work Permit', site:'1600', contractor:'Jensen (Cutting rebar)' },
     { type:'Hot Work Permit', site:'1475', contractor:'Jensen (Cutting rebar)' },
 ];
-// ══════════════════════════════════════════════════════
-// SITE MANAGEMENT (persisted in localStorage)
-// ══════════════════════════════════════════════════════
 function getCustomSites() { return JSON.parse(localStorage.getItem('customSites_v5')||'[]'); }
 function saveCustomSites(arr) { localStorage.setItem('customSites_v5', JSON.stringify(arr)); }
 function getAllSites() { return [...BASE_SITES, ...getCustomSites()]; }
@@ -325,7 +298,6 @@ function siteColor(s) {
     if(s==='1825') return '#059669';
     return '#d97706';
 }
-// Render site pill badges in top display
 function renderSiteDisplay() {
     const cont = document.getElementById('site-pills-display');
     cont.innerHTML = '';
@@ -348,7 +320,7 @@ function renderSiteDeleteList() {
         row.innerHTML = `<span class="text-sm font-semibold" style="color:#d97706">${s}</span>
             <button class="btn btn-danger btn-sm del-site-btn" data-site="${s}">Delete</button>`;
         row.querySelector('.del-site-btn').addEventListener('click', () => {
-            if (!confirm(`Delete site "${s}"? This will remove it from all selectors.`)) return;
+            if (!confirm(`Delete site "${s}"?`)) return;
             const arr = getCustomSites().filter(x=>x!==s);
             saveCustomSites(arr);
             renderSiteDisplay();
@@ -378,9 +350,6 @@ document.getElementById('add-site-btn').addEventListener('click', () => {
     refreshAllSitePills();
     saveData();
 });
-// ══════════════════════════════════════════════════════
-// HELPERS
-// ══════════════════════════════════════════════════════
 function uid() { return Date.now()+'-'+Math.floor(Math.random()*9999); }
 function buildSiteRadiosHtml(nameAttr, selected) {
     return getAllSites().map(s =>
@@ -390,7 +359,6 @@ function buildSiteRadiosHtml(nameAttr, selected) {
         </label>`
     ).join('');
 }
-// Build site selector pills (for crane / equipment)
 function buildSitePillsInto(container, currentSite) {
     container.innerHTML = '';
     getAllSites().forEach(s => {
@@ -412,7 +380,6 @@ function buildSitePillsInto(container, currentSite) {
         container.appendChild(btn);
     });
 }
-// Refresh all existing crane + equipment site pills when sites change
 function refreshAllSitePills() {
     document.querySelectorAll('.crane-site-pills').forEach(container => {
         const hiddenInp = container.nextElementSibling;
@@ -429,9 +396,6 @@ function refreshAllSitePills() {
         buildSitePillsInto(container, validSite);
     });
 }
-// ══════════════════════════════════════════════════════
-// TABS
-// ══════════════════════════════════════════════════════
 document.getElementById('checklistDate').valueAsDate = new Date();
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -441,9 +405,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         document.getElementById('tab-'+btn.dataset.tab).classList.remove('hidden');
     });
 });
-// ══════════════════════════════════════════════════════
-// HEADCOUNT TABLE
-// ══════════════════════════════════════════════════════
 const hcTbody = document.getElementById('hc-tbody');
 function captureCurrentHC() {
     const hc={};
@@ -473,10 +434,7 @@ function rebuildHeadcount(savedHC) {
                 ${getAllSites().map(site => {
                     const id = `hc-wdc-${site}`;
                     const val = savedHC && savedHC[id] != null ? savedHC[id] : 0;
-                    return `<td class="text-center">
-                        <input type="number" min="0" value="${val}" id="${id}"
-                            class="hc-num-input headcount-input" data-site="${site}" data-trade="WDC">
-                    </td>`;
+                    return `<td class="text-center"><input type="number" min="0" value="${val}" id="${id}" class="hc-num-input headcount-input" data-site="${site}" data-trade="WDC"></td>`;
                 }).join('')}`;
         } else {
             const tId = trade.name.toLowerCase().replace(/[^a-z0-9]/g,'-');
@@ -489,10 +447,7 @@ function rebuildHeadcount(savedHC) {
                 ${getAllSites().map(site => {
                     const id = `hc-${site}-${tId}`;
                     const val = savedHC && savedHC[id] != null ? savedHC[id] : 0;
-                    return `<td class="text-center">
-                        <input type="number" min="0" value="${val}" id="${id}"
-                            class="hc-num-input headcount-input" data-site="${site}" data-trade="${trade.name}">
-                    </td>`;
+                    return `<td class="text-center"><input type="number" min="0" value="${val}" id="${id}" class="hc-num-input headcount-input" data-site="${site}" data-trade="${trade.name}"></td>`;
                 }).join('')}`;
         }
         hcTbody.appendChild(tr);
@@ -508,7 +463,6 @@ function rebuildHeadcount(savedHC) {
             });
         }
     });
-    // + Add Trade row
     const addTr = document.createElement('tr');
     addTr.className = 'add-trade-row';
     addTr.innerHTML = `
@@ -532,7 +486,6 @@ function rebuildHeadcount(savedHC) {
         rebuildHeadcount();
         saveData();
     });
-    // Totals
     const totalsRow = document.getElementById('hc-totals-row');
     totalsRow.innerHTML = `<div></div>`;
     getAllSites().forEach(s => {
@@ -558,9 +511,6 @@ function updateHeadcounts() {
     });
     document.getElementById('grand-total').textContent = grand;
 }
-// ══════════════════════════════════════════════════════
-// HOT WORK
-// ══════════════════════════════════════════════════════
 function checkHotwork() {
     const waterUse = document.getElementById('waterUse').value;
     const fireDanger = document.getElementById('fireDanger').value;
@@ -569,9 +519,6 @@ function checkHotwork() {
     el.textContent = restricted ? '⚠ Hot work NOT permitted within 10m of the forest interface.' : '✓ Hot work is safe to do.';
     el.className = `text-sm font-bold text-center ${restricted?'text-red-600':'text-green-600'}`;
 }
-// ══════════════════════════════════════════════════════
-// INSPECTIONS
-// ══════════════════════════════════════════════════════
 function rebuildInspections(savedWalks) {
     if(!savedWalks) savedWalks = captureCurrentWalks();
     const cont = document.getElementById('morning-tasks');
@@ -581,8 +528,7 @@ function rebuildInspections(savedWalks) {
     const table = document.createElement('table');
     table.style.cssText = 'width:100%;border-collapse:collapse;';
     const thead = document.createElement('thead');
-    let thHtml = `<tr>
-        <th style="text-align:left;padding:0.45rem 0.6rem;font-size:0.75rem;font-weight:700;color:#374151;background:#f9fafb;border-bottom:2px solid #e5e7eb;min-width:160px">Inspection Type</th>`;
+    let thHtml = `<tr><th style="text-align:left;padding:0.45rem 0.6rem;font-size:0.75rem;font-weight:700;color:#374151;background:#f9fafb;border-bottom:2px solid #e5e7eb;min-width:160px">Inspection Type</th>`;
     sites.forEach(s => {
         thHtml += `<th style="text-align:center;padding:0.45rem 0.5rem;font-size:0.75rem;font-weight:700;color:${siteColor(s)};background:${siteColor(s)}12;border-bottom:2px solid #e5e7eb;min-width:70px">${s}</th>`;
     });
@@ -612,15 +558,11 @@ function rebuildInspections(savedWalks) {
     wrapper.appendChild(table);
     cont.appendChild(wrapper);
 }
-// ══════════════════════════════════════════════════════
-// CRANE
-// ══════════════════════════════════════════════════════
 function buildCrane() {
     document.getElementById('crane-container').innerHTML = '';
     addCraneCard({ name:'Crane #1', site:'1600', done:false, inspector:'', otherInspector:'',
         rigging:false, riggingInspector:'', riggingOtherInspector:'', coldWeather:false,
-        overlap:[], overlapOtherChecked:false, overlapOtherText:'',
-        overlapOther2Checked:false, overlapOther2Text:'' });
+        overlap:[], overlapOtherChecked:false, overlapOtherText:'', overlapOther2Checked:false, overlapOther2Text:'' });
 }
 function addCraneCard(data) {
     data = data||{};
@@ -629,8 +571,7 @@ function addCraneCard(data) {
     const rinspOpts = [...CRANE_INSPECTORS,'Other'].map(i=>`<option ${i===(data.riggingInspector||'')?'selected':''}>${i}</option>`).join('');
     const overlapChecks = OVERLAP_COMPANIES.map(c => {
         const chk = data.overlap && data.overlap.includes(c) ? 'checked' : '';
-        return `<label class="flex items-center gap-1 p-1 bg-white rounded border border-gray-200 text-xs">
-            <input type="checkbox" value="${c}" class="h-3 w-3 overlap-check" ${chk}><span>${c}</span></label>`;
+        return `<label class="flex items-center gap-1 p-1 bg-white rounded border border-gray-200 text-xs"><input type="checkbox" value="${c}" class="h-3 w-3 overlap-check" ${chk}><span>${c}</span></label>`;
     }).join('');
     const div = document.createElement('div');
     div.className = 'equipment-card crane-card border-2 border-sky-100';
@@ -647,8 +588,7 @@ function addCraneCard(data) {
         <div class="border rounded-lg p-2 mb-2 bg-white">
             <div class="flex items-center justify-between gap-2">
                 <span class="text-sm font-semibold text-gray-700">Crane Daily Inspection</span>
-                <label class="flex items-center cursor-pointer gap-1">
-                    <span class="text-xs text-gray-500">Done</span>
+                <label class="flex items-center cursor-pointer gap-1"><span class="text-xs text-gray-500">Done</span>
                     <div class="relative"><input type="checkbox" class="sr-only crane-daily-toggle" ${data.done?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
                 </label>
             </div>
@@ -663,8 +603,7 @@ function addCraneCard(data) {
         <div class="border rounded-lg p-2 mb-2 bg-white">
             <div class="flex items-center justify-between gap-2">
                 <span class="text-sm font-semibold text-gray-700">Rigging Daily Inspection</span>
-                <label class="flex items-center cursor-pointer gap-1">
-                    <span class="text-xs text-gray-500">Done</span>
+                <label class="flex items-center cursor-pointer gap-1"><span class="text-xs text-gray-500">Done</span>
                     <div class="relative"><input type="checkbox" class="sr-only crane-rigging-toggle" ${data.rigging?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
                 </label>
             </div>
@@ -687,25 +626,21 @@ function addCraneCard(data) {
             <div class="grid grid-cols-2 gap-1 mt-2">${overlapChecks}</div>
             <div class="mt-1">
                 <label class="flex items-center gap-1 text-xs p-1 bg-gray-50 rounded border border-gray-200 cursor-pointer">
-                    <input type="checkbox" class="h-3 w-3 overlap-other1-check" ${data.overlapOtherChecked?'checked':''}>
-                    <span>Other:</span>
+                    <input type="checkbox" class="h-3 w-3 overlap-other1-check" ${data.overlapOtherChecked?'checked':''}><span>Other:</span>
                 </label>
                 <input type="text" class="form-input text-xs mt-1 overlap-other1-text ${data.overlapOtherChecked?'':'hidden'}" placeholder="Company name…" value="${data.overlapOtherText||''}">
             </div>
             <div class="mt-1">
                 <label class="flex items-center gap-1 text-xs p-1 bg-gray-50 rounded border border-gray-200 cursor-pointer">
-                    <input type="checkbox" class="h-3 w-3 overlap-other2-check" ${data.overlapOther2Checked?'checked':''}>
-                    <span>Other 2:</span>
+                    <input type="checkbox" class="h-3 w-3 overlap-other2-check" ${data.overlapOther2Checked?'checked':''}><span>Other 2:</span>
                 </label>
                 <input type="text" class="form-input text-xs mt-1 overlap-other2-text ${data.overlapOther2Checked?'':'hidden'}" placeholder="Company name…" value="${data.overlapOther2Text||''}">
             </div>
         </div>`;
     buildSitePillsInto(div.querySelector('.crane-site-pills'), data.site||'1600');
-    const dailyTog = div.querySelector('.crane-daily-toggle');
-    const dailyDet = div.querySelector('.crane-daily-det');
+    const dailyTog = div.querySelector('.crane-daily-toggle'), dailyDet = div.querySelector('.crane-daily-det');
     dailyTog.addEventListener('change',()=>{dailyDet.classList.toggle('hidden',!dailyTog.checked);saveData();});
-    const riggTog = div.querySelector('.crane-rigging-toggle');
-    const riggDet = div.querySelector('.crane-rigging-det');
+    const riggTog = div.querySelector('.crane-rigging-toggle'), riggDet = div.querySelector('.crane-rigging-det');
     riggTog.addEventListener('change',()=>{riggDet.classList.toggle('hidden',!riggTog.checked);saveData();});
     const insSel=div.querySelector('.crane-insp-sel'), insOth=div.querySelector('.crane-insp-other');
     insSel.addEventListener('change',()=>{insOth.classList.toggle('hidden',insSel.value!=='Other');saveData();});
@@ -722,9 +657,6 @@ document.getElementById('add-crane-btn').addEventListener('click',()=>{
     addCraneCard({name:`Crane #${n}`,site:'1600',done:false,inspector:'',rigging:false,riggingInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''});
     saveData();
 });
-// ══════════════════════════════════════════════════════
-// MOBILE EQUIPMENT
-// ══════════════════════════════════════════════════════
 function buildMobileEquipment() {
     document.getElementById('mobile-equipment-container').innerHTML='';
     EQUIPMENT_LIST.forEach(eq=>addEquipmentItem({name:eq.name,site:eq.site,done:false,inspector:'',otherInspector:'',inspectors:eq.inspectors}));
@@ -738,8 +670,7 @@ function addEquipmentItem(data) {
     div.innerHTML = `
         <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
             <input type="text" class="form-input text-sm font-semibold equip-name flex-1" style="min-width:150px" value="${data.name||''}" placeholder="Equipment name…">
-            <label class="flex items-center cursor-pointer ml-1 gap-1">
-                <span class="text-xs text-gray-500">Done</span>
+            <label class="flex items-center cursor-pointer ml-1 gap-1"><span class="text-xs text-gray-500">Done</span>
                 <div class="relative"><input type="checkbox" class="sr-only equip-toggle" ${data.done?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
             </label>
         </div>
@@ -760,8 +691,7 @@ function addEquipmentItem(data) {
         </div>
         <button type="button" class="btn btn-danger btn-sm mt-2 remove-equip-btn">Remove</button>`;
     buildSitePillsInto(div.querySelector('.equip-site-pills'), data.site||'1475');
-    const tog=div.querySelector('.equip-toggle');
-    const det=div.querySelector('.equip-details');
+    const tog=div.querySelector('.equip-toggle'), det=div.querySelector('.equip-details');
     tog.addEventListener('change',()=>{det.classList.toggle('hidden',!tog.checked);saveData();});
     const sel=div.querySelector('.equip-inspector-sel');
     if(sel){const oth=div.querySelector('.equip-inspector-other');sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});}
@@ -770,9 +700,6 @@ function addEquipmentItem(data) {
     document.getElementById('mobile-equipment-container').appendChild(div);
 }
 document.getElementById('add-equipment-btn').addEventListener('click',()=>{addEquipmentItem({name:'',site:'1475',done:false,inspector:'',otherInspector:'',inspectors:[]});saveData();});
-// ══════════════════════════════════════════════════════
-// ORIENTATIONS
-// ══════════════════════════════════════════════════════
 const ORIENTATION_TYPES_FULL = [...ORIENTATION_TYPES, 'Other'];
 function addOrientationItem(data={type:'New Worker Orientation',site:'1475',typeOther:'',worker:''}) {
     const id=uid();
@@ -781,17 +708,14 @@ function addOrientationItem(data={type:'New Worker Orientation',site:'1475',type
     div.className='orientation-item relative';
     div.innerHTML=`
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Type</label>
+            <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Type</label>
                 <select class="form-select text-sm orientation-type">${typeOpts}</select>
                 <input type="text" class="form-input text-xs mt-1 orientation-type-other ${data.type==='Other'?'':'hidden'}" placeholder="Specify type…" value="${data.typeOther||''}">
             </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Site</label>
+            <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Site</label>
                 <div class="flex flex-wrap mt-1">${buildSiteRadiosHtml('oriSite-'+id,data.site)}</div>
             </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Worker / Notes</label>
+            <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Worker / Notes</label>
                 <input type="text" class="form-input text-sm orientation-worker" placeholder="Worker name…" value="${data.worker||''}">
             </div>
         </div>
@@ -803,9 +727,6 @@ function addOrientationItem(data={type:'New Worker Orientation',site:'1475',type
     document.getElementById('orientations-container').appendChild(div);
 }
 document.getElementById('add-orientation-btn').addEventListener('click',()=>{addOrientationItem();saveData();});
-// ══════════════════════════════════════════════════════
-// WORK PERMITS
-// ══════════════════════════════════════════════════════
 const PERMIT_TYPES_FULL = [...PERMIT_TYPES, 'Other'];
 function addWorkPermitItem(data={type:'Fall Protection Plan',site:'1475',typeOther:'',contractor:''}) {
     const id=uid();
@@ -814,17 +735,14 @@ function addWorkPermitItem(data={type:'Fall Protection Plan',site:'1475',typeOth
     div.className='permit-item relative';
     div.innerHTML=`
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase">Permit Type</label>
+            <div><label class="block text-xs font-semibold text-gray-500 uppercase">Permit Type</label>
                 <select class="form-select text-sm mt-1 permit-type">${typeOpts}</select>
                 <input type="text" class="form-input text-xs mt-1 permit-type-other ${data.type==='Other'?'':'hidden'}" placeholder="Specify type…" value="${data.typeOther||''}">
             </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase">Site</label>
+            <div><label class="block text-xs font-semibold text-gray-500 uppercase">Site</label>
                 <div class="flex flex-col mt-1 space-y-0.5">${buildSiteRadiosHtml('permSite-'+id,data.site)}</div>
             </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase">Contractor & Task</label>
+            <div><label class="block text-xs font-semibold text-gray-500 uppercase">Contractor & Task</label>
                 <input type="text" class="form-input text-sm mt-1 permit-contractor" placeholder="e.g. WDC (task)…" value="${data.contractor||''}">
             </div>
         </div>
@@ -836,9 +754,6 @@ function addWorkPermitItem(data={type:'Fall Protection Plan',site:'1475',typeOth
     document.getElementById('work-permits-container').appendChild(div);
 }
 document.getElementById('add-permit-btn').addEventListener('click',()=>{addWorkPermitItem();saveData();});
-// ══════════════════════════════════════════════════════
-// SAFETY MEETINGS
-// ══════════════════════════════════════════════════════
 function addMeetingItem(data={site:'1475',status:'Yes',comment:''}) {
     const id=uid();
     const div=document.createElement('div');
@@ -846,14 +761,9 @@ function addMeetingItem(data={site:'1475',status:'Yes',comment:''}) {
     div.innerHTML=`
         <div class="flex flex-wrap items-center gap-2">
             <span class="text-sm font-semibold text-gray-700">Weekly Safety Meeting</span>
-            <select class="form-select w-auto text-sm mtg-status">
-                ${['Yes','No','N/A'].map(v=>`<option ${v===data.status?'selected':''}>${v}</option>`).join('')}
-            </select>
+            <select class="form-select w-auto text-sm mtg-status">${['Yes','No','N/A'].map(v=>`<option ${v===data.status?'selected':''}>${v}</option>`).join('')}</select>
         </div>
-        <div class="flex flex-wrap items-center gap-1">
-            <span class="text-xs font-semibold text-gray-600">Site:</span>
-            ${buildSiteRadiosHtml('mtgSite-'+id,data.site)}
-        </div>
+        <div class="flex flex-wrap items-center gap-1"><span class="text-xs font-semibold text-gray-600">Site:</span>${buildSiteRadiosHtml('mtgSite-'+id,data.site)}</div>
         <input type="text" class="form-input text-sm mtg-comment" placeholder="Comments…" value="${data.comment||''}">
         <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-mtg-btn">Remove</button>`;
     div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
@@ -861,9 +771,6 @@ function addMeetingItem(data={site:'1475',status:'Yes',comment:''}) {
     document.getElementById('safety-meetings-container').appendChild(div);
 }
 document.getElementById('add-meeting-btn').addEventListener('click',()=>{addMeetingItem();saveData();});
-// ══════════════════════════════════════════════════════
-// SITE INCIDENTS
-// ══════════════════════════════════════════════════════
 const INCIDENT_TYPES_FULL = [...INCIDENT_TYPES,'Other'];
 function addIncidentItem(data={site:'1475',type:'First Aid',typeOther:'',comment:''}) {
     const id=uid();
@@ -875,10 +782,7 @@ function addIncidentItem(data={site:'1475',type:'First Aid',typeOther:'',comment
             <select class="form-select w-auto text-sm inc-type">${typeOpts}</select>
             <input type="text" class="form-input text-xs inc-type-other ${data.type==='Other'?'':'hidden'}" style="max-width:200px" placeholder="Specify type…" value="${data.typeOther||''}">
         </div>
-        <div class="flex flex-wrap items-center gap-1">
-            <span class="text-xs font-semibold text-gray-600">Site:</span>
-            ${buildSiteRadiosHtml('incSite-'+id,data.site)}
-        </div>
+        <div class="flex flex-wrap items-center gap-1"><span class="text-xs font-semibold text-gray-600">Site:</span>${buildSiteRadiosHtml('incSite-'+id,data.site)}</div>
         <input type="text" class="form-input text-sm inc-comment" placeholder="Details / Comments…" value="${data.comment||''}">
         <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-inc-btn">Remove</button>`;
     const sel=div.querySelector('.inc-type'),oth=div.querySelector('.inc-type-other');
@@ -888,9 +792,6 @@ function addIncidentItem(data={site:'1475',type:'First Aid',typeOther:'',comment
     document.getElementById('site-incidents-container').appendChild(div);
 }
 document.getElementById('add-incident-btn').addEventListener('click',()=>{addIncidentItem();saveData();});
-// ══════════════════════════════════════════════════════
-// WEEKEND WORK
-// ══════════════════════════════════════════════════════
 function addWeekendItem(data={site:'1475',status:'Yes',comment:''}) {
     const id=uid();
     const div=document.createElement('div');
@@ -898,14 +799,9 @@ function addWeekendItem(data={site:'1475',status:'Yes',comment:''}) {
     div.innerHTML=`
         <div class="flex flex-wrap items-center gap-2">
             <span class="text-sm font-semibold text-gray-700">Working on Weekend</span>
-            <select class="form-select w-auto text-sm wknd-status">
-                ${['Yes','No','N/A'].map(v=>`<option ${v===data.status?'selected':''}>${v}</option>`).join('')}
-            </select>
+            <select class="form-select w-auto text-sm wknd-status">${['Yes','No','N/A'].map(v=>`<option ${v===data.status?'selected':''}>${v}</option>`).join('')}</select>
         </div>
-        <div class="flex flex-wrap items-center gap-1">
-            <span class="text-xs font-semibold text-gray-600">Site:</span>
-            ${buildSiteRadiosHtml('wkndSite-'+id,data.site)}
-        </div>
+        <div class="flex flex-wrap items-center gap-1"><span class="text-xs font-semibold text-gray-600">Site:</span>${buildSiteRadiosHtml('wkndSite-'+id,data.site)}</div>
         <input type="text" class="form-input text-sm wknd-comment" placeholder="Details…" value="${data.comment||''}">
         <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-wknd-btn">Remove</button>`;
     div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
@@ -913,46 +809,27 @@ function addWeekendItem(data={site:'1475',status:'Yes',comment:''}) {
     document.getElementById('weekend-work-container').appendChild(div);
 }
 document.getElementById('add-weekend-btn').addEventListener('click',()=>{addWeekendItem();saveData();});
-
-// ══════════════════════════════════════════════════════
-// OBSERVATIONS  ← MODIFIED: status checklist added
-// ══════════════════════════════════════════════════════
 function buildObsSiteOptions(selected) {
     const opts = [...getAllSites(), 'All Sites', 'Other'];
     return opts.map(s=>`<option value="${s}" ${s===selected?'selected':''}>${s}</option>`).join('');
 }
-
-/**
- * Status values: 'new' | 'pending' | 'resolved'
- * foremanInformed: true/false
- * resolvedDate: 'YYYY-MM-DD' or ''
- */
 function addObservationItem(data) {
     data = data || {};
     const siteVal    = data.site || '1475';
-    const obsStatus  = data.obsStatus  || 'new';       // 'new' | 'pending' | 'resolved'
+    const obsStatus  = data.obsStatus  || 'new';
     const foremanInf = data.foremanInformed || false;
     const resolvedDate = data.resolvedDate || '';
-
     const div = document.createElement('div');
     div.className = 'observation-item relative';
-
-    // Determine status bar style
-    const barClass = obsStatus === 'resolved' ? 'obs-status-resolved' :
-                     obsStatus === 'pending'   ? 'obs-status-pending'  : '';
-
+    const barClass = obsStatus === 'resolved' ? 'obs-status-resolved' : obsStatus === 'pending' ? 'obs-status-pending' : '';
     div.innerHTML = `
         <div class="flex flex-wrap items-center gap-2 mb-2">
             <span class="text-xs font-semibold text-gray-600">Site:</span>
-            <select class="form-select text-sm obs-site-sel" style="max-width:160px">
-                ${buildObsSiteOptions(siteVal)}
-            </select>
+            <select class="form-select text-sm obs-site-sel" style="max-width:160px">${buildObsSiteOptions(siteVal)}</select>
             <input type="text" class="form-input text-xs obs-site-other ${siteVal==='Other'?'':'hidden'}" style="max-width:150px" placeholder="Specify site…" value="${data.siteOther||''}">
             <span class="obs-allsites-badge ${siteVal==='All Sites'?'':'hidden'}" style="font-size:0.7rem;background:#003D5218;color:#003D52;font-weight:700;padding:0.15rem 0.5rem;border-radius:9999px">All Sites</span>
         </div>
         <textarea class="form-textarea obs-text" rows="3" placeholder="Enter observation…">${data.text||''}</textarea>
-
-        <!-- STATUS CHECKLIST -->
         <div class="obs-status-bar ${barClass} mt-2">
             <div class="flex flex-wrap items-center gap-3 mb-1">
                 <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Follow-up Status</span>
@@ -961,544 +838,226 @@ function addObservationItem(data) {
                 </span>
             </div>
             <div class="flex flex-wrap gap-4 items-start">
-                <!-- 1. Foreman Informed -->
                 <label class="flex items-center gap-1.5 cursor-pointer select-none">
                     <input type="checkbox" class="h-4 w-4 obs-foreman-check" style="accent-color:#003D52" ${foremanInf?'checked':''}>
                     <span class="text-xs font-semibold text-gray-700">Foreman Informed</span>
                 </label>
-                <!-- 2. Pending -->
                 <label class="flex items-center gap-1.5 cursor-pointer select-none">
                     <input type="checkbox" class="h-4 w-4 obs-pending-check" style="accent-color:#d97706" ${obsStatus==='pending'||obsStatus==='resolved'?'checked':''}>
                     <span class="text-xs font-semibold text-gray-700">Pending Resolution</span>
                 </label>
-                <!-- 3. Resolved -->
                 <label class="flex items-center gap-1.5 cursor-pointer select-none">
                     <input type="checkbox" class="h-4 w-4 obs-resolved-check" style="accent-color:#059669" ${obsStatus==='resolved'?'checked':''}>
                     <span class="text-xs font-semibold text-gray-700">Resolved</span>
                 </label>
             </div>
-            <!-- Resolved date row -->
             <div class="obs-resolved-date-row flex items-center gap-2 mt-2 ${obsStatus==='resolved'?'':'hidden'}">
                 <span class="text-xs text-gray-500 font-semibold">Date Resolved:</span>
                 <input type="date" class="form-input text-xs obs-resolved-date" style="max-width:170px" value="${resolvedDate}">
             </div>
         </div>
-
         <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-obs-btn">X</button>`;
-
-    // Site selector logic
-    const sel   = div.querySelector('.obs-site-sel');
-    const oth   = div.querySelector('.obs-site-other');
-    const badge = div.querySelector('.obs-allsites-badge');
-    sel.addEventListener('change', ()=>{
-        oth.classList.toggle('hidden', sel.value !== 'Other');
-        badge.classList.toggle('hidden', sel.value !== 'All Sites');
-        saveData();
-    });
-
-    // Status checklist logic
-    const foremanChk  = div.querySelector('.obs-foreman-check');
-    const pendingChk  = div.querySelector('.obs-pending-check');
-    const resolvedChk = div.querySelector('.obs-resolved-check');
-    const dateRow     = div.querySelector('.obs-resolved-date-row');
-    const statusBar   = div.querySelector('.obs-status-bar');
-    const statusBadge = div.querySelector('.obs-status-badge');
-
+    const sel=div.querySelector('.obs-site-sel'), oth=div.querySelector('.obs-site-other'), badge=div.querySelector('.obs-allsites-badge');
+    sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');badge.classList.toggle('hidden',sel.value!=='All Sites');saveData();});
+    const foremanChk=div.querySelector('.obs-foreman-check'), pendingChk=div.querySelector('.obs-pending-check');
+    const resolvedChk=div.querySelector('.obs-resolved-check'), dateRow=div.querySelector('.obs-resolved-date-row');
+    const statusBar=div.querySelector('.obs-status-bar'), statusBadge=div.querySelector('.obs-status-badge');
     function updateObsStatus() {
-        // If resolved is checked → resolved
-        // Else if pending is checked → pending
-        // Else → new
-        const isResolved = resolvedChk.checked;
-        const isPending  = pendingChk.checked;
-
-        dateRow.classList.toggle('hidden', !isResolved);
-
-        // If marking resolved, auto-set today's date if empty
-        if (isResolved && !div.querySelector('.obs-resolved-date').value) {
-            div.querySelector('.obs-resolved-date').value = new Date().toISOString().slice(0,10);
+        const isResolved=resolvedChk.checked, isPending=pendingChk.checked;
+        dateRow.classList.toggle('hidden',!isResolved);
+        if(isResolved && !div.querySelector('.obs-resolved-date').value) {
+            div.querySelector('.obs-resolved-date').value=new Date().toISOString().slice(0,10);
         }
-
-        // If resolved unchecked, keep pending checked as-is
-        if (!isResolved && resolvedChk.checked === false) {
-            // do nothing to pending
-        }
-
-        let currentStatus = 'new';
-        if (isResolved)      currentStatus = 'resolved';
-        else if (isPending)  currentStatus = 'pending';
-
-        // Update badge
-        statusBadge.className = `obs-status-chip ${currentStatus==='resolved'?'chip-resolved':currentStatus==='pending'?'chip-pending':'chip-new'} obs-status-badge`;
-        statusBadge.textContent = currentStatus==='resolved' ? '✓ Resolved' : currentStatus==='pending' ? '⏳ Pending' : '◦ New';
-
-        // Update bar border/bg
+        let currentStatus='new';
+        if(isResolved) currentStatus='resolved';
+        else if(isPending) currentStatus='pending';
+        statusBadge.className=`obs-status-chip ${currentStatus==='resolved'?'chip-resolved':currentStatus==='pending'?'chip-pending':'chip-new'} obs-status-badge`;
+        statusBadge.textContent=currentStatus==='resolved'?'✓ Resolved':currentStatus==='pending'?'⏳ Pending':'◦ New';
         statusBar.classList.remove('obs-status-resolved','obs-status-pending');
-        if (currentStatus==='resolved') statusBar.classList.add('obs-status-resolved');
-        else if (currentStatus==='pending') statusBar.classList.add('obs-status-pending');
-
+        if(currentStatus==='resolved') statusBar.classList.add('obs-status-resolved');
+        else if(currentStatus==='pending') statusBar.classList.add('obs-status-pending');
         saveData();
     }
-
-    resolvedChk.addEventListener('change', updateObsStatus);
-    pendingChk.addEventListener('change', updateObsStatus);
-    foremanChk.addEventListener('change', saveData);
-
+    resolvedChk.addEventListener('change',updateObsStatus);
+    pendingChk.addEventListener('change',updateObsStatus);
+    foremanChk.addEventListener('change',saveData);
     div.querySelectorAll('input,textarea,select').forEach(el=>el.addEventListener('input',saveData));
     div.querySelector('.remove-obs-btn').addEventListener('click',()=>{div.remove();saveData();});
     document.getElementById('additional-observations-container').appendChild(div);
 }
 document.getElementById('add-observation-btn').addEventListener('click',()=>{addObservationItem();saveData();});
-
-// ══════════════════════════════════════════════════════
-// SAVE
-// ══════════════════════════════════════════════════════
 function saveData() {
-    const d = {
-        checklistDate: document.getElementById('checklistDate').value,
-        csoName:       document.getElementById('csoName').value,
-        waterUse:      document.getElementById('waterUse').value,
-        fireDanger:    document.getElementById('fireDanger').value,
-    };
-    // headcounts
+    const d={checklistDate:document.getElementById('checklistDate').value,csoName:document.getElementById('csoName').value,waterUse:document.getElementById('waterUse').value,fireDanger:document.getElementById('fireDanger').value};
     const hc={};
     document.querySelectorAll('.headcount-input').forEach(inp=>{hc[inp.id]=parseInt(inp.value)||0;});
     d.headcounts=JSON.stringify(hc);
-    // inspections
     const walks={};
     document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]').forEach(cb=>{walks[cb.id]=cb.checked;});
     d.morningWalks=JSON.stringify(walks);
-    // orientations
     const oris=[];
     document.getElementById('orientations-container').querySelectorAll('.orientation-item').forEach(item=>{
-        const s=item.querySelector('input[name^="oriSite-"]:checked');
-        const sel=item.querySelector('.orientation-type');
+        const s=item.querySelector('input[name^="oriSite-"]:checked'), sel=item.querySelector('.orientation-type');
         oris.push({type:sel.value,typeOther:item.querySelector('.orientation-type-other')?.value||'',site:s?s.value:'1475',worker:item.querySelector('.orientation-worker').value});
     });
     d.orientations=JSON.stringify(oris);
-    // permits (always saved)
     const permits=[];
     document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{
-        const s=item.querySelector('input[name^="permSite-"]:checked');
-        const sel=item.querySelector('.permit-type');
+        const s=item.querySelector('input[name^="permSite-"]:checked'), sel=item.querySelector('.permit-type');
         permits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?.value||'',site:s?s.value:'1475',contractor:item.querySelector('.permit-contractor').value});
     });
     d.permits=JSON.stringify(permits);
-    // crane
     const cranes=[];
     document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(div=>{
         const companies=[];
         div.querySelectorAll('.overlap-check:checked').forEach(cb=>companies.push(cb.value));
-        cranes.push({
-            name:div.querySelector('.crane-name')?.value||'Crane',
-            site:div.querySelector('.crane-site-val')?.value||'1600',
-            done:div.querySelector('.crane-daily-toggle')?.checked||false,
-            inspector:div.querySelector('.crane-insp-sel')?.value||'',
-            otherInspector:div.querySelector('.crane-insp-other')?.value||'',
-            rigging:div.querySelector('.crane-rigging-toggle')?.checked||false,
-            riggingInspector:div.querySelector('.crane-rigging-sel')?.value||'',
-            riggingOtherInspector:div.querySelector('.crane-rigging-other')?.value||'',
-            coldWeather:div.querySelector('.crane-cold-check')?.checked||false,
-            overlap:companies,
-            overlapOtherChecked:div.querySelector('.overlap-other1-check')?.checked||false,
-            overlapOtherText:div.querySelector('.overlap-other1-text')?.value||'',
-            overlapOther2Checked:div.querySelector('.overlap-other2-check')?.checked||false,
-            overlapOther2Text:div.querySelector('.overlap-other2-text')?.value||''
-        });
+        cranes.push({name:div.querySelector('.crane-name')?.value||'Crane',site:div.querySelector('.crane-site-val')?.value||'1600',done:div.querySelector('.crane-daily-toggle')?.checked||false,inspector:div.querySelector('.crane-insp-sel')?.value||'',otherInspector:div.querySelector('.crane-insp-other')?.value||'',rigging:div.querySelector('.crane-rigging-toggle')?.checked||false,riggingInspector:div.querySelector('.crane-rigging-sel')?.value||'',riggingOtherInspector:div.querySelector('.crane-rigging-other')?.value||'',coldWeather:div.querySelector('.crane-cold-check')?.checked||false,overlap:companies,overlapOtherChecked:div.querySelector('.overlap-other1-check')?.checked||false,overlapOtherText:div.querySelector('.overlap-other1-text')?.value||'',overlapOther2Checked:div.querySelector('.overlap-other2-check')?.checked||false,overlapOther2Text:div.querySelector('.overlap-other2-text')?.value||''});
     });
     d.craneData=JSON.stringify(cranes);
-    // equipment
     const equip=[];
     document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{
-        const sel=div.querySelector('.equip-inspector-sel');
-        const freeInp=div.querySelector('.equip-inspector-free');
-        equip.push({
-            name:div.querySelector('.equip-name').value,
-            site:div.querySelector('.equip-site-val').value,
-            done:div.querySelector('.equip-toggle')?.checked||false,
-            inspector:sel?sel.value:'',
-            otherInspector:freeInp?freeInp.value:(div.querySelector('.equip-inspector-other')?.value||'')
-        });
+        const sel=div.querySelector('.equip-inspector-sel'), freeInp=div.querySelector('.equip-inspector-free');
+        equip.push({name:div.querySelector('.equip-name').value,site:div.querySelector('.equip-site-val').value,done:div.querySelector('.equip-toggle')?.checked||false,inspector:sel?sel.value:'',otherInspector:freeInp?freeInp.value:(div.querySelector('.equip-inspector-other')?.value||'')});
     });
     d.equipment=JSON.stringify(equip);
-    // meetings
     const mtgs=[];
     document.getElementById('safety-meetings-container').querySelectorAll('.relative').forEach(div=>{
         const s=div.querySelector('input[name^="mtgSite-"]:checked');
         mtgs.push({site:s?s.value:'1475',status:div.querySelector('.mtg-status').value,comment:div.querySelector('.mtg-comment').value});
     });
     d.meetings=JSON.stringify(mtgs);
-    // incidents
     const incs=[];
     document.getElementById('site-incidents-container').querySelectorAll('.relative').forEach(div=>{
-        const s=div.querySelector('input[name^="incSite-"]:checked');
-        const sel=div.querySelector('.inc-type');
+        const s=div.querySelector('input[name^="incSite-"]:checked'), sel=div.querySelector('.inc-type');
         incs.push({site:s?s.value:'1475',type:sel.value,typeOther:div.querySelector('.inc-type-other')?.value||'',comment:div.querySelector('.inc-comment').value});
     });
     d.incidents=JSON.stringify(incs);
-    // weekends
     const wknds=[];
     document.getElementById('weekend-work-container').querySelectorAll('.relative').forEach(div=>{
         const s=div.querySelector('input[name^="wkndSite-"]:checked');
         wknds.push({site:s?s.value:'1475',status:div.querySelector('.wknd-status').value,comment:div.querySelector('.wknd-comment').value});
     });
     d.weekends=JSON.stringify(wknds);
-    // observations — now with status fields
     const obs=[];
     document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(item=>{
-        const sel=item.querySelector('.obs-site-sel');
-        const siteVal=sel?sel.value:'1475';
-        const siteOther=item.querySelector('.obs-site-other')?.value||'';
+        const sel=item.querySelector('.obs-site-sel'), siteVal=sel?sel.value:'1475';
         const text=item.querySelector('.obs-text')?.value.trim()||'';
-        const foremanInformed = item.querySelector('.obs-foreman-check')?.checked || false;
-        const isPending  = item.querySelector('.obs-pending-check')?.checked  || false;
-        const isResolved = item.querySelector('.obs-resolved-check')?.checked || false;
-        const resolvedDate = item.querySelector('.obs-resolved-date')?.value || '';
-        let obsStatus = 'new';
-        if (isResolved)     obsStatus = 'resolved';
-        else if (isPending) obsStatus = 'pending';
-        if(text) obs.push({site:siteVal, siteOther, text, foremanInformed, obsStatus, resolvedDate});
+        const foremanInformed=item.querySelector('.obs-foreman-check')?.checked||false;
+        const isPending=item.querySelector('.obs-pending-check')?.checked||false;
+        const isResolved=item.querySelector('.obs-resolved-check')?.checked||false;
+        const resolvedDate=item.querySelector('.obs-resolved-date')?.value||'';
+        let obsStatus='new';
+        if(isResolved) obsStatus='resolved';
+        else if(isPending) obsStatus='pending';
+        if(text) obs.push({site:siteVal,siteOther:item.querySelector('.obs-site-other')?.value||'',text,foremanInformed,obsStatus,resolvedDate});
     });
     d.observations=JSON.stringify(obs);
     localStorage.setItem('csoChecklist_v5',JSON.stringify(d));
 }
-// ══════════════════════════════════════════════════════
-// LOAD
-// ══════════════════════════════════════════════════════
 function loadData() {
     const raw=localStorage.getItem('csoChecklist_v5');
     const today=document.getElementById('checklistDate').value;
     const data=raw?JSON.parse(raw):null;
     if(data&&data.csoName) document.getElementById('csoName').value=data.csoName;
-    // Permits always loaded — merge saved + any missing defaults
     document.getElementById('work-permits-container').innerHTML='';
-    let permitsToLoad = [];
-    if(data && data.permits) {
-        const saved = JSON.parse(data.permits);
-        if(saved.length) {
-            permitsToLoad = saved;
-            // Add any DEFAULT_PERMITS not already present (matched by contractor+type)
-            DEFAULT_PERMITS.forEach(def => {
-                const alreadyExists = saved.some(s =>
-                    s.type === def.type &&
-                    s.contractor.trim().toLowerCase() === def.contractor.trim().toLowerCase()
-                );
-                if (!alreadyExists) permitsToLoad.push(def);
+    let permitsToLoad=[];
+    if(data&&data.permits){
+        const saved=JSON.parse(data.permits);
+        if(saved.length){
+            permitsToLoad=saved;
+            DEFAULT_PERMITS.forEach(def=>{
+                const exists=saved.some(s=>s.type===def.type&&s.contractor.trim().toLowerCase()===def.contractor.trim().toLowerCase());
+                if(!exists) permitsToLoad.push(def);
             });
-        } else {
-            permitsToLoad = DEFAULT_PERMITS;
-        }
-    } else {
-        permitsToLoad = DEFAULT_PERMITS;
-    }
-    permitsToLoad.forEach(x => addWorkPermitItem(x));
-    // Observations: always load all (pending ones persist across days)
+        } else { permitsToLoad=DEFAULT_PERMITS; }
+    } else { permitsToLoad=DEFAULT_PERMITS; }
+    permitsToLoad.forEach(x=>addWorkPermitItem(x));
     if(data&&data.observations){
         document.getElementById('additional-observations-container').innerHTML='';
         JSON.parse(data.observations).forEach(o=>addObservationItem(o));
     }
-    if(!data||data.checklistDate!==today) {
-        rebuildHeadcount();
-        rebuildInspections();
-        return;
-    }
+    if(!data||data.checklistDate!==today){rebuildHeadcount();rebuildInspections();return;}
     document.getElementById('waterUse').value=data.waterUse||'L1';
     document.getElementById('fireDanger').value=data.fireDanger||'Low';
-    const savedHC = data.headcounts ? JSON.parse(data.headcounts) : {};
-    rebuildHeadcount(savedHC);
-    const savedWalks = data.morningWalks ? JSON.parse(data.morningWalks) : {};
-    rebuildInspections(savedWalks);
+    rebuildHeadcount(data.headcounts?JSON.parse(data.headcounts):{});
+    rebuildInspections(data.morningWalks?JSON.parse(data.morningWalks):{});
     if(data.orientations){document.getElementById('orientations-container').innerHTML='';JSON.parse(data.orientations).forEach(o=>addOrientationItem(o));}
-    if(data.craneData){
-        const cd=JSON.parse(data.craneData);
-        if(Array.isArray(cd)){document.getElementById('crane-container').innerHTML='';cd.forEach(c=>addCraneCard(c));}
-    }
-    if(data.equipment){
-        document.getElementById('mobile-equipment-container').innerHTML='';
-        JSON.parse(data.equipment).forEach(eq=>{
-            const base=EQUIPMENT_LIST.find(e=>e.name===eq.name);
-            addEquipmentItem({...eq,inspectors:base?base.inspectors:[]});
-        });
-    }
+    if(data.craneData){const cd=JSON.parse(data.craneData);if(Array.isArray(cd)){document.getElementById('crane-container').innerHTML='';cd.forEach(c=>addCraneCard(c));}}
+    if(data.equipment){document.getElementById('mobile-equipment-container').innerHTML='';JSON.parse(data.equipment).forEach(eq=>{const base=EQUIPMENT_LIST.find(e=>e.name===eq.name);addEquipmentItem({...eq,inspectors:base?base.inspectors:[]});});}
     if(data.meetings){document.getElementById('safety-meetings-container').innerHTML='';JSON.parse(data.meetings).forEach(m=>addMeetingItem(m));}
     if(data.incidents){document.getElementById('site-incidents-container').innerHTML='';JSON.parse(data.incidents).forEach(i=>addIncidentItem(i));}
     if(data.weekends){document.getElementById('weekend-work-container').innerHTML='';JSON.parse(data.weekends).forEach(w=>addWeekendItem(w));}
-    updateHeadcounts();
-    checkHotwork();
+    updateHeadcounts();checkHotwork();
 }
-// ══════════════════════════════════════════════════════
-// REPORT — per site
-// ══════════════════════════════════════════════════════
 function generateReport() {
-    const date=document.getElementById('checklistDate').value||'N/A';
-    const cso=document.getElementById('csoName').value||'N/A';
     const allSites=getAllSites();
     const hcBySite={},permitsBySite={},orisBySite={},walksBySite={},equipBySite={},craneBySite={},mtgsBySite={},incsBySite={},wkndsBySite={},obsBySite={};
-    // Headcount
-    document.querySelectorAll('.headcount-input').forEach(inp=>{
-        const v=parseInt(inp.value)||0; if(!v) return;
-        const site=inp.dataset.site;
-        if(!hcBySite[site]) hcBySite[site]=[];
-        hcBySite[site].push({trade:inp.dataset.trade,count:v});
-    });
-    // Permits
-    document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{
-        const s=item.querySelector('input[name^="permSite-"]:checked'); const site=s?s.value:'1475';
-        const sel=item.querySelector('.permit-type');
-        let type=sel.value; if(type==='Other'){const o=item.querySelector('.permit-type-other')?.value;if(o)type=`Other: ${o}`;}
-        const c=item.querySelector('.permit-contractor').value; if(!c) return;
-        if(!permitsBySite[site]) permitsBySite[site]=[];
-        permitsBySite[site].push({type,contractor:c});
-    });
-    // Orientations
-    document.getElementById('orientations-container').querySelectorAll('.orientation-item').forEach(item=>{
-        const s=item.querySelector('input[name^="oriSite-"]:checked'); const site=s?s.value:'1475';
-        const sel=item.querySelector('.orientation-type');
-        let type=sel.value; if(type==='Other'){const o=item.querySelector('.orientation-type-other')?.value;if(o)type=`Other: ${o}`;}
-        if(!orisBySite[site]) orisBySite[site]=[];
-        orisBySite[site].push({type,worker:item.querySelector('.orientation-worker').value});
-    });
-    // Walks
-    document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{
-        const id = cb.id;
-        allSites.forEach(s=>{
-            const sSlug=s.toLowerCase().replace(/[^a-z0-9]/g,'');
-            if(id.includes(sSlug)){
-                let label='';
-                if(id.startsWith('safetywalk')) label=`Safety Walk ${s}`;
-                else if(id.startsWith('weeklysafety')) label=`Weekly Safety Site Inspection ${s}`;
-                else label=id.replace('-completed','');
-                if(!walksBySite[s])walksBySite[s]=[];
-                walksBySite[s].push(label);
-            }
-        });
-    });
-    // Equipment
-    document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{
-        const tog=div.querySelector('.equip-toggle'); if(!tog||!tog.checked) return;
-        const site=div.querySelector('.equip-site-val').value||'1475';
-        const name=div.querySelector('.equip-name').value;
-        const sel=div.querySelector('.equip-inspector-sel');
-        let insp=sel?sel.value:(div.querySelector('.equip-inspector-free')?.value||'');
-        if(insp==='Other') insp=div.querySelector('.equip-inspector-other')?.value||'Other';
-        if(!equipBySite[site]) equipBySite[site]=[];
-        equipBySite[site].push({name,inspector:insp});
-    });
-    // Crane
-    document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(div=>{
-        const site=div.querySelector('.crane-site-val')?.value||'1600';
-        const craneName=div.querySelector('.crane-name')?.value||'Crane';
-        if(!craneBySite[site]) craneBySite[site]=[];
-        const entry={craneName,tasks:[]};
-        const dailyTog=div.querySelector('.crane-daily-toggle');
-        if(dailyTog&&dailyTog.checked){
-            let insp=div.querySelector('.crane-insp-sel')?.value||'';
-            if(insp==='Other') insp=div.querySelector('.crane-insp-other')?.value||'Other';
-            entry.tasks.push({task:'Crane Daily Inspection',inspector:insp});
-        }
-        const riggTog=div.querySelector('.crane-rigging-toggle');
-        if(riggTog&&riggTog.checked){
-            let insp=div.querySelector('.crane-rigging-sel')?.value||'';
-            if(insp==='Other') insp=div.querySelector('.crane-rigging-other')?.value||'Other';
-            entry.tasks.push({task:'Rigging Daily Inspection',inspector:insp});
-        }
-        const cold=div.querySelector('.crane-cold-check');
-        if(cold&&cold.checked) entry.tasks.push({task:'Cold Weather Crane Inspection',inspector:''});
-        const companies=[];
-        div.querySelectorAll('.overlap-check:checked').forEach(cb=>companies.push(cb.value));
-        const o1c=div.querySelector('.overlap-other1-check'); if(o1c&&o1c.checked){const t=div.querySelector('.overlap-other1-text')?.value;if(t)companies.push(t);}
-        const o2c=div.querySelector('.overlap-other2-check'); if(o2c&&o2c.checked){const t=div.querySelector('.overlap-other2-text')?.value;if(t)companies.push(t);}
-        if(companies.length) entry.tasks.push({task:'Overlapping Procedure',companies});
-        if(entry.tasks.length) craneBySite[site].push(entry);
-    });
-    // Meetings / incidents / weekends
-    document.getElementById('safety-meetings-container').querySelectorAll('.relative').forEach(div=>{
-        const s=div.querySelector('input[name^="mtgSite-"]:checked'); const site=s?s.value:'1475';
-        if(!mtgsBySite[site]) mtgsBySite[site]=[];
-        mtgsBySite[site].push({status:div.querySelector('.mtg-status').value,comment:div.querySelector('.mtg-comment').value});
-    });
-    document.getElementById('site-incidents-container').querySelectorAll('.relative').forEach(div=>{
-        const s=div.querySelector('input[name^="incSite-"]:checked'); const site=s?s.value:'1475';
-        const sel=div.querySelector('.inc-type');
-        let type=sel.value; if(type==='Other'){const o=div.querySelector('.inc-type-other')?.value;if(o)type=`Other: ${o}`;}
-        if(!incsBySite[site]) incsBySite[site]=[];
-        incsBySite[site].push({type,comment:div.querySelector('.inc-comment').value});
-    });
-    document.getElementById('weekend-work-container').querySelectorAll('.relative').forEach(div=>{
-        const s=div.querySelector('input[name^="wkndSite-"]:checked'); const site=s?s.value:'1475';
-        if(!wkndsBySite[site]) wkndsBySite[site]=[];
-        wkndsBySite[site].push({status:div.querySelector('.wknd-status').value,comment:div.querySelector('.wknd-comment').value});
-    });
-    // Observations — with status
-    const allSitesObs = [];
-    document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(item=>{
-        const sel=item.querySelector('.obs-site-sel');
-        let site=sel?sel.value:'1475';
-        if(site==='Other'){const o=item.querySelector('.obs-site-other')?.value;if(o)site=o;}
-        const text=item.querySelector('.obs-text')?.value.trim()||'';
-        if(!text) return;
-        const foremanInformed = item.querySelector('.obs-foreman-check')?.checked || false;
-        const isPending  = item.querySelector('.obs-pending-check')?.checked  || false;
-        const isResolved = item.querySelector('.obs-resolved-check')?.checked || false;
-        const resolvedDate = item.querySelector('.obs-resolved-date')?.value || '';
-        let obsStatus = 'new';
-        if (isResolved)     obsStatus = 'resolved';
-        else if (isPending) obsStatus = 'pending';
-        const obsObj = {text, foremanInformed, obsStatus, resolvedDate};
-        if(site==='All Sites'){
-            allSitesObs.push(obsObj);
-        } else {
-            if(!obsBySite[site]) obsBySite[site]=[];
-            obsBySite[site].push(obsObj);
-        }
-    });
-
-    const blocks = [];
-    let isFirstSite = true;
+    document.querySelectorAll('.headcount-input').forEach(inp=>{const v=parseInt(inp.value)||0;if(!v)return;const site=inp.dataset.site;if(!hcBySite[site])hcBySite[site]=[];hcBySite[site].push({trade:inp.dataset.trade,count:v});});
+    document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{const s=item.querySelector('input[name^="permSite-"]:checked');const site=s?s.value:'1475';const sel=item.querySelector('.permit-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.permit-type-other')?.value;if(o)type=`Other: ${o}`;}const c=item.querySelector('.permit-contractor').value;if(!c)return;if(!permitsBySite[site])permitsBySite[site]=[];permitsBySite[site].push({type,contractor:c});});
+    document.getElementById('orientations-container').querySelectorAll('.orientation-item').forEach(item=>{const s=item.querySelector('input[name^="oriSite-"]:checked');const site=s?s.value:'1475';const sel=item.querySelector('.orientation-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.orientation-type-other')?.value;if(o)type=`Other: ${o}`;}if(!orisBySite[site])orisBySite[site]=[];orisBySite[site].push({type,worker:item.querySelector('.orientation-worker').value});});
+    document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{const id=cb.id;allSites.forEach(s=>{const sSlug=s.toLowerCase().replace(/[^a-z0-9]/g,'');if(id.includes(sSlug)){let label='';if(id.startsWith('safetywalk'))label=`Safety Walk ${s}`;else if(id.startsWith('weeklysafety'))label=`Weekly Safety Site Inspection ${s}`;else label=id.replace('-completed','');if(!walksBySite[s])walksBySite[s]=[];walksBySite[s].push(label);}});});
+    document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{const tog=div.querySelector('.equip-toggle');if(!tog||!tog.checked)return;const site=div.querySelector('.equip-site-val').value||'1475';const name=div.querySelector('.equip-name').value;const sel=div.querySelector('.equip-inspector-sel');let insp=sel?sel.value:(div.querySelector('.equip-inspector-free')?.value||'');if(insp==='Other')insp=div.querySelector('.equip-inspector-other')?.value||'Other';if(!equipBySite[site])equipBySite[site]=[];equipBySite[site].push({name,inspector:insp});});
+    document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(div=>{const site=div.querySelector('.crane-site-val')?.value||'1600';const craneName=div.querySelector('.crane-name')?.value||'Crane';if(!craneBySite[site])craneBySite[site]=[];const entry={craneName,tasks:[]};const dailyTog=div.querySelector('.crane-daily-toggle');if(dailyTog&&dailyTog.checked){let insp=div.querySelector('.crane-insp-sel')?.value||'';if(insp==='Other')insp=div.querySelector('.crane-insp-other')?.value||'Other';entry.tasks.push({task:'Crane Daily Inspection',inspector:insp});}const riggTog=div.querySelector('.crane-rigging-toggle');if(riggTog&&riggTog.checked){let insp=div.querySelector('.crane-rigging-sel')?.value||'';if(insp==='Other')insp=div.querySelector('.crane-rigging-other')?.value||'Other';entry.tasks.push({task:'Rigging Daily Inspection',inspector:insp});}const cold=div.querySelector('.crane-cold-check');if(cold&&cold.checked)entry.tasks.push({task:'Cold Weather Crane Inspection',inspector:''});const companies=[];div.querySelectorAll('.overlap-check:checked').forEach(cb=>companies.push(cb.value));const o1c=div.querySelector('.overlap-other1-check');if(o1c&&o1c.checked){const t=div.querySelector('.overlap-other1-text')?.value;if(t)companies.push(t);}const o2c=div.querySelector('.overlap-other2-check');if(o2c&&o2c.checked){const t=div.querySelector('.overlap-other2-text')?.value;if(t)companies.push(t);}if(companies.length)entry.tasks.push({task:'Overlapping Procedure',companies});if(entry.tasks.length)craneBySite[site].push(entry);});
+    document.getElementById('safety-meetings-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="mtgSite-"]:checked');const site=s?s.value:'1475';if(!mtgsBySite[site])mtgsBySite[site]=[];mtgsBySite[site].push({status:div.querySelector('.mtg-status').value,comment:div.querySelector('.mtg-comment').value});});
+    document.getElementById('site-incidents-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="incSite-"]:checked');const site=s?s.value:'1475';const sel=div.querySelector('.inc-type');let type=sel.value;if(type==='Other'){const o=div.querySelector('.inc-type-other')?.value;if(o)type=`Other: ${o}`;}if(!incsBySite[site])incsBySite[site]=[];incsBySite[site].push({type,comment:div.querySelector('.inc-comment').value});});
+    document.getElementById('weekend-work-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="wkndSite-"]:checked');const site=s?s.value:'1475';if(!wkndsBySite[site])wkndsBySite[site]=[];wkndsBySite[site].push({status:div.querySelector('.wknd-status').value,comment:div.querySelector('.wknd-comment').value});});
+    const allSitesObs=[];
+    document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(item=>{const sel=item.querySelector('.obs-site-sel');let site=sel?sel.value:'1475';if(site==='Other'){const o=item.querySelector('.obs-site-other')?.value;if(o)site=o;}const text=item.querySelector('.obs-text')?.value.trim()||'';if(!text)return;const foremanInformed=item.querySelector('.obs-foreman-check')?.checked||false;const isPending=item.querySelector('.obs-pending-check')?.checked||false;const isResolved=item.querySelector('.obs-resolved-check')?.checked||false;const resolvedDate=item.querySelector('.obs-resolved-date')?.value||'';let obsStatus='new';if(isResolved)obsStatus='resolved';else if(isPending)obsStatus='pending';const obsObj={text,foremanInformed,obsStatus,resolvedDate};if(site==='All Sites'){allSitesObs.push(obsObj);}else{if(!obsBySite[site])obsBySite[site]=[];obsBySite[site].push(obsObj);}});
+    const blocks=[];let isFirstSite=true;
     allSites.forEach(site=>{
         const hasAny=hcBySite[site]||permitsBySite[site]||orisBySite[site]||walksBySite[site]||equipBySite[site]||craneBySite[site]||mtgsBySite[site]||incsBySite[site]||wkndsBySite[site]||obsBySite[site];
-        if(!hasAny) return;
-        const pageBreakClass = isFirstSite ? 'report-site-block report-first-site' : 'report-site-block';
-        isFirstSite = false;
+        if(!hasAny)return;
+        const pageBreakClass=isFirstSite?'report-site-block report-first-site':'report-site-block';
+        isFirstSite=false;
         let b=`<div class="${pageBreakClass}">`;
-        b+=`<div class="report-site-header" style="margin:0 0 6pt;padding:5pt 8pt;background:#003D52;border-radius:3pt">`;
-        b+=`<span style="font-size:12pt;font-weight:800;color:#96C61C;letter-spacing:0.06em">SITE ${site}</span>`;
-        b+=`</div>`;
-        if(hcBySite[site]){
-            const t=hcBySite[site].reduce((s,x)=>s+x.count,0);
-            b+=sectionHtml('Headcount');
-            b+=`<div style="margin-left:10pt;margin-bottom:3pt">`;
-            b+=`<span style="font-weight:700;font-size:9pt;color:#003D52">${t} workers on site</span><br>`;
-            hcBySite[site].forEach(x=>{b+=`<span style="color:#374151;font-size:8.5pt">&nbsp;&nbsp;${x.trade}: <b>${x.count}</b></span><br>`;});
-            b+=`</div>`;
-        }
-        if(orisBySite[site]){
-            b+=sectionHtml('Orientations');
-            orisBySite[site].forEach(o=>{
-                let txt=o.type;if(o.worker)txt+=` <span style="color:#A5A5A5">— ${o.worker}</span>`;
-                b+=rowHtml(txt);
-            });
-        }
-        if(walksBySite[site]){
-            b+=sectionHtml('Inspections Completed');
-            walksBySite[site].forEach(w=>{b+=rowHtml(`<span style="color:#059669;font-weight:600">Completed</span> — ${w}`);});
-        }
-        if(craneBySite[site]){
-            b+=sectionHtml('Crane');
-            craneBySite[site].forEach(e=>{
-                b+=`<div style="margin-left:0.75rem;font-weight:700;color:#003D52;margin-top:0.2rem">${e.craneName}</div>`;
-                e.tasks.forEach(t=>{
-                    let txt=t.task;
-                    if(t.inspector)txt+=` <span style="color:#A5A5A5">— ${t.inspector}</span>`;
-                    if(t.companies&&t.companies.length)txt+=` <span style="color:#A5A5A5">| With: ${t.companies.join(', ')}</span>`;
-                    b+=rowHtml(txt, 1.5);
-                });
-            });
-        }
-        if(equipBySite[site]){
-            b+=sectionHtml('Mobile Equipment');
-            equipBySite[site].forEach(e=>{
-                let txt=e.name;if(e.inspector)txt+=` <span style="color:#A5A5A5">— ${e.inspector}</span>`;
-                b+=rowHtml(txt);
-            });
-        }
-        if(permitsBySite[site]){
-            b+=sectionHtml('Active Work Permits');
-            permitsBySite[site].forEach(p=>{b+=rowHtml(`<b>${p.type}</b>: ${p.contractor}`);});
-        }
-        if(mtgsBySite[site]){
-            b+=sectionHtml('Safety Meetings');
-            mtgsBySite[site].forEach(m=>{
-                let txt=`Weekly Safety Meeting: <b>${m.status}</b>`;
-                if(m.comment)txt+=`<br><span style="color:#A5A5A5;font-size:0.88em;padding-left:1rem">${m.comment}</span>`;
-                b+=rowHtml(txt);
-            });
-        }
+        b+=`<div class="report-site-header" style="margin:0 0 6pt;padding:5pt 8pt;background:#003D52;border-radius:3pt"><span style="font-size:12pt;font-weight:800;color:#96C61C;letter-spacing:0.06em">SITE ${site}</span></div>`;
+        if(hcBySite[site]){const t=hcBySite[site].reduce((s,x)=>s+x.count,0);b+=sectionHtml('Headcount');b+=`<div style="margin-left:10pt;margin-bottom:3pt"><span style="font-weight:700;font-size:9pt;color:#003D52">${t} workers on site</span><br>`;hcBySite[site].forEach(x=>{b+=`<span style="color:#374151;font-size:8.5pt">&nbsp;&nbsp;${x.trade}: <b>${x.count}</b></span><br>`;});b+=`</div>`;}
+        if(orisBySite[site]){b+=sectionHtml('Orientations');orisBySite[site].forEach(o=>{let txt=o.type;if(o.worker)txt+=` <span style="color:#A5A5A5">— ${o.worker}</span>`;b+=rowHtml(txt);});}
+        if(walksBySite[site]){b+=sectionHtml('Inspections Completed');walksBySite[site].forEach(w=>{b+=rowHtml(`<span style="color:#059669;font-weight:600">Completed</span> — ${w}`);});}
+        if(craneBySite[site]){b+=sectionHtml('Crane');craneBySite[site].forEach(e=>{b+=`<div style="margin-left:0.75rem;font-weight:700;color:#003D52;margin-top:0.2rem">${e.craneName}</div>`;e.tasks.forEach(t=>{let txt=t.task;if(t.inspector)txt+=` <span style="color:#A5A5A5">— ${t.inspector}</span>`;if(t.companies&&t.companies.length)txt+=` <span style="color:#A5A5A5">| With: ${t.companies.join(', ')}</span>`;b+=rowHtml(txt,1.5);});});}
+        if(equipBySite[site]){b+=sectionHtml('Mobile Equipment');equipBySite[site].forEach(e=>{let txt=e.name;if(e.inspector)txt+=` <span style="color:#A5A5A5">— ${e.inspector}</span>`;b+=rowHtml(txt);});}
+        if(permitsBySite[site]){b+=sectionHtml('Active Work Permits');permitsBySite[site].forEach(p=>{b+=rowHtml(`<b>${p.type}</b>: ${p.contractor}`);});}
+        if(mtgsBySite[site]){b+=sectionHtml('Safety Meetings');mtgsBySite[site].forEach(m=>{let txt=`Weekly Safety Meeting: <b>${m.status}</b>`;if(m.comment)txt+=`<br><span style="color:#A5A5A5;font-size:0.88em;padding-left:1rem">${m.comment}</span>`;b+=rowHtml(txt);});}
         b+=sectionHtml('Site Incidents');
-        if(incsBySite[site]&&incsBySite[site].length){
-            incsBySite[site].forEach(i=>{
-                let txt=`<span style="color:#dc2626;font-weight:700">${i.type}</span>`;
-                if(i.comment)txt+=`<br><span style="color:#A5A5A5;font-size:0.88em;padding-left:1rem">${i.comment}</span>`;
-                b+=rowHtml(txt);
-            });
-        } else {
-            b+=rowHtml(`<span style="color:#059669;font-weight:600">No incidents reported.</span>`);
-        }
-        if(wkndsBySite[site]){
-            b+=sectionHtml('Weekend Work');
-            wkndsBySite[site].forEach(w=>{
-                let txt=`Weekend: <b>${w.status}</b>`;
-                if(w.comment)txt+=`<br><span style="color:#A5A5A5;font-size:0.88em;padding-left:1rem">${w.comment}</span>`;
-                b+=rowHtml(txt);
-            });
-        }
-        if(obsBySite[site]){
-            b+=sectionHtml('Observations');
-            obsBySite[site].forEach(o=>{
-                const statusColor = o.obsStatus==='resolved' ? '#059669' : o.obsStatus==='pending' ? '#d97706' : '#6b7280';
-                const statusLabel = o.obsStatus==='resolved' ? 'Resolved' : o.obsStatus==='pending' ? 'Pending' : 'New';
-                let statusLine = `<span style="font-size:8pt;font-weight:700;color:${statusColor}">[${statusLabel}]</span>`;
-                if(o.foremanInformed) statusLine += ` <span style="font-size:8pt;color:#003D52;font-weight:600">Foreman Informed</span>`;
-                if(o.obsStatus==='resolved'&&o.resolvedDate) statusLine += ` <span style="font-size:8pt;color:#059669"> — Resolved: ${o.resolvedDate}</span>`;
-                b+=rowHtml(`${statusLine}<br><span style="white-space:pre-wrap">${obsHtml(o.text)}</span>`);
-            });
-        }
-        b+=`</div>`;
-        blocks.push(b);
+        if(incsBySite[site]&&incsBySite[site].length){incsBySite[site].forEach(i=>{let txt=`<span style="color:#dc2626;font-weight:700">${i.type}</span>`;if(i.comment)txt+=`<br><span style="color:#A5A5A5;font-size:0.88em;padding-left:1rem">${i.comment}</span>`;b+=rowHtml(txt);});}
+        else{b+=rowHtml(`<span style="color:#059669;font-weight:600">No incidents reported.</span>`);}
+        if(wkndsBySite[site]){b+=sectionHtml('Weekend Work');wkndsBySite[site].forEach(w=>{let txt=`Weekend: <b>${w.status}</b>`;if(w.comment)txt+=`<br><span style="color:#A5A5A5;font-size:0.88em;padding-left:1rem">${w.comment}</span>`;b+=rowHtml(txt);});}
+        if(obsBySite[site]){b+=sectionHtml('Observations');obsBySite[site].forEach(o=>{const statusColor=o.obsStatus==='resolved'?'#059669':o.obsStatus==='pending'?'#d97706':'#6b7280';const statusLabel=o.obsStatus==='resolved'?'Resolved':o.obsStatus==='pending'?'Pending':'New';let statusLine=`<span style="font-size:8pt;font-weight:700;color:${statusColor}">[${statusLabel}]</span>`;if(o.foremanInformed)statusLine+=` <span style="font-size:8pt;color:#003D52;font-weight:600">Foreman Informed</span>`;if(o.obsStatus==='resolved'&&o.resolvedDate)statusLine+=` <span style="font-size:8pt;color:#059669"> — Resolved: ${o.resolvedDate}</span>`;b+=rowHtml(`${statusLine}<br><span style="white-space:pre-wrap">${obsHtml(o.text)}</span>`);});}
+        b+=`</div>`;blocks.push(b);
     });
-    // All Sites Observations block
-    let allSitesBlock = '';
-    if(allSitesObs.length > 0){
-        allSitesBlock += `<div style="margin:8pt 0;padding:6pt 8pt;background:#f0f7ff;border-left:4pt solid #003D52;border-radius:3pt">`;
-        allSitesBlock += `<div style="font-weight:700;font-size:7.5pt;color:#003D52;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4pt">All Sites — General Observations</div>`;
-        allSitesObs.forEach(o=>{
-            const statusColor = o.obsStatus==='resolved' ? '#059669' : o.obsStatus==='pending' ? '#d97706' : '#6b7280';
-            const statusLabel = o.obsStatus==='resolved' ? 'Resolved' : o.obsStatus==='pending' ? 'Pending' : 'New';
-            let statusLine = `<span style="font-size:8pt;font-weight:700;color:${statusColor}">[${statusLabel}]</span>`;
-            if(o.foremanInformed) statusLine += ` <span style="font-size:8pt;color:#003D52;font-weight:600">Foreman Informed</span>`;
-            if(o.obsStatus==='resolved'&&o.resolvedDate) statusLine += ` <span style="font-size:8pt;color:#059669"> — Resolved: ${o.resolvedDate}</span>`;
-            allSitesBlock += `<div style="font-size:9pt;color:#374151;margin-bottom:6pt;padding-left:6pt">• ${statusLine}<br><span style="white-space:pre-wrap">${obsHtml(o.text)}</span></div>`;
-        });
-        allSitesBlock += `</div>`;
+    let allSitesBlock='';
+    if(allSitesObs.length>0){
+        allSitesBlock+=`<div style="margin:8pt 0;padding:6pt 8pt;background:#f0f7ff;border-left:4pt solid #003D52;border-radius:3pt">`;
+        allSitesBlock+=`<div style="font-weight:700;font-size:7.5pt;color:#003D52;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4pt">All Sites — General Observations</div>`;
+        allSitesObs.forEach(o=>{const statusColor=o.obsStatus==='resolved'?'#059669':o.obsStatus==='pending'?'#d97706':'#6b7280';const statusLabel=o.obsStatus==='resolved'?'Resolved':o.obsStatus==='pending'?'Pending':'New';let statusLine=`<span style="font-size:8pt;font-weight:700;color:${statusColor}">[${statusLabel}]</span>`;if(o.foremanInformed)statusLine+=` <span style="font-size:8pt;color:#003D52;font-weight:600">Foreman Informed</span>`;if(o.obsStatus==='resolved'&&o.resolvedDate)statusLine+=` <span style="font-size:8pt;color:#059669"> — Resolved: ${o.resolvedDate}</span>`;allSitesBlock+=`<div style="font-size:9pt;color:#374151;margin-bottom:6pt;padding-left:6pt">• ${statusLine}<br><span style="white-space:pre-wrap">${obsHtml(o.text)}</span></div>`;});
+        allSitesBlock+=`</div>`;
     }
-    return allSitesBlock + blocks.join('');
+    return allSitesBlock+blocks.join('');
 }
-function sectionHtml(title){
-    return `<div class="report-section-header" style="margin:7pt 0 2pt;font-weight:700;font-size:7.5pt;color:#003D52;letter-spacing:0.05em;text-transform:uppercase;border-left:3px solid #96C61C;padding:2pt 0 2pt 6pt;background:#f4f6f8">${title}</div>`;
-}
-function rowHtml(txt, extraIndent){
-    const indPt = 10 + ((extraIndent||0)*10);
-    return `<div style="margin-left:${indPt}pt;margin-bottom:2pt;font-size:9pt;color:#374151;line-height:1.35">${txt}</div>`;
-}
-function obsHtml(text){
-    return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-}
+function sectionHtml(title){return `<div class="report-section-header" style="margin:7pt 0 2pt;font-weight:700;font-size:7.5pt;color:#003D52;letter-spacing:0.05em;text-transform:uppercase;border-left:3px solid #96C61C;padding:2pt 0 2pt 6pt;background:#f4f6f8">${title}</div>`;}
+function rowHtml(txt,extraIndent){const indPt=10+((extraIndent||0)*10);return `<div style="margin-left:${indPt}pt;margin-bottom:2pt;font-size:9pt;color:#374151;line-height:1.35">${txt}</div>`;}
+function obsHtml(text){return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
 function generateReportHeader(){
     const date=document.getElementById('checklistDate').value||'N/A';
     const cso=document.getElementById('csoName').value||'N/A';
-    const water=document.getElementById('waterUse').value;
-    const fire=document.getElementById('fireDanger').value;
+    const water=document.getElementById('waterUse').value, fire=document.getElementById('fireDanger').value;
     const hotwork=document.getElementById('hotwork-status').textContent;
     let h=`<div style="background:#003D52;border-radius:4pt;padding:10pt 12pt;margin-bottom:10pt">`;
     h+=`<div style="font-size:14pt;font-weight:800;color:#96C61C;letter-spacing:0.07em">CSO DAILY LOG</div>`;
     h+=`<div style="color:#ffffff;font-size:9pt;margin-top:3pt;font-weight:500">Whistler 2020 Development Corporation</div>`;
-    h+=`<div style="color:#c0cdd4;font-size:8.5pt;margin-top:4pt">Date: <b style="color:#fff">${date}</b> &nbsp;|&nbsp; CSO: <b style="color:#fff">${cso}</b></div>`;
-    h+=`</div>`;
+    h+=`<div style="color:#c0cdd4;font-size:8.5pt;margin-top:4pt">Date: <b style="color:#fff">${date}</b> &nbsp;|&nbsp; CSO: <b style="color:#fff">${cso}</b></div></div>`;
     h+=`<div style="background:#f0fdf4;border:1pt solid #bbf7d0;border-radius:3pt;padding:5pt 8pt;margin-bottom:8pt;font-size:8.5pt">`;
     h+=`<span style="color:#374151">Water Use: <b>${water}</b> &nbsp;|&nbsp; Fire Danger: <b>${fire}</b></span><br>`;
-    h+=`<span style="${hotwork.includes('NOT')?'color:#dc2626':'color:#059669'};font-weight:600">${hotwork}</span>`;
-    h+=`</div>`;
+    h+=`<span style="${hotwork.includes('NOT')?'color:#dc2626':'color:#059669'};font-weight:600">${hotwork}</span></div>`;
     return h;
 }
 document.getElementById('generateFullReport').addEventListener('click',()=>{
-    const el = document.getElementById('report-content');
-    el.style.whiteSpace = 'normal';
-    el.innerHTML = generateReportHeader() + generateReport();
+    const el=document.getElementById('report-content');
+    el.style.whiteSpace='normal';
+    el.innerHTML=generateReportHeader()+generateReport();
     document.getElementById('report-output').classList.remove('hidden');
     document.getElementById('report-output').scrollIntoView({behavior:'smooth'});
 });
-// ══════════════════════════════════════════════════════
-// RESET — preserves Work Permits AND pending observations
-// ══════════════════════════════════════════════════════
+// ══ RESET ══
 document.getElementById('resetForm').addEventListener('click',function(){
     document.getElementById('reset-confirm-bar').classList.remove('hidden');
 });
@@ -1508,47 +1067,36 @@ document.getElementById('reset-no').addEventListener('click',function(){
 document.getElementById('reset-yes').addEventListener('click',function(){
     try{
     document.getElementById('reset-confirm-bar').classList.add('hidden');
-    // Save permits
     var savedPermits=[];
     document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(function(item){
-        var s=item.querySelector('input[name^="permSite-"]:checked');
-        var sel=item.querySelector('.permit-type');
+        var s=item.querySelector('input[name^="permSite-"]:checked'), sel=item.querySelector('.permit-type');
         savedPermits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?item.querySelector('.permit-type-other').value:'',site:s?s.value:'1475',contractor:item.querySelector('.permit-contractor').value});
     });
-    // Save PENDING observations (not resolved, not new-only)
-    var savedObs = [];
+    // ✅ FIX: solo preservar observaciones PENDING — las resolved y new se borran en el reset
+    var savedObs=[];
     document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(function(item){
-        var isPending  = item.querySelector('.obs-pending-check')?.checked  || false;
-        var isResolved = item.querySelector('.obs-resolved-check')?.checked || false;
-        var obsStatus  = isResolved ? 'resolved' : isPending ? 'pending' : 'new';
-        // Keep pending AND resolved for history — only drop 'new' ones without text on reset
-        if(obsStatus === 'pending' || obsStatus === 'resolved') {
-            var selEl = item.querySelector('.obs-site-sel');
+        var isPending=item.querySelector('.obs-pending-check')&&item.querySelector('.obs-pending-check').checked||false;
+        var isResolved=item.querySelector('.obs-resolved-check')&&item.querySelector('.obs-resolved-check').checked||false;
+        var obsStatus=isResolved?'resolved':isPending?'pending':'new';
+        if(obsStatus==='pending'){  // SOLO pending — resolved y new se descartan
+            var selEl=item.querySelector('.obs-site-sel');
             savedObs.push({
-                site: selEl ? selEl.value : '1475',
-                siteOther: item.querySelector('.obs-site-other')?.value || '',
-                text: item.querySelector('.obs-text')?.value.trim() || '',
-                foremanInformed: item.querySelector('.obs-foreman-check')?.checked || false,
-                obsStatus: obsStatus,
-                resolvedDate: item.querySelector('.obs-resolved-date')?.value || ''
+                site:selEl?selEl.value:'1475',
+                siteOther:item.querySelector('.obs-site-other')?item.querySelector('.obs-site-other').value:'',
+                text:item.querySelector('.obs-text')?item.querySelector('.obs-text').value.trim():'',
+                foremanInformed:item.querySelector('.obs-foreman-check')&&item.querySelector('.obs-foreman-check').checked||false,
+                obsStatus:'pending',
+                resolvedDate:''
             });
         }
     });
-    // Preserve crane names and sites
     var savedCranes=[];
     document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(function(div){
-        savedCranes.push({
-            name:div.querySelector('.crane-name')?div.querySelector('.crane-name').value:'Crane',
-            site:div.querySelector('.crane-site-val')?div.querySelector('.crane-site-val').value:getAllSites()[0]
-        });
+        savedCranes.push({name:div.querySelector('.crane-name')?div.querySelector('.crane-name').value:'Crane',site:div.querySelector('.crane-site-val')?div.querySelector('.crane-site-val').value:getAllSites()[0]});
     });
-    // Preserve equipment names and sites
     var savedEquip=[];
     document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(function(div){
-        savedEquip.push({
-            name:div.querySelector('.equip-name')?div.querySelector('.equip-name').value:'Equipment',
-            site:div.querySelector('.equip-site-val')?div.querySelector('.equip-site-val').value:getAllSites()[0]
-        });
+        savedEquip.push({name:div.querySelector('.equip-name')?div.querySelector('.equip-name').value:'Equipment',site:div.querySelector('.equip-site-val')?div.querySelector('.equip-site-val').value:getAllSites()[0]});
     });
     document.getElementById('waterUse').selectedIndex=0;
     document.getElementById('fireDanger').selectedIndex=0;
@@ -1561,93 +1109,43 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     document.getElementById('site-incidents-container').innerHTML='';
     document.getElementById('weekend-work-container').innerHTML='';
     document.getElementById('crane-container').innerHTML='';
-    if(savedCranes.length>0){
-        savedCranes.forEach(function(c){addCraneCard({name:c.name,site:c.site,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''});});
-    } else { buildCrane(); }
+    if(savedCranes.length>0){savedCranes.forEach(function(c){addCraneCard({name:c.name,site:c.site,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''});});}else{buildCrane();}
     document.getElementById('mobile-equipment-container').innerHTML='';
-    if(savedEquip.length>0){
-        savedEquip.forEach(function(e){addEquipmentItem({name:e.name,site:e.site,done:false,inspector:'',otherInspector:''});});
-    } else { buildMobileEquipment(); }
+    if(savedEquip.length>0){savedEquip.forEach(function(e){addEquipmentItem({name:e.name,site:e.site,done:false,inspector:'',otherInspector:''});});}else{buildMobileEquipment();}
     document.getElementById('work-permits-container').innerHTML='';
     savedPermits.forEach(function(p){addWorkPermitItem(p);});
-    // Restore pending/resolved observations
     document.getElementById('additional-observations-container').innerHTML='';
     savedObs.forEach(function(o){addObservationItem(o);});
     document.getElementById('report-output').classList.add('hidden');
     checkHotwork();
     saveData();
-    alert('Form reset complete! Pending observations have been preserved.');
-    }catch(e){ alert('Reset error: '+e.message+' at line: '+e.stack); }
+    }catch(e){alert('Reset error: '+e.message);}
 });
-// ══════════════════════════════════════════════════════
-// COPY / PDF
-// ══════════════════════════════════════════════════════
 document.getElementById('copyReport').addEventListener('click',()=>{
     const el=document.getElementById('report-content');
     const ta=document.createElement('textarea');
-    ta.value=el.innerText;
-    ta.style.position='fixed';ta.style.top='-9999px';document.body.appendChild(ta);ta.focus();ta.select();
+    ta.value=el.innerText;ta.style.position='fixed';ta.style.top='-9999px';document.body.appendChild(ta);ta.focus();ta.select();
     try{document.execCommand('copy');document.getElementById('copyReport').textContent='Copied!';}catch{}
     document.body.removeChild(ta);
     setTimeout(()=>document.getElementById('copyReport').textContent='Copy Report',2000);
 });
 document.getElementById('exportPdf').addEventListener('click',()=>{
-    const cso = document.getElementById('csoName').value || 'CSO';
-    const dt  = document.getElementById('checklistDate').value || 'date';
-    const reportHTML = document.getElementById('report-content').innerHTML;
-    const win = window.open('', '_blank');
-    win.document.write(`<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>CSO Report ${cso} ${dt}</title>
-<style>
-  @page { size: A4; margin: 12mm 14mm 14mm 14mm; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 9pt;
-    line-height: 1.4;
-    color: #1a1a1a;
-    background: white;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .report-site-block { page-break-before: always; }
-  .report-first-site { page-break-before: avoid; }
-  .report-section-header { page-break-after: avoid; }
-  .report-site-header { page-break-after: avoid; }
-  b { font-weight: 700; }
-  span { font-size: inherit; }
-</style>
-</head>
-<body>${reportHTML}</body>
-</html>`);
-    win.document.close();
-    win.focus();
-    setTimeout(() => { win.print(); }, 400);
+    const cso=document.getElementById('csoName').value||'CSO';
+    const dt=document.getElementById('checklistDate').value||'date';
+    const reportHTML=document.getElementById('report-content').innerHTML;
+    const win=window.open('','_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CSO Report ${cso} ${dt}</title><style>@page{size:A4;margin:12mm 14mm 14mm 14mm;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,Helvetica,sans-serif;font-size:9pt;line-height:1.4;color:#1a1a1a;background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact;}.report-site-block{page-break-before:always;}.report-first-site{page-break-before:avoid;}.report-section-header{page-break-after:avoid;}.report-site-header{page-break-after:avoid;}b{font-weight:700;}span{font-size:inherit;}</style></head><body>${reportHTML}</body></html>`);
+    win.document.close();win.focus();setTimeout(()=>{win.print();},400);
 });
-// ══════════════════════════════════════════════════════
-// SIMPLE INPUT EVENTS
-// ══════════════════════════════════════════════════════
 document.getElementById('waterUse').addEventListener('change',()=>{checkHotwork();saveData();});
 document.getElementById('fireDanger').addEventListener('change',()=>{checkHotwork();saveData();});
 document.getElementById('checklistDate').addEventListener('input',saveData);
 document.getElementById('csoName').addEventListener('input',saveData);
-// ══════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════
 (function(){
-    const customSites = getCustomSites().filter(s => s !== '2050');
-    saveCustomSites(customSites);
-    const customTrades = getCustomTrades().filter(t => t.toLowerCase() !== 'cursing');
-    saveCustomTrades(customTrades);
+    const customSites=getCustomSites().filter(s=>s!=='2050');saveCustomSites(customSites);
+    const customTrades=getCustomTrades().filter(t=>t.toLowerCase()!=='cursing');saveCustomTrades(customTrades);
 })();
-renderSiteDisplay();
-buildCrane();
-buildMobileEquipment();
-loadData();
-checkHotwork();
+renderSiteDisplay();buildCrane();buildMobileEquipment();loadData();checkHotwork();
 }); // end DOMContentLoaded
 </script>
 </body>
