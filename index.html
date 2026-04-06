@@ -66,6 +66,9 @@
         #manage-sites-panel{ display:none; }
         #manage-sites-panel.open{ display:block; }
         .tag-chip{ display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; background:#e0f2fe; color:#0369a1; border-radius:9999px; padding:0.1rem 0.5rem; font-weight:600; }
+        .operator-manager{ background:#f0f7ff; border:1px dashed #93c5fd; border-radius:0.4rem; padding:0.5rem 0.65rem; margin-top:0.5rem; }
+        .operator-chip{ display:inline-flex; align-items:center; gap:3px; font-size:0.7rem; background:#dbeafe; color:#1e40af; border-radius:9999px; padding:0.15rem 0.5rem; font-weight:600; }
+        .operator-chip button{ background:none; border:none; color:#dc2626; cursor:pointer; font-size:0.75rem; line-height:1; padding:0 2px; font-weight:700; }
     </style>
 </head>
 <body class="p-3 md:p-5">
@@ -292,6 +295,24 @@ function getAllTrades() {
 }
 function saveCustomTrades(arr) { localStorage.setItem('customTrades_v5', JSON.stringify(arr)); }
 function getCustomTrades() { return JSON.parse(localStorage.getItem('customTrades_v5')||'[]'); }
+// ── Persistent Operators ──
+// stored as: { "WDC Telehandler": ["Dan M.","Austin W.",...], "Crane #1": [...], ... }
+function getAllOperators() { return JSON.parse(localStorage.getItem('customOperators_v5')||'{}'); }
+function saveAllOperators(obj) { localStorage.setItem('customOperators_v5', JSON.stringify(obj)); }
+function getOperatorsFor(equipName) { return getAllOperators()[equipName] || []; }
+function setOperatorsFor(equipName, arr) {
+    const all = getAllOperators();
+    all[equipName] = arr;
+    saveAllOperators(all);
+}
+function addOperatorFor(equipName, operatorName) {
+    const arr = getOperatorsFor(equipName);
+    if (!arr.includes(operatorName)) { arr.push(operatorName); setOperatorsFor(equipName, arr); }
+}
+function removeOperatorFor(equipName, operatorName) {
+    const arr = getOperatorsFor(equipName).filter(x=>x!==operatorName);
+    setOperatorsFor(equipName, arr);
+}
 function siteColor(s) {
     if(s==='1475') return '#2563eb';
     if(s==='1600') return '#7c3aed';
@@ -564,11 +585,53 @@ function buildCrane() {
         rigging:false, riggingInspector:'', riggingOtherInspector:'', coldWeather:false,
         overlap:[], overlapOtherChecked:false, overlapOtherText:'', overlapOther2Checked:false, overlapOther2Text:'' });
 }
+function buildCraneOperatorManager(div, craneName) {
+    const mgr = div.querySelector('.crane-operator-manager');
+    if (!mgr) return;
+    const ops = getOperatorsFor(craneName);
+    const chipsDiv = mgr.querySelector('.crane-ops-chips');
+    chipsDiv.innerHTML = '';
+    ops.forEach(op => {
+        const chip = document.createElement('span');
+        chip.className = 'operator-chip';
+        chip.innerHTML = `${op} <button type="button" data-op="${op}" title="Remove">×</button>`;
+        chip.querySelector('button').addEventListener('click', () => {
+            removeOperatorFor(craneName, op);
+            buildCraneOperatorManager(div, craneName);
+            rebuildCraneInspectorSelects(div, craneName, data);
+            saveData();
+        });
+        chipsDiv.appendChild(chip);
+    });
+    if (ops.length === 0) chipsDiv.innerHTML = '<span class="text-xs text-gray-400">No operators saved yet.</span>';
+}
+function rebuildCraneInspectorSelects(div, craneName, data) {
+    const ops = getOperatorsFor(craneName);
+    const baseOps = ops.length > 0 ? ops : CRANE_INSPECTORS;
+    ['crane-insp-container','crane-rigging-insp-container'].forEach((cls, idx) => {
+        const container = div.querySelector('.'+cls);
+        if (!container) return;
+        const currentSel = idx===0 ? (div.querySelector('.crane-insp-sel')||{}).value : (div.querySelector('.crane-rigging-sel')||{}).value;
+        const opts = [...baseOps,'Other'].map(i=>`<option ${i===currentSel?'selected':''}>${i}</option>`).join('');
+        const selClass = idx===0 ? 'crane-insp-sel' : 'crane-rigging-sel';
+        const othClass = idx===0 ? 'crane-insp-other' : 'crane-rigging-other';
+        container.innerHTML = `<select class="form-select text-xs ${selClass}" style="max-width:180px">${opts}</select>
+            <input type="text" class="form-input text-xs ${othClass} hidden" style="max-width:160px" placeholder="Name…" value="">`;
+        const sel=container.querySelector('.'+selClass), oth=container.querySelector('.'+othClass);
+        sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});
+        container.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    });
+}
 function addCraneCard(data) {
     data = data||{};
     const id = uid();
-    const inspOpts  = [...CRANE_INSPECTORS,'Other'].map(i=>`<option ${i===(data.inspector||'')?'selected':''}>${i}</option>`).join('');
-    const rinspOpts = [...CRANE_INSPECTORS,'Other'].map(i=>`<option ${i===(data.riggingInspector||'')?'selected':''}>${i}</option>`).join('');
+    const craneName = data.name || 'Crane';
+    // Seed crane operators from CRANE_INSPECTORS if none stored yet
+    if (getOperatorsFor(craneName).length === 0) setOperatorsFor(craneName, [...CRANE_INSPECTORS]);
+    const craneOps = getOperatorsFor(craneName);
+    const baseOps = craneOps.length > 0 ? craneOps : CRANE_INSPECTORS;
+    const inspOpts  = [...baseOps,'Other'].map(i=>`<option ${i===(data.inspector||'')?'selected':''}>${i}</option>`).join('');
+    const rinspOpts = [...baseOps,'Other'].map(i=>`<option ${i===(data.riggingInspector||'')?'selected':''}>${i}</option>`).join('');
     const overlapChecks = OVERLAP_COMPANIES.map(c => {
         const chk = data.overlap && data.overlap.includes(c) ? 'checked' : '';
         return `<label class="flex items-center gap-1 p-1 bg-white rounded border border-gray-200 text-xs"><input type="checkbox" value="${c}" class="h-3 w-3 overlap-check" ${chk}><span>${c}</span></label>`;
@@ -594,7 +657,7 @@ function addCraneCard(data) {
             </div>
             <div class="crane-daily-det ${data.done?'':'hidden'} mt-2 pl-2 border-l-2 border-sky-200">
                 <label class="text-xs font-semibold text-gray-500">Inspected by</label>
-                <div class="flex gap-1 mt-1 flex-wrap">
+                <div class="flex gap-1 mt-1 flex-wrap crane-insp-container">
                     <select class="form-select text-xs crane-insp-sel" style="max-width:180px">${inspOpts}</select>
                     <input type="text" class="form-input text-xs crane-insp-other ${(data.inspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${data.otherInspector||''}">
                 </div>
@@ -609,7 +672,7 @@ function addCraneCard(data) {
             </div>
             <div class="crane-rigging-det ${data.rigging?'':'hidden'} mt-2 pl-2 border-l-2 border-sky-200">
                 <label class="text-xs font-semibold text-gray-500">Inspected by</label>
-                <div class="flex gap-1 mt-1 flex-wrap">
+                <div class="flex gap-1 mt-1 flex-wrap crane-rigging-insp-container">
                     <select class="form-select text-xs crane-rigging-sel" style="max-width:180px">${rinspOpts}</select>
                     <input type="text" class="form-input text-xs crane-rigging-other ${(data.riggingInspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${data.riggingOtherInspector||''}">
                 </div>
@@ -636,6 +699,17 @@ function addCraneCard(data) {
                 </label>
                 <input type="text" class="form-input text-xs mt-1 overlap-other2-text ${data.overlapOther2Checked?'':'hidden'}" placeholder="Company name…" value="${data.overlapOther2Text||''}">
             </div>
+        </div>
+        <div class="crane-operator-manager operator-manager mt-2">
+            <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-bold" style="color:#003D52">Operators / Inspectors</span>
+                <button type="button" class="btn btn-sm btn-primary toggle-crane-ops-btn" style="font-size:0.65rem;padding:0.15rem 0.5rem">Manage</button>
+            </div>
+            <div class="crane-ops-chips flex flex-wrap gap-1 mb-1"></div>
+            <div class="crane-ops-add-row hidden flex gap-1 mt-1">
+                <input type="text" class="form-input text-xs crane-ops-new-input" style="max-width:180px" placeholder="Operator name…">
+                <button type="button" class="btn btn-green btn-sm crane-ops-add-btn">+ Add</button>
+            </div>
         </div>`;
     buildSitePillsInto(div.querySelector('.crane-site-pills'), data.site||'1600');
     const dailyTog = div.querySelector('.crane-daily-toggle'), dailyDet = div.querySelector('.crane-daily-det');
@@ -650,6 +724,22 @@ function addCraneCard(data) {
     div.querySelector('.overlap-other2-check').addEventListener('change',e=>{div.querySelector('.overlap-other2-text').classList.toggle('hidden',!e.target.checked);saveData();});
     div.querySelector('.remove-crane-btn').addEventListener('click',()=>{div.remove();saveData();});
     div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    // Crane operator manager
+    div.querySelector('.toggle-crane-ops-btn').addEventListener('click', () => {
+        div.querySelector('.crane-ops-add-row').classList.toggle('hidden');
+    });
+    div.querySelector('.crane-ops-add-btn').addEventListener('click', () => {
+        const inp = div.querySelector('.crane-ops-new-input');
+        const name = inp.value.trim();
+        const currentCraneName = div.querySelector('.crane-name').value.trim() || craneName;
+        if (!name) return;
+        addOperatorFor(currentCraneName, name);
+        inp.value = '';
+        buildCraneOperatorManager(div, currentCraneName);
+        rebuildCraneInspectorSelects(div, currentCraneName, data);
+        saveData();
+    });
+    buildCraneOperatorManager(div, craneName);
     document.getElementById('crane-container').appendChild(div);
 }
 document.getElementById('add-crane-btn').addEventListener('click',()=>{
@@ -661,15 +751,59 @@ function buildMobileEquipment() {
     document.getElementById('mobile-equipment-container').innerHTML='';
     EQUIPMENT_LIST.forEach(eq=>addEquipmentItem({name:eq.name,site:eq.site,done:false,inspector:'',otherInspector:'',inspectors:eq.inspectors}));
 }
+function buildOperatorManager(div, equipName) {
+    const mgr = div.querySelector('.operator-manager');
+    if (!mgr) return;
+    const ops = getOperatorsFor(equipName);
+    // rebuild chips
+    const chipsDiv = mgr.querySelector('.ops-chips');
+    chipsDiv.innerHTML = '';
+    ops.forEach(op => {
+        const chip = document.createElement('span');
+        chip.className = 'operator-chip';
+        chip.innerHTML = `${op} <button type="button" data-op="${op}" title="Remove">×</button>`;
+        chip.querySelector('button').addEventListener('click', () => {
+            removeOperatorFor(equipName, op);
+            buildOperatorManager(div, equipName);
+            rebuildEquipInspectorSelect(div, equipName);
+            saveData();
+        });
+        chipsDiv.appendChild(chip);
+    });
+    if (ops.length === 0) chipsDiv.innerHTML = '<span class="text-xs text-gray-400">No operators saved yet.</span>';
+}
+function rebuildEquipInspectorSelect(div, equipName) {
+    const det = div.querySelector('.equip-details');
+    const ops = getOperatorsFor(equipName);
+    const currentVal = div.querySelector('.equip-inspector-sel') ? div.querySelector('.equip-inspector-sel').value : (div.querySelector('.equip-inspector-free') ? div.querySelector('.equip-inspector-free').value : '');
+    const inspContainer = det.querySelector('.equip-insp-container');
+    if (ops.length > 0) {
+        const opts = [...ops,'Other'].map(i=>`<option ${i===currentVal?'selected':''}>${i}</option>`).join('');
+        inspContainer.innerHTML = `<select class="form-select text-xs equip-inspector-sel" style="max-width:180px">${opts}</select>
+            <input type="text" class="form-input text-xs equip-inspector-other ${currentVal==='Other'?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="">`;
+        const sel=inspContainer.querySelector('.equip-inspector-sel'), oth=inspContainer.querySelector('.equip-inspector-other');
+        sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});
+        inspContainer.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    } else {
+        inspContainer.innerHTML = `<input type="text" class="form-input text-xs equip-inspector-free" style="max-width:220px" placeholder="Inspector name…" value="${currentVal}">`;
+        inspContainer.querySelector('input').addEventListener('input', saveData);
+    }
+}
 function addEquipmentItem(data) {
-    const inspList = data.inspectors||[];
-    const hasNamed = inspList.length > 0;
-    const inspOpts = hasNamed ? [...inspList,'Other'].map(i=>`<option ${i===(data.inspector||'')?'selected':''}>${i}</option>`).join('') : '';
+    const equipName = data.name || '';
+    // Merge default inspectors into persistent storage (only first time)
+    if (data.inspectors && data.inspectors.length > 0) {
+        const stored = getOperatorsFor(equipName);
+        if (stored.length === 0) setOperatorsFor(equipName, [...data.inspectors]);
+    }
+    const ops = getOperatorsFor(equipName);
+    const hasNamed = ops.length > 0;
+    const inspOpts = hasNamed ? [...ops,'Other'].map(i=>`<option ${i===(data.inspector||'')?'selected':''}>${i}</option>`).join('') : '';
     const div = document.createElement('div');
     div.className = 'equipment-card mb-2 equipment-item';
     div.innerHTML = `
         <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
-            <input type="text" class="form-input text-sm font-semibold equip-name flex-1" style="min-width:150px" value="${data.name||''}" placeholder="Equipment name…">
+            <input type="text" class="form-input text-sm font-semibold equip-name flex-1" style="min-width:150px" value="${equipName}" placeholder="Equipment name…">
             <label class="flex items-center cursor-pointer ml-1 gap-1"><span class="text-xs text-gray-500">Done</span>
                 <div class="relative"><input type="checkbox" class="sr-only equip-toggle" ${data.done?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
             </label>
@@ -681,12 +815,23 @@ function addEquipmentItem(data) {
         </div>
         <div class="equip-details ${data.done?'':'hidden'} pl-2 border-l-2 border-orange-200">
             <label class="text-xs font-semibold text-gray-500">Inspected by</label>
-            <div class="flex gap-1 mt-1 flex-wrap">
+            <div class="flex gap-1 mt-1 flex-wrap equip-insp-container">
                 ${hasNamed
                     ? `<select class="form-select text-xs equip-inspector-sel" style="max-width:180px">${inspOpts}</select>
                        <input type="text" class="form-input text-xs equip-inspector-other ${(data.inspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${data.otherInspector||''}">`
                     : `<input type="text" class="form-input text-xs equip-inspector-free" style="max-width:220px" placeholder="Inspector name…" value="${data.otherInspector||data.inspector||''}">`
                 }
+            </div>
+        </div>
+        <div class="operator-manager mt-2">
+            <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-bold" style="color:#003D52">Operators</span>
+                <button type="button" class="btn btn-sm btn-primary toggle-ops-btn" style="font-size:0.65rem;padding:0.15rem 0.5rem">Manage</button>
+            </div>
+            <div class="ops-chips flex flex-wrap gap-1 mb-1"></div>
+            <div class="ops-add-row hidden flex gap-1 mt-1">
+                <input type="text" class="form-input text-xs ops-new-input" style="max-width:180px" placeholder="Operator name…">
+                <button type="button" class="btn btn-green btn-sm ops-add-btn">+ Add</button>
             </div>
         </div>
         <button type="button" class="btn btn-danger btn-sm mt-2 remove-equip-btn">Remove</button>`;
@@ -697,6 +842,27 @@ function addEquipmentItem(data) {
     if(sel){const oth=div.querySelector('.equip-inspector-other');sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});}
     div.querySelector('.remove-equip-btn').addEventListener('click',()=>{div.remove();saveData();});
     div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    // Operator manager toggle
+    div.querySelector('.toggle-ops-btn').addEventListener('click', () => {
+        div.querySelector('.ops-add-row').classList.toggle('hidden');
+    });
+    // Add operator
+    div.querySelector('.ops-add-btn').addEventListener('click', () => {
+        const inp = div.querySelector('.ops-new-input');
+        const name = inp.value.trim();
+        const currentEquipName = div.querySelector('.equip-name').value.trim() || equipName;
+        if (!name) return;
+        addOperatorFor(currentEquipName, name);
+        inp.value = '';
+        buildOperatorManager(div, currentEquipName);
+        rebuildEquipInspectorSelect(div, currentEquipName);
+        saveData();
+    });
+    // Name change: update operator key
+    div.querySelector('.equip-name').addEventListener('change', () => {
+        saveData();
+    });
+    buildOperatorManager(div, equipName);
     document.getElementById('mobile-equipment-container').appendChild(div);
 }
 document.getElementById('add-equipment-btn').addEventListener('click',()=>{addEquipmentItem({name:'',site:'1475',done:false,inspector:'',otherInspector:'',inspectors:[]});saveData();});
@@ -953,7 +1119,18 @@ function saveData() {
     d.observations=JSON.stringify(obs);
     localStorage.setItem('csoChecklist_v5',JSON.stringify(d));
 }
+function seedDefaultOperators() {
+    // On first use, seed EQUIPMENT_LIST inspectors into persistent storage
+    EQUIPMENT_LIST.forEach(eq => {
+        if (getOperatorsFor(eq.name).length === 0 && eq.inspectors && eq.inspectors.length > 0) {
+            setOperatorsFor(eq.name, [...eq.inspectors]);
+        }
+    });
+    // Seed crane inspectors for default cranes
+    if (getOperatorsFor('Crane #1').length === 0) setOperatorsFor('Crane #1', [...CRANE_INSPECTORS]);
+}
 function loadData() {
+    seedDefaultOperators();
     const raw=localStorage.getItem('csoChecklist_v5');
     const today=document.getElementById('checklistDate').value;
     const data=raw?JSON.parse(raw):null;
@@ -962,27 +1139,24 @@ function loadData() {
     let permitsToLoad=[];
     if(data&&data.permits){
         const saved=JSON.parse(data.permits);
-        if(saved.length){
-            permitsToLoad=saved;
-            DEFAULT_PERMITS.forEach(def=>{
-                const exists=saved.some(s=>s.type===def.type&&s.contractor.trim().toLowerCase()===def.contractor.trim().toLowerCase());
-                if(!exists) permitsToLoad.push(def);
-            });
-        } else { permitsToLoad=DEFAULT_PERMITS; }
+        // ✅ FIX: solo usar lo que está guardado — el usuario borró lo que no quiere
+        permitsToLoad = saved.length ? saved : DEFAULT_PERMITS;
     } else { permitsToLoad=DEFAULT_PERMITS; }
     permitsToLoad.forEach(x=>addWorkPermitItem(x));
     if(data&&data.observations){
         document.getElementById('additional-observations-container').innerHTML='';
         JSON.parse(data.observations).forEach(o=>addObservationItem(o));
     }
+    // ✅ FIX: siempre cargar crane/equipo guardado sin importar la fecha, para no perder serial/color
+    if(data&&data.craneData){const cd=JSON.parse(data.craneData);if(Array.isArray(cd)&&cd.length){document.getElementById('crane-container').innerHTML='';cd.forEach(c=>addCraneCard(c));}}
+    if(data&&data.equipment){const eq=JSON.parse(data.equipment);if(eq.length){document.getElementById('mobile-equipment-container').innerHTML='';eq.forEach(e=>{const base=EQUIPMENT_LIST.find(b=>b.name===e.name);addEquipmentItem({...e,inspectors:base?base.inspectors:[]});});}}
     if(!data||data.checklistDate!==today){rebuildHeadcount();rebuildInspections();return;}
     document.getElementById('waterUse').value=data.waterUse||'L1';
     document.getElementById('fireDanger').value=data.fireDanger||'Low';
     rebuildHeadcount(data.headcounts?JSON.parse(data.headcounts):{});
     rebuildInspections(data.morningWalks?JSON.parse(data.morningWalks):{});
     if(data.orientations){document.getElementById('orientations-container').innerHTML='';JSON.parse(data.orientations).forEach(o=>addOrientationItem(o));}
-    if(data.craneData){const cd=JSON.parse(data.craneData);if(Array.isArray(cd)){document.getElementById('crane-container').innerHTML='';cd.forEach(c=>addCraneCard(c));}}
-    if(data.equipment){document.getElementById('mobile-equipment-container').innerHTML='';JSON.parse(data.equipment).forEach(eq=>{const base=EQUIPMENT_LIST.find(e=>e.name===eq.name);addEquipmentItem({...eq,inspectors:base?base.inspectors:[]});});}
+    // crane y equipo ya se cargaron arriba
     if(data.meetings){document.getElementById('safety-meetings-container').innerHTML='';JSON.parse(data.meetings).forEach(m=>addMeetingItem(m));}
     if(data.incidents){document.getElementById('site-incidents-container').innerHTML='';JSON.parse(data.incidents).forEach(i=>addIncidentItem(i));}
     if(data.weekends){document.getElementById('weekend-work-container').innerHTML='';JSON.parse(data.weekends).forEach(w=>addWeekendItem(w));}
