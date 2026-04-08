@@ -432,11 +432,7 @@ function captureCurrentHC() {
     document.querySelectorAll('.headcount-input').forEach(inp=>{hc[inp.id]=parseInt(inp.value)||0;});
     return hc;
 }
-function captureCurrentWalks() {
-    const walks={};
-    document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]').forEach(cb=>{walks[cb.id]=cb.checked;});
-    return walks;
-}
+// captureCurrentWalks defined below with weekly checklist support
 function rebuildHeadcount(savedHC) {
     if(!savedHC) savedHC = captureCurrentHC();
     const hcTheadRow = document.getElementById('hc-thead-row');
@@ -540,6 +536,119 @@ function checkHotwork() {
     el.textContent = restricted ? '⚠ Hot work NOT permitted within 10m of the forest interface.' : '✓ Hot work is safe to do.';
     el.className = `text-sm font-bold text-center ${restricted?'text-red-600':'text-green-600'}`;
 }
+const WEEKLY_CHECKLIST_CATS = [
+    { key:'fall',   label:'Fall Protection',    hint:'Guardrails, lifelines, anchors in place and used correctly' },
+    { key:'house',  label:'Housekeeping',        hint:'Site is clean, no trip hazards, materials properly stored' },
+    { key:'access', label:'Access / Egress',     hint:'Safe, clear walkways, stairs, ladders, and exits accessible' },
+    { key:'ppe',    label:'PPE Compliance',      hint:'Workers using required PPE (hard hat, boots, hi-vis, etc.)' },
+    { key:'equip',  label:'Equipment / Tools',   hint:'Equipment in safe condition, properly used, no obvious defects' },
+];
+function captureCurrentWalks() {
+    const walks = {};
+    const cont = document.getElementById('morning-tasks');
+    cont.querySelectorAll('input[type="checkbox"]').forEach(cb => { walks[cb.id] = cb.checked; });
+    // capture weekly checklist category values per site
+    cont.querySelectorAll('.weekly-detail-panel').forEach(panel => {
+        const site = panel.dataset.site;
+        const cats = {};
+        WEEKLY_CHECKLIST_CATS.forEach(c => {
+            const el = panel.querySelector('.wcat-'+c.key);
+            cats[c.key] = el ? el.value : 'ok';
+        });
+        walks['weekly-cats-'+site] = JSON.stringify(cats);
+    });
+    return walks;
+}
+// Generate the prellenado observation text for a weekly checklist category
+function weeklyObsText(catLabel, site) {
+    return `[Weekly Inspection — Site ${site}] ${catLabel} deficiency found.`;
+}
+// Check if an observation with this exact prellenado text already exists
+function weeklyObsExists(catLabel, site) {
+    const target = weeklyObsText(catLabel, site);
+    let found = false;
+    document.getElementById('additional-observations-container').querySelectorAll('.obs-text').forEach(ta => {
+        if (ta.value.trim() === target) found = true;
+    });
+    return found;
+}
+// Create observation from weekly checklist and switch to Observations tab
+function createWeeklyObs(catLabel, site) {
+    if (weeklyObsExists(catLabel, site)) {
+        // Switch to observations tab
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        const obsBtn = document.querySelector('[data-tab="observations"]');
+        if (obsBtn) obsBtn.classList.add('tab-active');
+        document.getElementById('tab-observations').classList.remove('hidden');
+        document.getElementById('tab-observations').scrollIntoView({behavior:'smooth'});
+        return;
+    }
+    addObservationItem({
+        site: site,
+        siteOther: '',
+        text: weeklyObsText(catLabel, site),
+        foremanInformed: false,
+        obsStatus: 'pending',
+        resolvedDate: ''
+    });
+    saveData();
+    // Switch to observations tab
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+    const obsBtn = document.querySelector('[data-tab="observations"]');
+    if (obsBtn) obsBtn.classList.add('tab-active');
+    document.getElementById('tab-observations').classList.remove('hidden');
+    document.getElementById('tab-observations').scrollIntoView({behavior:'smooth'});
+}
+function buildWeeklyDetailPanel(site, savedWalks) {
+    const savedCats = savedWalks && savedWalks['weekly-cats-'+site] ? JSON.parse(savedWalks['weekly-cats-'+site]) : {};
+    const panel = document.createElement('div');
+    panel.className = 'weekly-detail-panel mt-2 p-3 rounded-lg border border-green-200 bg-green-50';
+    panel.dataset.site = site;
+    const color = siteColor(site);
+    panel.innerHTML = `
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wide" style="color:${color}">Weekly Inspection — Site ${site}</span>
+        </div>
+        <div class="mb-2 bg-white rounded p-2 border border-green-100">
+            <div class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">✅ Checklist Categories</div>
+            <div class="wcat-rows space-y-1"></div>
+        </div>
+        <div class="text-xs text-gray-400 italic mt-1">🧾 Observations generated here are tracked in the Observations tab and preserved on reset if Pending.</div>`;
+    const rowsContainer = panel.querySelector('.wcat-rows');
+    WEEKLY_CHECKLIST_CATS.forEach(c => {
+        const val = savedCats[c.key] || 'ok';
+        const obsAlreadyExists = weeklyObsExists(c.label, site);
+        const row = document.createElement('div');
+        row.className = 'flex items-start gap-2 py-1 border-b border-green-100 last:border-0';
+        row.innerHTML = `
+            <div class="flex-1">
+                <div class="text-xs font-bold text-gray-700">${c.label}</div>
+                <div class="text-xs text-gray-400">${c.hint}</div>
+                <div class="wcat-obs-indicator text-xs font-semibold mt-0.5 ${obsAlreadyExists?'':'hidden'}" style="color:#d97706">⏳ Observation created — see Observations tab</div>
+            </div>
+            <select class="form-select text-xs wcat-${c.key}" style="min-width:120px;max-width:130px" data-site="${site}" data-label="${c.label}">
+                <option value="ok" ${val==='ok'?'selected':''}>✓ OK</option>
+                <option value="add_obs" ${val==='add_obs'?'selected':''}>➕ Add Observation</option>
+                <option value="na" ${val==='na'?'selected':''}>N/A</option>
+            </select>`;
+        const sel = row.querySelector('select');
+        const indicator = row.querySelector('.wcat-obs-indicator');
+        sel.addEventListener('change', () => {
+            if (sel.value === 'add_obs') {
+                createWeeklyObs(c.label, site);
+                // Show indicator if obs was created or already existed
+                indicator.classList.remove('hidden');
+            } else {
+                indicator.classList.add('hidden');
+            }
+            saveData();
+        });
+        rowsContainer.appendChild(row);
+    });
+    return panel;
+}
 function rebuildInspections(savedWalks) {
     if(!savedWalks) savedWalks = captureCurrentWalks();
     const cont = document.getElementById('morning-tasks');
@@ -558,6 +667,7 @@ function rebuildInspections(savedWalks) {
     table.appendChild(thead);
     const tbody = document.createElement('tbody');
     walkTypes.forEach((wt, rowIdx) => {
+        const isWeekly = wt === 'Weekly Safety Site Inspection';
         const tr = document.createElement('tr');
         tr.style.background = rowIdx % 2 === 0 ? 'white' : '#f9fafb';
         let tdHtml = `<td style="padding:0.5rem 0.6rem;font-size:0.82rem;color:#374151;font-weight:500;border-bottom:1px solid #f3f4f6">${wt}</td>`;
@@ -566,7 +676,7 @@ function rebuildInspections(savedWalks) {
             const id = label.toLowerCase().replace(/[^a-z0-9]/g,'') + '-completed';
             const checked = savedWalks && savedWalks[id] ? 'checked' : '';
             tdHtml += `<td style="text-align:center;padding:0.5rem 0.3rem;border-bottom:1px solid #f3f4f6">
-                <input type="checkbox" id="${id}" class="h-5 w-5 insp-check" style="accent-color:${siteColor(site)};cursor:pointer" ${checked}>
+                <input type="checkbox" id="${id}" class="h-5 w-5 insp-check ${isWeekly?'weekly-check':''}" data-site="${site}" style="accent-color:${siteColor(site)};cursor:pointer" ${checked}>
             </td>`;
         });
         tr.innerHTML = tdHtml;
@@ -578,6 +688,28 @@ function rebuildInspections(savedWalks) {
     wrapper.style.overflowX = 'auto';
     wrapper.appendChild(table);
     cont.appendChild(wrapper);
+    // Build weekly detail panels for each site (always visible when checkbox is checked)
+    const panelsWrapper = document.createElement('div');
+    panelsWrapper.id = 'weekly-panels-wrapper';
+    panelsWrapper.className = 'space-y-3 mt-3';
+    sites.forEach(site => {
+        const label = `Weekly Safety Site Inspection ${site}`;
+        const id = label.toLowerCase().replace(/[^a-z0-9]/g,'') + '-completed';
+        const isChecked = savedWalks && savedWalks[id];
+        const panel = buildWeeklyDetailPanel(site, savedWalks);
+        panel.style.display = isChecked ? 'block' : 'none';
+        panel.id = 'weekly-panel-'+site;
+        panelsWrapper.appendChild(panel);
+    });
+    cont.appendChild(panelsWrapper);
+    // Wire checkboxes to show/hide panels
+    cont.querySelectorAll('.weekly-check').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const panel = document.getElementById('weekly-panel-'+cb.dataset.site);
+            if (panel) panel.style.display = cb.checked ? 'block' : 'none';
+            saveData();
+        });
+    });
 }
 function buildCrane() {
     document.getElementById('crane-container').innerHTML = '';
@@ -1186,7 +1318,32 @@ function generateReport() {
         b+=`<div class="report-site-header" style="margin:0 0 6pt;padding:5pt 8pt;background:#003D52;border-radius:3pt"><span style="font-size:12pt;font-weight:800;color:#96C61C;letter-spacing:0.06em">SITE ${site}</span></div>`;
         if(hcBySite[site]){const t=hcBySite[site].reduce((s,x)=>s+x.count,0);b+=sectionHtml('Headcount');b+=`<div style="margin-left:10pt;margin-bottom:3pt"><span style="font-weight:700;font-size:9pt;color:#003D52">${t} workers on site</span><br>`;hcBySite[site].forEach(x=>{b+=`<span style="color:#374151;font-size:8.5pt">&nbsp;&nbsp;${x.trade}: <b>${x.count}</b></span><br>`;});b+=`</div>`;}
         if(orisBySite[site]){b+=sectionHtml('Orientations');orisBySite[site].forEach(o=>{let txt=o.type;if(o.worker)txt+=` <span style="color:#A5A5A5">— ${o.worker}</span>`;b+=rowHtml(txt);});}
-        if(walksBySite[site]){b+=sectionHtml('Inspections Completed');walksBySite[site].forEach(w=>{b+=rowHtml(`<span style="color:#059669;font-weight:600">Completed</span> — ${w}`);});}
+        if(walksBySite[site]){
+            b+=sectionHtml('Inspections Completed');
+            walksBySite[site].forEach(w=>{b+=rowHtml(`<span style="color:#059669;font-weight:600">Completed</span> — ${w}`);});
+            // Weekly checklist subreport — only if weekly was done for this site
+            const weeklyPanel = document.getElementById('weekly-panel-'+site);
+            if(weeklyPanel && weeklyPanel.style.display!=='none'){
+                b+=`<div style="margin-left:10pt;margin-top:4pt;margin-bottom:4pt;padding:6pt 8pt;background:#f0fdf4;border-left:3pt solid #96C61C;border-radius:2pt">`;
+                b+=`<div style="font-size:8pt;font-weight:800;color:#003D52;margin-bottom:4pt;letter-spacing:0.03em">WEEKLY SAFETY INSPECTION — SITE ${site}</div>`;
+                // Categories
+                let hasObs = false;
+                WEEKLY_CHECKLIST_CATS.forEach(c=>{
+                    const sel = weeklyPanel.querySelector('.wcat-'+c.key);
+                    const val = sel ? sel.value : 'ok';
+                    const icon = val==='ok'?'✓':val==='add_obs'?'⚠':'–';
+                    const col  = val==='ok'?'#059669':val==='add_obs'?'#d97706':'#6b7280';
+                    const label= val==='add_obs'?`${c.label} <span style="color:#d97706;font-size:7.5pt">(Observation created)</span>`:c.label;
+                    b+=`<div style="font-size:8.5pt;color:#374151;margin-bottom:2pt"><span style="font-weight:800;color:${col}">${icon}</span> ${label}</div>`;
+                    if(val==='add_obs') hasObs=true;
+                });
+                // Link to observations if any were created from this checklist
+                if(hasObs){
+                    b+=`<div style="font-size:7.5pt;color:#d97706;font-style:italic;margin-top:4pt;border-top:1pt solid #d1fae5;padding-top:3pt">⚠️ Observations generated from this inspection are tracked in the Observations section below.</div>`;
+                }
+                b+=`</div>`;
+            }
+        }
         if(craneBySite[site]){b+=sectionHtml('Crane');craneBySite[site].forEach(e=>{b+=`<div style="margin-left:0.75rem;font-weight:700;color:#003D52;margin-top:0.2rem">${e.craneName}</div>`;e.tasks.forEach(t=>{let txt=t.task;if(t.inspector)txt+=` <span style="color:#A5A5A5">— ${t.inspector}</span>`;if(t.companies&&t.companies.length)txt+=` <span style="color:#A5A5A5">| With: ${t.companies.join(', ')}</span>`;b+=rowHtml(txt,1.5);});});}
         if(equipBySite[site]){b+=sectionHtml('Mobile Equipment');equipBySite[site].forEach(e=>{let txt=e.name;if(e.inspector)txt+=` <span style="color:#A5A5A5">— ${e.inspector}</span>`;b+=rowHtml(txt);});}
         if(permitsBySite[site]){b+=sectionHtml('Active Work Permits');permitsBySite[site].forEach(p=>{b+=rowHtml(`<b>${p.type}</b>: ${p.contractor}`);});}
@@ -1210,13 +1367,21 @@ function generateReport() {
 function sectionHtml(title){return `<div class="report-section-header" style="margin:7pt 0 2pt;font-weight:700;font-size:7.5pt;color:#003D52;letter-spacing:0.05em;text-transform:uppercase;border-left:3px solid #96C61C;padding:2pt 0 2pt 6pt;background:#f4f6f8">${title}</div>`;}
 function rowHtml(txt,extraIndent){const indPt=10+((extraIndent||0)*10);return `<div style="margin-left:${indPt}pt;margin-bottom:2pt;font-size:9pt;color:#374151;line-height:1.35">${txt}</div>`;}
 function obsHtml(text){return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+function hasWeeklyInspectionDone() {
+    let done = false;
+    document.getElementById('morning-tasks').querySelectorAll('.weekly-check').forEach(cb => {
+        if (cb.checked) done = true;
+    });
+    return done;
+}
 function generateReportHeader(){
     const date=document.getElementById('checklistDate').value||'N/A';
     const cso=document.getElementById('csoName').value||'N/A';
     const water=document.getElementById('waterUse').value, fire=document.getElementById('fireDanger').value;
     const hotwork=document.getElementById('hotwork-status').textContent;
+    const weeklyDone = hasWeeklyInspectionDone();
     let h=`<div style="background:#003D52;border-radius:4pt;padding:10pt 12pt;margin-bottom:10pt">`;
-    h+=`<div style="font-size:14pt;font-weight:800;color:#96C61C;letter-spacing:0.07em">CSO DAILY LOG</div>`;
+    h+=`<div style="font-size:14pt;font-weight:800;color:#96C61C;letter-spacing:0.07em">CSO DAILY LOG${weeklyDone?' — Weekly Safety Inspection':''}</div>`;
     h+=`<div style="color:#ffffff;font-size:9pt;margin-top:3pt;font-weight:500">Whistler 2020 Development Corporation</div>`;
     h+=`<div style="color:#c0cdd4;font-size:8.5pt;margin-top:4pt">Date: <b style="color:#fff">${date}</b> &nbsp;|&nbsp; CSO: <b style="color:#fff">${cso}</b></div></div>`;
     h+=`<div style="background:#f0fdf4;border:1pt solid #bbf7d0;border-radius:3pt;padding:5pt 8pt;margin-bottom:8pt;font-size:8.5pt">`;
