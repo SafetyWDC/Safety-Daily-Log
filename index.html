@@ -1280,9 +1280,10 @@ function loadData() {
         JSON.parse(data.observations).forEach(o=>addObservationItem(o));
     }
     // ✅ FIX: siempre cargar crane/equipo guardado sin importar la fecha, para no perder serial/color
-    if(data&&data.craneData){const cd=JSON.parse(data.craneData);if(Array.isArray(cd)&&cd.length){document.getElementById('crane-container').innerHTML='';cd.forEach(c=>addCraneCard(c));}}
-    if(data&&data.equipment){const eq=JSON.parse(data.equipment);if(eq.length){document.getElementById('mobile-equipment-container').innerHTML='';eq.forEach(e=>{const base=EQUIPMENT_LIST.find(b=>b.name===e.name);addEquipmentItem({...e,inspectors:base?base.inspectors:[]});});}}
-    if(!data||data.checklistDate!==today){rebuildHeadcount();rebuildInspections();return;}
+    const isSameDay = data && data.checklistDate === today;
+    if(data&&data.craneData){const cd=JSON.parse(data.craneData);if(Array.isArray(cd)&&cd.length){document.getElementById('crane-container').innerHTML='';cd.forEach(c=>addCraneCard(isSameDay?c:{...c,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''}));}}
+    if(data&&data.equipment){const eq=JSON.parse(data.equipment);if(eq.length){document.getElementById('mobile-equipment-container').innerHTML='';eq.forEach(e=>{const base=EQUIPMENT_LIST.find(b=>b.name===e.name);addEquipmentItem({...e,done:isSameDay?e.done:false,inspector:isSameDay?e.inspector:'',otherInspector:isSameDay?e.otherInspector:'',inspectors:base?base.inspectors:[]});});}}
+    if(!isSameDay){rebuildHeadcount();rebuildInspections();return;}
     document.getElementById('waterUse').value=data.waterUse||'L1';
     document.getElementById('fireDanger').value=data.fireDanger||'Low';
     rebuildHeadcount(data.headcounts?JSON.parse(data.headcounts):{});
