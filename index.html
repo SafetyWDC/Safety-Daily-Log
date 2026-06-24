@@ -13,6 +13,13 @@
         .tab-active { border-bottom-color:#003D52!important; color:#003D52!important; font-weight:700; }
         .tab-btn { padding:0.65rem 0.6rem; border-bottom:3px solid transparent; font-size:0.72rem; font-weight:500; color:#6b7280; cursor:pointer; white-space:nowrap; transition:all 0.15s; }
         .tab-btn:hover:not(.tab-active){ color:#003D52; border-bottom-color:#96C61C; }
+        @media (max-width:768px) {
+            #section-tabs { position:sticky; top:0; background:white; z-index:20; box-shadow:0 2px 6px rgba(0,0,0,0.10); }
+            .tab-btn { padding:0.8rem 0.55rem; font-size:0.68rem; }
+            .hc-num-input { width:58px; font-size:0.9rem; padding:0.35rem 0.1rem; }
+            .btn { padding:0.75rem 1.1rem; font-size:0.9rem; }
+            .form-input,.form-select,.form-textarea { font-size:1rem; padding:0.65rem 0.85rem; }
+        }
         .form-input,.form-select,.form-textarea{ border-radius:0.5rem; border:1px solid #d1d5db; padding:0.55rem 0.85rem; width:100%; transition:border-color 0.2s,box-shadow 0.2s; font-size:0.875rem; }
         .form-input:focus,.form-select:focus,.form-textarea:focus{ outline:none; border-color:#003D52; box-shadow:0 0 0 2px rgba(0,61,82,0.2); }
         .card{ background:white; border-radius:0.75rem; padding:1.25rem; box-shadow:0 4px 6px -1px rgb(0 0 0/.07),0 2px 4px -2px rgb(0 0 0/.05); margin-bottom:1rem; }
@@ -249,18 +256,21 @@ const BASE_TRADES = [
     { name:'Environmental Monitoring' },{ name:'Erosion Control' },
 ];
 const CRANE_INSPECTORS   = ['Noah C.','Eric J.','Miguel M.','Mahlon Taylor','Mike Butcher','Dan Hirst','Tim C.'];
-const BJORDAL_INSPECTORS = ['Mike Butcher','Mahlon Taylor','Tim C.'];
+const BJORDAL_INSPECTORS = ['Mike Butcher','Mahlon Taylor','Tim C.','Tyler F.'];
 const EQUIPMENT_LIST = [
-    { name:'Lemyre Boom Lift (Green)',    site:'1475', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
-    { name:'Lemyre Boom Lift (Blue)',     site:'1475', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
-    { name:'Lemyre Boom Lift (Orange)',   site:'1475', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
-    { name:'WDC Telehandler',             site:'1475', inspectors:['Dan M.','Daniel-A. A.','Austin W.','Jordan W.','Dylan','Dan E.','Shayne L.'] },
-    { name:'Jensen Telehandler',          site:'1600', inspectors:['Noah C.','Eric J.','Miguel M.','Pat Foster'] },
-    { name:'Jensen Bobcat',               site:'1600', inspectors:['Noah C.','Eric J.','Miguel M.','Pat Foster'] },
-    { name:'Jordan Red Mini Telehandler', site:'1600', inspectors:['Noah C.','Eric J.','Miguel M.','Pat Foster'] },
-    { name:'Bjordal Telehandler',         site:'1600', inspectors:BJORDAL_INSPECTORS },
-    { name:'Bjordal Boom Lift',           site:'1600', inspectors:BJORDAL_INSPECTORS },
-    { name:'Painter Boomlift Blue',       site:'1475', inspectors:['Mathieu L.','Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
+    // Site 1475
+    { name:'WDC Telehandler 612-557 (S/N: 0160026154)',                    site:'1475', inspectors:['Dan M.','Daniel-A. A.','Austin W.','Jordan W.','Dylan','Dan E.','Shayne L.'] },
+    { name:'Painter Boomlift Blue (S/N: S8513-10244)',                     site:'1475', inspectors:['Mathieu L.','Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
+    // Site 1600
+    { name:'Lemyre Boom Lift (Green)',                                      site:'1600', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
+    { name:'Lemyre Boom Lift (Blue) S/N: 56013-25596',                     site:'1600', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
+    { name:'Lemyre Boom Lift (Orange) S/N: 03001186785',                   site:'1600', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
+    { name:'Jensen Telehandler',                                            site:'1600', inspectors:['Noah C.','Eric J.','Miguel M.','Pat Foster'] },
+    { name:'Jensen Bobcat',                                                 site:'1600', inspectors:['Noah C.','Eric J.','Miguel M.','Pat Foster'] },
+    { name:'Jordan Red Mini Telehandler FRH100 (S/N: 4190710020)',         site:'1600', inspectors:['Dan McGuire','Noah C.','Eric J.','Miguel M.','Pat Foster'] },
+    { name:'Bjordal Manlift/Scissorlift Orange JLG/660SJ (S/N: 0300206478)', site:'1600', inspectors:BJORDAL_INSPECTORS },
+    { name:'Corona Excavations Cat 308E#3',                                site:'1600', inspectors:['Myles Kowalczyk'] },
+    { name:'Corona Excavations CAT330F',                                   site:'1600', inspectors:['Travis Williams'] },
 ];
 const OVERLAP_COMPANIES = ['Jensen Construction','Corona Excavations','Blacktail Reinforcing','Astra Concrete','Cardinal Concrete','Corridor Concrete','Bjordal'];
 const ORIENTATION_TYPES = ['Young Worker Orientation','New Worker Orientation','Site-Specific Orientation','Visitor Orientation'];
@@ -713,7 +723,7 @@ function rebuildInspections(savedWalks) {
 }
 function buildCrane() {
     document.getElementById('crane-container').innerHTML = '';
-    addCraneCard({ name:'Crane #1', site:'1600', done:false, inspector:'', otherInspector:'',
+    addCraneCard({ name:'HDT80 Potain S/N: 88715 (Yellow)', site:'1600', done:false, inspector:'', otherInspector:'',
         rigging:false, riggingInspector:'', riggingOtherInspector:'', coldWeather:false,
         overlap:[], overlapOtherChecked:false, overlapOtherText:'', overlapOther2Checked:false, overlapOther2Text:'' });
 }
