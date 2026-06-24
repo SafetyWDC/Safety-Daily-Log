@@ -92,7 +92,7 @@
         </div>
         <div>
             <label class="block text-xs font-semibold text-gray-600 mb-1">CSO Name</label>
-            <input type="text" id="csoName" class="form-input" placeholder="Your name">
+            <input type="text" id="csoName" class="form-input" placeholder="Your name" value="Bethzy">
         </div>
     </div>
     <div class="border-t pt-3">
@@ -259,42 +259,39 @@ const CRANE_INSPECTORS   = ['Noah C.','Eric J.','Miguel M.','Mahlon Taylor','Mik
 const BJORDAL_INSPECTORS = ['Mike Butcher','Mahlon Taylor','Tim C.','Tyler F.'];
 const EQUIPMENT_LIST = [
     // Site 1475
-    { name:'WDC Telehandler 612-557 (S/N: 0160026154)',                    site:'1475', inspectors:['Dan M.','Daniel-A. A.','Austin W.','Jordan W.','Dylan','Dan E.','Shayne L.'] },
-    { name:'Painter Boomlift Blue (S/N: S8513-10244)',                     site:'1475', inspectors:['Mathieu L.','Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
+    { name:'WDC Telehandler 612-557 (S/N: 0160026154)',                       site:'1475', inspectors:['Dan McGuire','Dan M.','Daniel-A. A.','Austin W.','Jordan W.','Dylan','Dan E.','Shayne L.'] },
+    { name:'Painter Boomlift Blue (S/N: S8513-10244)',                        site:'1475', inspectors:['Dany Lefrancois','Mathieu L.','Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
+    { name:'Cat 730 Rock Truck',                                               site:'1475', inspectors:['Dave Skinner'] },
     // Site 1600
-    { name:'Lemyre Boom Lift (Green)',                                      site:'1600', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
-    { name:'Lemyre Boom Lift (Blue) S/N: 56013-25596',                     site:'1600', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
-    { name:'Lemyre Boom Lift (Orange) S/N: 03001186785',                   site:'1600', inspectors:['Daniel-alexandre A','Serhii D','Austin W','Terrence','Shayne L.','Dave Santerre'] },
-    { name:'Jensen Telehandler',                                            site:'1600', inspectors:['Noah C.','Eric J.','Miguel M.','Pat Foster'] },
-    { name:'Jensen Bobcat',                                                 site:'1600', inspectors:['Noah C.','Eric J.','Miguel M.','Pat Foster'] },
-    { name:'Jordan Red Mini Telehandler FRH100 (S/N: 4190710020)',         site:'1600', inspectors:['Dan McGuire','Noah C.','Eric J.','Miguel M.','Pat Foster'] },
+    { name:'Lemyre Boom Lift (Blue) S/N: 56013-25596',                        site:'1600', inspectors:['Shayne L.','Daniel-alexandre A','Serhii D','Austin W','Terrence','Dave Santerre'] },
+    { name:'Lemyre Boom Lift (Orange) S/N: 03001186785',                      site:'1600', inspectors:['Terrence','Daniel-alexandre A','Serhii D','Austin W','Shayne L.','Dave Santerre'] },
+    { name:'Jordan Red Mini Telehandler FRH100 (S/N: 4190710020)',            site:'1600', inspectors:['Dan McGuire','Noah C.','Eric J.','Miguel M.','Pat Foster'] },
+    { name:'Bjordal Telehandler 612-557 (S/N: 0160026154)',                   site:'1600', inspectors:['Mahlon Taylor','Mike Butcher','Tim C.','Tyler F.'] },
     { name:'Bjordal Manlift/Scissorlift Orange JLG/660SJ (S/N: 0300206478)', site:'1600', inspectors:BJORDAL_INSPECTORS },
-    { name:'Corona Excavations Cat 308E#3',                                site:'1600', inspectors:['Myles Kowalczyk'] },
-    { name:'Corona Excavations CAT330F',                                   site:'1600', inspectors:['Travis Williams'] },
+    { name:'Corona Excavations Cat 308E#3',                                   site:'1600', inspectors:['Myles Kowalczyk'] },
+    { name:'Corona Excavations CAT330F',                                      site:'1600', inspectors:['Travis Williams'] },
+    { name:'Corona Excavations CAT 336F',                                     site:'1600', inspectors:['Chris Laird'] },
 ];
-const OVERLAP_COMPANIES = ['Jensen Construction','Corona Excavations','Blacktail Reinforcing','Astra Concrete','Cardinal Concrete','Corridor Concrete','Bjordal'];
+const OVERLAP_COMPANIES = ['Jensen Construction','Corona Excavations','Blacktail Reinforcing','Astra Concrete','Cardinal Concrete','Corridor Concrete','Bjordal','WDC','AWSE','Lemyre'];
 const ORIENTATION_TYPES = ['Young Worker Orientation','New Worker Orientation','Site-Specific Orientation','Visitor Orientation'];
 const PERMIT_TYPES      = ['Silica Dust Exposure Plan','Hot Work Permit','Fall Protection Plan','Critical Lift Plan','Confined Space Entry Permit'];
 const INCIDENT_TYPES    = ['First Aid','Near Miss','Incident Investigation Report','Claim Management'];
 const DEFAULT_PERMITS = [
-    { type:'Silica Dust Exposure Plan', site:'1475', contractor:'Lemyre (Cladding assembly)' },
-    { type:'Silica Dust Exposure Plan', site:'1475', contractor:'CMO Flooring (Mixing and pouring cement)' },
-    { type:'Silica Dust Exposure Plan', site:'1475', contractor:'Terracraft (cutting tiles)' },
-    { type:'Silica Dust Exposure Plan', site:'1475', contractor:'Tantalus Flooring (Mixing and pouring cement)' },
-    { type:'Fall Protection Plan', site:'1600', contractor:'Bjordal (Framing and erecting walls on 1600)' },
-    { type:'Fall Protection Plan', site:'1475', contractor:'Lemyre (cladding exterior and roof of building 1 and 2)' },
-    { type:'Fall Protection Plan', site:'1475', contractor:'Terracraft (B1 B2 L3 L4 installing Tiles on Balconies)' },
-    { type:'Fall Protection Plan', site:'1475', contractor:'Tantalus Flooring (receiving materials)' },
-    { type:'Fall Protection Plan', site:'1475', contractor:'CMO Flooring (receiving materials)' },
-    { type:'Fall Protection Plan', site:'1475', contractor:'Linton Painting (receiving materials)' },
-    { type:'Fall Protection Plan', site:'1475', contractor:'Coastal Mountain Mechanical (receiving Materials)' },
-    { type:'Fall Protection Plan', site:'1475', contractor:'AMC (Receiving materials from balcony L3&L4 B1&B2)' },
-    { type:'Hot Work Permit', site:'1600', contractor:'Raven (Torch-on roofing)' },
-    { type:'Hot Work Permit', site:'1475', contractor:'AWSE (Cutting metal on underground parking)' },
-    { type:'Hot Work Permit', site:'1600', contractor:'True North Masonry (Cutting Rebar)' },
-    { type:'Hot Work Permit', site:'1600', contractor:'True Air System (Cutting Metal on underground parking)' },
-    { type:'Hot Work Permit', site:'1600', contractor:'Jensen (Cutting rebar)' },
-    { type:'Hot Work Permit', site:'1475', contractor:'Jensen (Cutting rebar)' },
+    // Site 1475
+    { type:'Silica Dust Exposure Plan', site:'1475', typeOther:'', contractor:'Terracraft (cutting tiles)' },
+    { type:'Silica Dust Exposure Plan', site:'1475', typeOther:'', contractor:'ACR Polyurethane Coating System underground Parking' },
+    // Site 1600
+    { type:'Fall Protection Plan',      site:'1600', typeOther:'', contractor:'Bjordal (Framing and erecting walls on 1600)' },
+    { type:'Fall Protection Plan',      site:'1600', typeOther:'', contractor:'Lemyre Exteriors (Cladding B1-B5)' },
+    { type:'Fall Protection Plan',      site:'1600', typeOther:'', contractor:'Raven (Working on balconies and Roof B1-B5)' },
+    { type:'Hot Work Permit',           site:'1600', typeOther:'', contractor:'Raven (Torch-on roofing)' },
+    { type:'Hot Work Permit',           site:'1600', typeOther:'', contractor:'True North Masonry (cutting Rebar)' },
+    { type:'Hot Work Permit',           site:'1600', typeOther:'', contractor:'True Air System (Cutting Metal on underground parking)' },
+    { type:'Hot Work Permit',           site:'1600', typeOther:'', contractor:'Jensen (Cutting rebar)' },
+    { type:'Hot Work Permit',           site:'1600', typeOther:'', contractor:'AWSE (Cutting metal on underground parking)' },
+    // Site 1825
+    { type:'Other',                     site:'1825', typeOther:'Blasting', contractor:'Hard Rock' },
+    { type:'Silica Dust Exposure Plan', site:'1825', typeOther:'', contractor:'WDC (braking concrete with a Jackhammer)' },
 ];
 function getCustomSites() { return JSON.parse(localStorage.getItem('customSites_v5')||'[]'); }
 function saveCustomSites(arr) { localStorage.setItem('customSites_v5', JSON.stringify(arr)); }
@@ -541,7 +538,7 @@ function updateHeadcounts() {
 function checkHotwork() {
     const waterUse = document.getElementById('waterUse').value;
     const fireDanger = document.getElementById('fireDanger').value;
-    const restricted = waterUse==='L3' || fireDanger==='Extreme';
+    const restricted = waterUse==='L3' && fireDanger==='Extreme';
     const el = document.getElementById('hotwork-status');
     el.textContent = restricted ? '⚠ Hot work NOT permitted within 10m of the forest interface.' : '✓ Hot work is safe to do.';
     el.className = `text-sm font-bold text-center ${restricted?'text-red-600':'text-green-600'}`;
@@ -944,39 +941,41 @@ function addEquipmentItem(data) {
     const div = document.createElement('div');
     div.className = 'equipment-card mb-2 equipment-item';
     div.innerHTML = `
-        <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
             <input type="text" class="form-input text-sm font-semibold equip-name flex-1" style="min-width:150px" value="${equipName}" placeholder="Equipment name…">
             <label class="flex items-center cursor-pointer ml-1 gap-1"><span class="text-xs text-gray-500">Done</span>
                 <div class="relative"><input type="checkbox" class="sr-only equip-toggle" ${data.done?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
             </label>
         </div>
-        <div class="mb-2">
-            <label class="text-xs font-semibold text-gray-500">SITE</label>
-            <div class="flex flex-wrap gap-1 mt-1 equip-site-pills"></div>
-            <input type="hidden" class="equip-site-val" value="${data.site||'1475'}">
-        </div>
-        <div class="equip-details ${data.done?'':'hidden'} pl-2 border-l-2 border-orange-200">
-            <label class="text-xs font-semibold text-gray-500">Inspected by</label>
-            <div class="flex gap-1 mt-1 flex-wrap equip-insp-container">
-                ${hasNamed
-                    ? `<select class="form-select text-xs equip-inspector-sel" style="max-width:180px">${inspOpts}</select>
-                       <input type="text" class="form-input text-xs equip-inspector-other ${(data.inspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${data.otherInspector||''}">`
-                    : `<input type="text" class="form-input text-xs equip-inspector-free" style="max-width:220px" placeholder="Inspector name…" value="${data.otherInspector||data.inspector||''}">`
-                }
+        <div class="equip-details ${data.done?'':'hidden'} mt-2">
+            <div class="mb-2">
+                <label class="text-xs font-semibold text-gray-500">SITE</label>
+                <div class="flex flex-wrap gap-1 mt-1 equip-site-pills"></div>
+                <input type="hidden" class="equip-site-val" value="${data.site||'1475'}">
             </div>
-        </div>
-        <div class="operator-manager mt-2">
-            <div class="flex items-center justify-between mb-1">
-                <span class="text-xs font-bold" style="color:#003D52">Operators</span>
-                <button type="button" class="btn btn-sm btn-primary toggle-ops-btn" style="font-size:0.65rem;padding:0.15rem 0.5rem">Manage</button>
+            <div class="pl-2 border-l-2 border-orange-200">
+                <label class="text-xs font-semibold text-gray-500">Inspected by</label>
+                <div class="flex gap-1 mt-1 flex-wrap equip-insp-container">
+                    ${hasNamed
+                        ? `<select class="form-select text-xs equip-inspector-sel" style="max-width:180px">${inspOpts}</select>
+                           <input type="text" class="form-input text-xs equip-inspector-other ${(data.inspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${data.otherInspector||''}">`
+                        : `<input type="text" class="form-input text-xs equip-inspector-free" style="max-width:220px" placeholder="Inspector name…" value="${data.otherInspector||data.inspector||''}">`
+                    }
+                </div>
             </div>
-            <div class="ops-chips flex flex-wrap gap-1 mb-1"></div>
-            <div class="ops-add-row hidden flex gap-1 mt-1">
-                <input type="text" class="form-input text-xs ops-new-input" style="max-width:180px" placeholder="Operator name…">
-                <button type="button" class="btn btn-green btn-sm ops-add-btn">+ Add</button>
+            <div class="operator-manager mt-2">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold" style="color:#003D52">Operators</span>
+                    <button type="button" class="btn btn-sm btn-primary toggle-ops-btn" style="font-size:0.65rem;padding:0.15rem 0.5rem">Manage</button>
+                </div>
+                <div class="ops-chips flex flex-wrap gap-1 mb-1"></div>
+                <div class="ops-add-row hidden flex gap-1 mt-1">
+                    <input type="text" class="form-input text-xs ops-new-input" style="max-width:180px" placeholder="Operator name…">
+                    <button type="button" class="btn btn-green btn-sm ops-add-btn">+ Add</button>
+                </div>
             </div>
-        </div>
-        <button type="button" class="btn btn-danger btn-sm mt-2 remove-equip-btn">Remove</button>`;
+            <button type="button" class="btn btn-danger btn-sm mt-2 remove-equip-btn">Remove</button>
+        </div>`;
     buildSitePillsInto(div.querySelector('.equip-site-pills'), data.site||'1475');
     const tog=div.querySelector('.equip-toggle'), det=div.querySelector('.equip-details');
     tog.addEventListener('change',()=>{det.classList.toggle('hidden',!tog.checked);saveData();});
@@ -1328,7 +1327,7 @@ function generateReport() {
         let b=`<div class="${pageBreakClass}">`;
         b+=`<div class="report-site-header" style="margin:0 0 6pt;padding:5pt 8pt;background:#003D52;border-radius:3pt"><span style="font-size:12pt;font-weight:800;color:#96C61C;letter-spacing:0.06em">SITE ${site}</span></div>`;
         if(hcBySite[site]){const t=hcBySite[site].reduce((s,x)=>s+x.count,0);b+=sectionHtml('Headcount');b+=`<div style="margin-left:10pt;margin-bottom:3pt"><span style="font-weight:700;font-size:9pt;color:#003D52">${t} workers on site</span><br>`;hcBySite[site].forEach(x=>{b+=`<span style="color:#374151;font-size:8.5pt">&nbsp;&nbsp;${x.trade}: <b>${x.count}</b></span><br>`;});b+=`</div>`;}
-        if(orisBySite[site]){b+=sectionHtml('Orientations');orisBySite[site].forEach(o=>{let txt=o.type;if(o.worker)txt+=` <span style="color:#A5A5A5">— ${o.worker}</span>`;b+=rowHtml(txt);});}
+        if(orisBySite[site]){b+=sectionHtml('Orientations');orisBySite[site].forEach(o=>{let txt=o.type;if(o.worker)txt+=` <span style="color:#374151">— ${o.worker}</span>`;b+=rowHtml(txt);});}
         if(walksBySite[site]){
             b+=sectionHtml('Inspections Completed');
             walksBySite[site].forEach(w=>{b+=rowHtml(`<span style="color:#059669;font-weight:600">Completed</span> — ${w}`);});
@@ -1355,14 +1354,14 @@ function generateReport() {
                 b+=`</div>`;
             }
         }
-        if(craneBySite[site]){b+=sectionHtml('Crane');craneBySite[site].forEach(e=>{b+=`<div style="margin-left:0.75rem;font-weight:700;color:#003D52;margin-top:0.2rem">${e.craneName}</div>`;e.tasks.forEach(t=>{let txt=t.task;if(t.inspector)txt+=` <span style="color:#A5A5A5">— ${t.inspector}</span>`;if(t.companies&&t.companies.length)txt+=` <span style="color:#A5A5A5">| With: ${t.companies.join(', ')}</span>`;b+=rowHtml(txt,1.5);});});}
-        if(equipBySite[site]){b+=sectionHtml('Mobile Equipment');equipBySite[site].forEach(e=>{let txt=e.name;if(e.inspector)txt+=` <span style="color:#A5A5A5">— ${e.inspector}</span>`;b+=rowHtml(txt);});}
+        if(craneBySite[site]){b+=sectionHtml('Crane');craneBySite[site].forEach(e=>{b+=`<div style="margin-left:0.75rem;font-weight:700;color:#003D52;margin-top:0.2rem">${e.craneName}</div>`;e.tasks.forEach(t=>{let txt=t.task;if(t.inspector)txt+=` <span style="color:#374151">— ${t.inspector}</span>`;if(t.companies&&t.companies.length)txt+=` <span style="color:#374151">| With: ${t.companies.join(', ')}</span>`;b+=rowHtml(txt,1.5);});});}
+        if(equipBySite[site]){b+=sectionHtml('Mobile Equipment');equipBySite[site].forEach(e=>{let txt=e.name;if(e.inspector)txt+=` <span style="color:#374151">— ${e.inspector}</span>`;b+=rowHtml(txt);});}
         if(permitsBySite[site]){b+=sectionHtml('Active Work Permits');permitsBySite[site].forEach(p=>{b+=rowHtml(`<b>${p.type}</b>: ${p.contractor}`);});}
-        if(mtgsBySite[site]){b+=sectionHtml('Safety Meetings');mtgsBySite[site].forEach(m=>{let txt=`Weekly Safety Meeting: <b>${m.status}</b>`;if(m.comment)txt+=`<br><span style="color:#A5A5A5;font-size:0.88em;padding-left:1rem">${m.comment}</span>`;b+=rowHtml(txt);});}
+        if(mtgsBySite[site]){b+=sectionHtml('Safety Meetings');mtgsBySite[site].forEach(m=>{let txt=`Weekly Safety Meeting: <b>${m.status}</b>`;if(m.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${m.comment}</span>`;b+=rowHtml(txt);});}
         b+=sectionHtml('Site Incidents');
-        if(incsBySite[site]&&incsBySite[site].length){incsBySite[site].forEach(i=>{let txt=`<span style="color:#dc2626;font-weight:700">${i.type}</span>`;if(i.comment)txt+=`<br><span style="color:#A5A5A5;font-size:0.88em;padding-left:1rem">${i.comment}</span>`;b+=rowHtml(txt);});}
+        if(incsBySite[site]&&incsBySite[site].length){incsBySite[site].forEach(i=>{let txt=`<span style="color:#dc2626;font-weight:700">${i.type}</span>`;if(i.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${i.comment}</span>`;b+=rowHtml(txt);});}
         else{b+=rowHtml(`<span style="color:#059669;font-weight:600">No incidents reported.</span>`);}
-        if(wkndsBySite[site]){b+=sectionHtml('Weekend Work');wkndsBySite[site].forEach(w=>{let txt=`Weekend: <b>${w.status}</b>`;if(w.comment)txt+=`<br><span style="color:#A5A5A5;font-size:0.88em;padding-left:1rem">${w.comment}</span>`;b+=rowHtml(txt);});}
+        if(wkndsBySite[site]){b+=sectionHtml('Weekend Work');wkndsBySite[site].forEach(w=>{let txt=`Weekend: <b>${w.status}</b>`;if(w.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${w.comment}</span>`;b+=rowHtml(txt);});}
         if(obsBySite[site]){b+=sectionHtml('Observations');obsBySite[site].forEach(o=>{const statusColor=o.obsStatus==='resolved'?'#059669':o.obsStatus==='pending'?'#d97706':'#6b7280';const statusLabel=o.obsStatus==='resolved'?'Resolved':o.obsStatus==='pending'?'Pending':'New';let statusLine=`<span style="font-size:8pt;font-weight:700;color:${statusColor}">[${statusLabel}]</span>`;if(o.foremanInformed)statusLine+=` <span style="font-size:8pt;color:#003D52;font-weight:600">Foreman Informed</span>`;if(o.obsStatus==='resolved'&&o.resolvedDate)statusLine+=` <span style="font-size:8pt;color:#059669"> — Resolved: ${o.resolvedDate}</span>`;b+=rowHtml(`${statusLine}<br><span style="white-space:pre-wrap">${obsHtml(o.text)}</span>`);});}
         b+=`</div>`;blocks.push(b);
     });
@@ -1451,7 +1450,7 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     document.getElementById('waterUse').selectedIndex=0;
     document.getElementById('fireDanger').selectedIndex=0;
     document.getElementById('checklistDate').valueAsDate=new Date();
-    document.getElementById('csoName').value='';
+    document.getElementById('csoName').value='Bethzy';
     rebuildHeadcount({});
     rebuildInspections({});
     document.getElementById('orientations-container').innerHTML='';
@@ -1495,7 +1494,7 @@ document.getElementById('csoName').addEventListener('input',saveData);
     const customSites=getCustomSites().filter(s=>s!=='2050');saveCustomSites(customSites);
     const customTrades=getCustomTrades().filter(t=>t.toLowerCase()!=='cursing');saveCustomTrades(customTrades);
 })();
-renderSiteDisplay();buildCrane();buildMobileEquipment();loadData();checkHotwork();
+renderSiteDisplay();rebuildHeadcount();rebuildInspections();buildCrane();buildMobileEquipment();loadData();checkHotwork();
 }); // end DOMContentLoaded
 </script>
 </body>
