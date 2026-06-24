@@ -1262,20 +1262,7 @@ function saveData() {
     d.observations=JSON.stringify(obs);
     localStorage.setItem('csoChecklist_v5',JSON.stringify(d));
 }
-function migrateEquipmentIfNeeded() {
-    const saved = parseInt(localStorage.getItem('equipmentVersion') || '0');
-    if (saved < EQUIPMENT_VERSION) {
-        const raw = localStorage.getItem('csoChecklist_v5');
-        if (raw) {
-            const d = JSON.parse(raw);
-            delete d.equipment;
-            delete d.craneData;
-            localStorage.setItem('csoChecklist_v5', JSON.stringify(d));
-        }
-        localStorage.removeItem('customOperators_v5');
-        localStorage.setItem('equipmentVersion', EQUIPMENT_VERSION);
-    }
-}
+
 function seedDefaultOperators() {
     // On first use, seed EQUIPMENT_LIST inspectors into persistent storage
     EQUIPMENT_LIST.forEach(eq => {
@@ -1510,7 +1497,7 @@ document.getElementById('csoName').addEventListener('input',saveData);
     const customSites=getCustomSites().filter(s=>s!=='2050');saveCustomSites(customSites);
     const customTrades=getCustomTrades().filter(t=>t.toLowerCase()!=='cursing');saveCustomTrades(customTrades);
 })();
-migrateEquipmentIfNeeded();renderSiteDisplay();buildCrane();buildMobileEquipment();loadData();checkHotwork();
+renderSiteDisplay();buildCrane();buildMobileEquipment();loadData();checkHotwork();
 }); // end DOMContentLoaded
 </script>
 </body>
