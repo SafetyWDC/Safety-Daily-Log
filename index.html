@@ -1270,7 +1270,28 @@ function seedDefaultOperators() {
     // Seed crane inspectors for default cranes
     if (getOperatorsFor('Crane #1').length === 0) setOperatorsFor('Crane #1', [...CRANE_INSPECTORS]);
 }
+function migrateOperatorKeys() {
+    const renames = [
+        ['Lemyre Boom Lift (Orange) Serial 03001186785 Cg4r96', 'Lemyre Boom Lift (Orange) S/N: 03001186785'],
+        ['Lemyre Boom Lift (Orange) S/N:03001186785',           'Lemyre Boom Lift (Orange) S/N: 03001186785'],
+        ['Lemyre Boom Lift (Blue) S/N:56013-25596',             'Lemyre Boom Lift (Blue) S/N: 56013-25596'],
+        ['Lemyre Boom Lift (Blue) 56013-25596',                 'Lemyre Boom Lift (Blue) S/N: 56013-25596'],
+        ['WDC Telehandler 612-557 (S/N:0160026154)',            'WDC Telehandler 612-557 (S/N: 0160026154)'],
+        ['Painter Boomlift Blue (S/N:S8513-10244)',             'Painter Boomlift Blue (S/N: S8513-10244)'],
+    ];
+    const all = getAllOperators();
+    let changed = false;
+    renames.forEach(([oldKey, newKey]) => {
+        if (all[oldKey] && all[oldKey].length > 0 && (!all[newKey] || all[newKey].length === 0)) {
+            all[newKey] = all[oldKey];
+            delete all[oldKey];
+            changed = true;
+        }
+    });
+    if (changed) saveAllOperators(all);
+}
 function loadData() {
+    migrateOperatorKeys();
     seedDefaultOperators();
     const raw=localStorage.getItem('csoChecklist_v5');
     const today=document.getElementById('checklistDate').value;
