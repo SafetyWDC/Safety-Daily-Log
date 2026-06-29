@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Debug Operators</title>
+<style>body{font-family:monospace;padding:20px;background:#f0f2f5;}
+h2{color:#003D52;}pre{background:white;border:1px solid #ccc;padding:15px;border-radius:8px;white-space:pre-wrap;word-break:break-all;font-size:13px;}</style>
+</head>
+<body>
+<h2>Operadores guardados en localStorage</h2>
+<pre id="out"></pre>
+<script>
+const data = JSON.parse(localStorage.getItem('customOperators_v5') || '{}');
+const keys = Object.keys(data);
+if (keys.length === 0) {
+    document.getElementById('out').textContent = '(vacío — no hay operadores guardados)';
+} else {
+    let txt = '';
+    keys.forEach(k => {
+        txt += `"${k}":\n  → ${JSON.stringify(data[k])}\n\n`;
+    });
+    document.getElementById('out').textContent = txt;
+}
+</script>
+</body>
+</html>
