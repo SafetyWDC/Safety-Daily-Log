@@ -257,6 +257,15 @@ const BASE_TRADES = [
 ];
 const CRANE_INSPECTORS   = ['Noah C.','Eric J.','Miguel M.','Mahlon Taylor','Mike Butcher','Dan Hirst','Tim C.'];
 const BJORDAL_INSPECTORS = ['Mike Butcher','Mahlon Taylor','Tim C.','Tyler F.'];
+const EQUIP_NAME_MAP = {
+    'Lemyre Boom Lift Color Orange Serial 03001186785 Cg4r96':'Lemyre Boom Lift (Orange) Serial 03001186785 Cg4r96',
+    'Lemyre Boom Lift (Orange) S/N:03001186785':              'Lemyre Boom Lift (Orange) Serial 03001186785 Cg4r96',
+    'Lemyre Boom Lift (Orange) S/N: 03001186785':             'Lemyre Boom Lift (Orange) Serial 03001186785 Cg4r96',
+    'Lemyre Boom Lift (Blue) S/N:56013-25596':                'Lemyre Boom Lift (Blue) S/N: 56013-25596',
+    'Lemyre Boom Lift (Blue) 56013-25596':                    'Lemyre Boom Lift (Blue) S/N: 56013-25596',
+    'WDC Telehandler 612-557 (S/N:0160026154)':               'WDC Telehandler 612-557 (S/N: 0160026154)',
+    'Painter Boomlift Blue (S/N:S8513-10244)':                'Painter Boomlift Blue (S/N: S8513-10244)',
+};
 const EQUIPMENT_LIST = [
     // Site 1475
     { name:'WDC Telehandler 612-557 (S/N: 0160026154)',                       site:'1475', inspectors:['Dan McGuire','Dan M.','Daniel-A. A.','Austin W.','Jordan W.','Dylan','Dan E.','Shayne L.'] },
@@ -264,7 +273,7 @@ const EQUIPMENT_LIST = [
     { name:'Cat 730 Rock Truck',                                               site:'1475', inspectors:['Dave Skinner'] },
     // Site 1600
     { name:'Lemyre Boom Lift (Blue) S/N: 56013-25596',                        site:'1600', inspectors:['Shayne L.','Daniel-alexandre A','Serhii D','Austin W','Terrence','Dave Santerre'] },
-    { name:'Lemyre Boom Lift (Orange) S/N: 03001186785',                      site:'1600', inspectors:['Terrence','Daniel-alexandre A','Serhii D','Austin W','Shayne L.','Dave Santerre'] },
+    { name:'Lemyre Boom Lift (Orange) Serial 03001186785 Cg4r96',              site:'1600', inspectors:['Terrence','Daniel-alexandre A','Serhii D','Austin W','Shayne L.','Dave Santerre'] },
     { name:'Jordan Red Mini Telehandler FRH100 (S/N: 4190710020)',            site:'1600', inspectors:['Dan McGuire','Noah C.','Eric J.','Miguel M.','Pat Foster'] },
     { name:'Bjordal Telehandler 612-557 (S/N: 0160026154)',                   site:'1600', inspectors:['Mahlon Taylor','Mike Butcher','Tim C.','Tyler F.'] },
     { name:'Bjordal Manlift/Scissorlift Orange JLG/660SJ (S/N: 0300206478)', site:'1600', inspectors:BJORDAL_INSPECTORS },
@@ -1271,18 +1280,9 @@ function seedDefaultOperators() {
     if (getOperatorsFor('Crane #1').length === 0) setOperatorsFor('Crane #1', [...CRANE_INSPECTORS]);
 }
 function migrateOperatorKeys() {
-    const renames = [
-        ['Lemyre Boom Lift (Orange) Serial 03001186785 Cg4r96',   'Lemyre Boom Lift (Orange) S/N: 03001186785'],
-        ['Lemyre Boom Lift Color Orange Serial 03001186785 Cg4r96','Lemyre Boom Lift (Orange) S/N: 03001186785'],
-        ['Lemyre Boom Lift (Orange) S/N:03001186785',              'Lemyre Boom Lift (Orange) S/N: 03001186785'],
-        ['Lemyre Boom Lift (Blue) S/N:56013-25596',                'Lemyre Boom Lift (Blue) S/N: 56013-25596'],
-        ['Lemyre Boom Lift (Blue) 56013-25596',                    'Lemyre Boom Lift (Blue) S/N: 56013-25596'],
-        ['WDC Telehandler 612-557 (S/N:0160026154)',               'WDC Telehandler 612-557 (S/N: 0160026154)'],
-        ['Painter Boomlift Blue (S/N:S8513-10244)',                'Painter Boomlift Blue (S/N: S8513-10244)'],
-    ];
     const all = getAllOperators();
     let changed = false;
-    renames.forEach(([oldKey, newKey]) => {
+    Object.entries(EQUIP_NAME_MAP).forEach(([oldKey, newKey]) => {
         if (all[oldKey] && all[oldKey].length > 0) {
             const existing = all[newKey] || [];
             const merged = [...existing];
@@ -1316,7 +1316,7 @@ function loadData() {
     // ✅ FIX: siempre cargar crane/equipo guardado sin importar la fecha, para no perder serial/color
     const isSameDay = data && data.checklistDate === today;
     if(data&&data.craneData){const cd=JSON.parse(data.craneData);if(Array.isArray(cd)&&cd.length){document.getElementById('crane-container').innerHTML='';cd.forEach(c=>addCraneCard(isSameDay?c:{...c,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''}));}}
-    if(data&&data.equipment){const eq=JSON.parse(data.equipment);if(eq.length){document.getElementById('mobile-equipment-container').innerHTML='';eq.forEach(e=>{const base=EQUIPMENT_LIST.find(b=>b.name===e.name);addEquipmentItem({...e,done:isSameDay?e.done:false,inspector:isSameDay?e.inspector:'',otherInspector:isSameDay?e.otherInspector:'',inspectors:base?base.inspectors:[]});});}}
+    if(data&&data.equipment){const eq=JSON.parse(data.equipment);if(eq.length){document.getElementById('mobile-equipment-container').innerHTML='';eq.forEach(e=>{const canonName=EQUIP_NAME_MAP[e.name]||e.name;const base=EQUIPMENT_LIST.find(b=>b.name===canonName);addEquipmentItem({...e,name:canonName,done:isSameDay?e.done:false,inspector:isSameDay?e.inspector:'',otherInspector:isSameDay?e.otherInspector:'',inspectors:base?base.inspectors:[]});});}}
     if(!isSameDay){rebuildHeadcount();rebuildInspections();return;}
     document.getElementById('waterUse').value=data.waterUse||'L1';
     document.getElementById('fireDanger').value=data.fireDanger||'Low';
