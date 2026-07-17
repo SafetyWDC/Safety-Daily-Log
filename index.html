@@ -1046,10 +1046,18 @@ document.getElementById('add-orientation-btn').addEventListener('click',()=>{add
 const PERMIT_TYPES_FULL = [...PERMIT_TYPES, 'Other'];
 function addWorkPermitItem(data={type:'Fall Protection Plan',site:'1475',typeOther:'',contractor:''}) {
     const id=uid();
+    const isActive = data.active !== false;
     const typeOpts=PERMIT_TYPES_FULL.map(t=>`<option ${t===data.type?'selected':''}>${t}</option>`).join('');
     const div=document.createElement('div');
     div.className='permit-item relative';
     div.innerHTML=`
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-1">
+            <span class="permit-collapsed-label text-sm font-semibold text-gray-400 ${isActive?'hidden':''}">${data.type==='Other'?(data.typeOther||'Other'):data.type}${data.contractor?' — '+data.contractor:''}</span>
+            <label class="flex items-center cursor-pointer gap-1 ml-auto"><span class="text-xs text-gray-500">Active</span>
+                <div class="relative"><input type="checkbox" class="sr-only permit-active-toggle" ${isActive?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
+            </label>
+        </div>
+        <div class="permit-details ${isActive?'':'hidden'}">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div><label class="block text-xs font-semibold text-gray-500 uppercase">Permit Type</label>
                 <select class="form-select text-sm mt-1 permit-type">${typeOpts}</select>
@@ -1062,9 +1070,19 @@ function addWorkPermitItem(data={type:'Fall Protection Plan',site:'1475',typeOth
                 <input type="text" class="form-input text-sm mt-1 permit-contractor" placeholder="e.g. WDC (task)…" value="${data.contractor||''}">
             </div>
         </div>
-        <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-permit-btn">Remove</button>`;
+        <button type="button" class="btn btn-danger btn-sm mt-2 remove-permit-btn">Remove</button>
+        </div>`;
     const sel=div.querySelector('.permit-type'),oth=div.querySelector('.permit-type-other');
     sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});
+    const actTog=div.querySelector('.permit-active-toggle'),details=div.querySelector('.permit-details'),colLabel=div.querySelector('.permit-collapsed-label');
+    actTog.addEventListener('change',()=>{
+        details.classList.toggle('hidden',!actTog.checked);
+        colLabel.classList.toggle('hidden',actTog.checked);
+        const t=sel.value==='Other'?(oth.value||'Other'):sel.value;
+        const c=div.querySelector('.permit-contractor').value;
+        colLabel.textContent=t+(c?' — '+c:'');
+        saveData();
+    });
     div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
     div.querySelector('.remove-permit-btn').addEventListener('click',()=>{div.remove();saveData();});
     document.getElementById('work-permits-container').appendChild(div);
@@ -1219,7 +1237,7 @@ function saveData() {
     const permits=[];
     document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{
         const s=item.querySelector('input[name^="permSite-"]:checked'), sel=item.querySelector('.permit-type');
-        permits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?.value||'',site:s?s.value:'1475',contractor:item.querySelector('.permit-contractor').value});
+        permits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?.value||'',site:s?s.value:'1475',contractor:item.querySelector('.permit-contractor').value,active:item.querySelector('.permit-active-toggle')?.checked!==false});
     });
     d.permits=JSON.stringify(permits);
     const cranes=[];
@@ -1333,7 +1351,7 @@ function generateReport() {
     const allSites=getAllSites();
     const hcBySite={},permitsBySite={},orisBySite={},walksBySite={},equipBySite={},craneBySite={},mtgsBySite={},incsBySite={},wkndsBySite={},obsBySite={};
     document.querySelectorAll('.headcount-input').forEach(inp=>{const v=parseInt(inp.value)||0;if(!v)return;const site=inp.dataset.site;if(!hcBySite[site])hcBySite[site]=[];hcBySite[site].push({trade:inp.dataset.trade,count:v});});
-    document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{const s=item.querySelector('input[name^="permSite-"]:checked');const site=s?s.value:'1475';const sel=item.querySelector('.permit-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.permit-type-other')?.value;if(o)type=`Other: ${o}`;}const c=item.querySelector('.permit-contractor').value;if(!c)return;if(!permitsBySite[site])permitsBySite[site]=[];permitsBySite[site].push({type,contractor:c});});
+    document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{const at=item.querySelector('.permit-active-toggle');if(at&&!at.checked)return;const s=item.querySelector('input[name^="permSite-"]:checked');const site=s?s.value:'1475';const sel=item.querySelector('.permit-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.permit-type-other')?.value;if(o)type=`Other: ${o}`;}const c=item.querySelector('.permit-contractor').value;if(!c)return;if(!permitsBySite[site])permitsBySite[site]=[];permitsBySite[site].push({type,contractor:c});});
     document.getElementById('orientations-container').querySelectorAll('.orientation-item').forEach(item=>{const s=item.querySelector('input[name^="oriSite-"]:checked');const site=s?s.value:'1475';const sel=item.querySelector('.orientation-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.orientation-type-other')?.value;if(o)type=`Other: ${o}`;}if(!orisBySite[site])orisBySite[site]=[];orisBySite[site].push({type,worker:item.querySelector('.orientation-worker').value});});
     document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{const id=cb.id;allSites.forEach(s=>{const sSlug=s.toLowerCase().replace(/[^a-z0-9]/g,'');if(id.includes(sSlug)){let label='';if(id.startsWith('safetywalk'))label=`Safety Walk ${s}`;else if(id.startsWith('weeklysafety'))label=`Weekly Safety Site Inspection ${s}`;else label=id.replace('-completed','');if(!walksBySite[s])walksBySite[s]=[];walksBySite[s].push(label);}});});
     document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{const tog=div.querySelector('.equip-toggle');if(!tog||!tog.checked)return;const site=div.querySelector('.equip-site-val').value||'1475';const name=div.querySelector('.equip-name').value;const sel=div.querySelector('.equip-inspector-sel');let insp=sel?sel.value:(div.querySelector('.equip-inspector-free')?.value||'');if(insp==='Other')insp=div.querySelector('.equip-inspector-other')?.value||'Other';if(!equipBySite[site])equipBySite[site]=[];equipBySite[site].push({name,inspector:insp});});
@@ -1444,7 +1462,7 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     var savedPermits=[];
     document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(function(item){
         var s=item.querySelector('input[name^="permSite-"]:checked'), sel=item.querySelector('.permit-type');
-        savedPermits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?item.querySelector('.permit-type-other').value:'',site:s?s.value:'1475',contractor:item.querySelector('.permit-contractor').value});
+        savedPermits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?item.querySelector('.permit-type-other').value:'',site:s?s.value:'1475',contractor:item.querySelector('.permit-contractor').value,active:item.querySelector('.permit-active-toggle')?item.querySelector('.permit-active-toggle').checked:true});
     });
     // ✅ FIX: solo preservar observaciones PENDING — las resolved y new se borran en el reset
     var savedObs=[];
