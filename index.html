@@ -304,7 +304,9 @@ const DEFAULT_PERMITS = [
 ];
 function getCustomSites() { return JSON.parse(localStorage.getItem('customSites_v5')||'[]'); }
 function saveCustomSites(arr) { localStorage.setItem('customSites_v5', JSON.stringify(arr)); }
-function getAllSites() { return [...BASE_SITES, ...getCustomSites()]; }
+function getInactiveBaseSites() { return JSON.parse(localStorage.getItem('inactiveBaseSites_v5')||'[]'); }
+function saveInactiveBaseSites(arr) { localStorage.setItem('inactiveBaseSites_v5', JSON.stringify(arr)); }
+function getAllSites() { return [...BASE_SITES.filter(s=>!getInactiveBaseSites().includes(s)), ...getCustomSites()]; }
 function getAllTrades() {
     const custom = JSON.parse(localStorage.getItem('customTrades_v5')||'[]');
     return [...BASE_TRADES, ...custom.map(n=>({name:n}))];
@@ -349,8 +351,37 @@ function renderSiteDisplay() {
 function renderSiteDeleteList() {
     const list = document.getElementById('site-delete-list');
     const custom = getCustomSites();
+    const inactiveBase = getInactiveBaseSites();
     list.innerHTML = '';
-    if (custom.length === 0) { list.innerHTML='<p class="text-xs text-gray-400">No custom sites added yet.</p>'; return; }
+    BASE_SITES.forEach(s => {
+        const isInactive = inactiveBase.includes(s);
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between bg-gray-50 border border-gray-100 rounded p-2';
+        row.innerHTML = `<span class="text-sm font-semibold" style="color:${siteColor(s)}">${s}${isInactive?' <span class="text-xs text-gray-400 font-normal">(removed)</span>':''}</span>
+            <button class="btn btn-sm ${isInactive?'btn-primary':'btn-danger'} base-site-btn" data-site="${s}">${isInactive?'Restore':'Remove'}</button>`;
+        row.querySelector('.base-site-btn').addEventListener('click', () => {
+            const arr = getInactiveBaseSites();
+            if (isInactive) {
+                saveInactiveBaseSites(arr.filter(x=>x!==s));
+            } else {
+                if (!confirm(`Remove site "${s}" from the active list?\n\nThis only hides it from new entries — nothing already saved is deleted, and you can restore it here anytime.`)) return;
+                if (!arr.includes(s)) arr.push(s);
+                saveInactiveBaseSites(arr);
+            }
+            renderSiteDisplay();
+            rebuildHeadcount();
+            rebuildInspections();
+            refreshAllSitePills();
+            saveData();
+        });
+        list.appendChild(row);
+    });
+    if (custom.length === 0) {
+        const note = document.createElement('p');
+        note.className = 'text-xs text-gray-400 mt-1';
+        note.textContent = 'No custom sites added yet.';
+        list.appendChild(note);
+    }
     custom.forEach(s => {
         const row = document.createElement('div');
         row.className = 'flex items-center justify-between bg-orange-50 border border-orange-100 rounded p-2';
