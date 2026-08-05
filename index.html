@@ -132,8 +132,8 @@
         <button class="tab-btn" data-tab="inspections">Inspections</button>
         <button class="tab-btn" data-tab="orientations">Orientations</button>
         <button class="tab-btn" data-tab="permits">Permits</button>
-        <button class="tab-btn" data-tab="crane">Crane</button>
-        <button class="tab-btn" data-tab="equipment">Equipment</button>
+        <button class="tab-btn" data-tab="crane">Cranes</button>
+        <button class="tab-btn" data-tab="equipment">Mobile Equipment</button>
         <button class="tab-btn" data-tab="meetings">Meetings</button>
         <button class="tab-btn" data-tab="incidents">Incidents</button>
         <button class="tab-btn" data-tab="weekend">Weekend</button>
@@ -330,6 +330,14 @@ function addOperatorFor(equipName, operatorName) {
 function removeOperatorFor(equipName, operatorName) {
     const arr = getOperatorsFor(equipName).filter(x=>x!==operatorName);
     setOperatorsFor(equipName, arr);
+    if (getPrincipalFor(equipName) === operatorName) setPrincipalFor(equipName, '');
+}
+function getPrincipalOperators() { return JSON.parse(localStorage.getItem('principalOperators_v5')||'{}'); }
+function getPrincipalFor(equipName) { return getPrincipalOperators()[equipName] || ''; }
+function setPrincipalFor(equipName, op) {
+    const all = getPrincipalOperators();
+    if (op) all[equipName] = op; else delete all[equipName];
+    localStorage.setItem('principalOperators_v5', JSON.stringify(all));
 }
 function siteColor(s) {
     if(s==='1475') return '#2563eb';
@@ -934,14 +942,21 @@ function buildOperatorManager(div, equipName) {
     const mgr = div.querySelector('.operator-manager');
     if (!mgr) return;
     const ops = getOperatorsFor(equipName);
+    const principal = getPrincipalFor(equipName);
     // rebuild chips
     const chipsDiv = mgr.querySelector('.ops-chips');
     chipsDiv.innerHTML = '';
     ops.forEach(op => {
+        const isP = op === principal;
         const chip = document.createElement('span');
         chip.className = 'operator-chip';
-        chip.innerHTML = `${op} <button type="button" data-op="${op}" title="Remove">×</button>`;
-        chip.querySelector('button').addEventListener('click', () => {
+        if (isP) chip.style.cssText = 'border:1px solid #96C61C;';
+        chip.innerHTML = `<button type="button" class="star-btn" title="${isP?'Principal (default)':'Make principal'}" style="background:none;border:none;cursor:pointer;padding:0 2px;${isP?'':'opacity:0.35;'}">${isP?'★':'☆'}</button>${op} <button type="button" class="rm-btn" data-op="${op}" title="Remove">×</button>`;
+        chip.querySelector('.star-btn').addEventListener('click', () => {
+            setPrincipalFor(equipName, isP ? '' : op);
+            buildOperatorManager(div, equipName);
+        });
+        chip.querySelector('.rm-btn').addEventListener('click', () => {
             removeOperatorFor(equipName, op);
             buildOperatorManager(div, equipName);
             rebuildEquipInspectorSelect(div, equipName);
@@ -970,6 +985,7 @@ function rebuildEquipInspectorSelect(div, equipName) {
 }
 function addEquipmentItem(data) {
     const equipName = data.name || '';
+    const isActive = data.active !== false;
     // Merge default inspectors into persistent storage (only first time)
     if (data.inspectors && data.inspectors.length > 0) {
         const stored = getOperatorsFor(equipName);
@@ -980,14 +996,18 @@ function addEquipmentItem(data) {
     const inspOpts = hasNamed ? [...ops,'Other'].map(i=>`<option ${i===(data.inspector||'')?'selected':''}>${i}</option>`).join('') : '';
     const div = document.createElement('div');
     div.className = 'equipment-card mb-2 equipment-item';
+    if (!isActive) div.style.opacity = '0.55';
     div.innerHTML = `
         <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
             <input type="text" class="form-input text-sm font-semibold equip-name flex-1" style="min-width:150px" value="${equipName}" placeholder="Equipment name…">
-            <label class="flex items-center cursor-pointer ml-1 gap-1"><span class="text-xs text-gray-500">Done</span>
+            <label class="flex items-center cursor-pointer ml-1 gap-1"><span class="text-xs text-gray-500">Active</span>
+                <div class="relative"><input type="checkbox" class="sr-only equip-active-toggle" ${isActive?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
+            </label>
+            <label class="equip-done-wrap flex items-center cursor-pointer ml-1 gap-1 ${isActive?'':'hidden'}"><span class="text-xs text-gray-500">Done</span>
                 <div class="relative"><input type="checkbox" class="sr-only equip-toggle" ${data.done?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
             </label>
         </div>
-        <div class="equip-details ${data.done?'':'hidden'} mt-2">
+        <div class="equip-details ${(isActive&&data.done)?'':'hidden'} mt-2">
             <div class="mb-2">
                 <label class="text-xs font-semibold text-gray-500">SITE</label>
                 <div class="flex flex-wrap gap-1 mt-1 equip-site-pills"></div>
@@ -1018,7 +1038,27 @@ function addEquipmentItem(data) {
         </div>`;
     buildSitePillsInto(div.querySelector('.equip-site-pills'), data.site||'1475');
     const tog=div.querySelector('.equip-toggle'), det=div.querySelector('.equip-details');
-    tog.addEventListener('change',()=>{det.classList.toggle('hidden',!tog.checked);saveData();});
+    tog.addEventListener('change',()=>{
+        det.classList.toggle('hidden',!tog.checked);
+        if(tog.checked){
+            const curName=div.querySelector('.equip-name').value.trim()||equipName;
+            const principal=getPrincipalFor(curName);
+            const s=div.querySelector('.equip-inspector-sel');
+            // preselect principal only if the user hasn't picked someone else yet
+            if(principal&&s&&s.selectedIndex===0&&[...s.options].some(o=>o.value===principal)){
+                s.value=principal;
+            }
+        }
+        saveData();
+    });
+    const actTog=div.querySelector('.equip-active-toggle'), doneWrap=div.querySelector('.equip-done-wrap');
+    actTog.addEventListener('change',()=>{
+        const on=actTog.checked;
+        div.style.opacity=on?'':'0.55';
+        doneWrap.classList.toggle('hidden',!on);
+        det.classList.toggle('hidden',!on||!tog.checked);
+        saveData();
+    });
     const sel=div.querySelector('.equip-inspector-sel');
     if(sel){const oth=div.querySelector('.equip-inspector-other');sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});}
     div.querySelector('.remove-equip-btn').addEventListener('click',()=>{div.remove();saveData();});
@@ -1281,7 +1321,7 @@ function saveData() {
     const equip=[];
     document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{
         const sel=div.querySelector('.equip-inspector-sel'), freeInp=div.querySelector('.equip-inspector-free');
-        equip.push({name:div.querySelector('.equip-name').value,site:div.querySelector('.equip-site-val').value,done:div.querySelector('.equip-toggle')?.checked||false,inspector:sel?sel.value:'',otherInspector:freeInp?freeInp.value:(div.querySelector('.equip-inspector-other')?.value||'')});
+        equip.push({name:div.querySelector('.equip-name').value,site:div.querySelector('.equip-site-val').value,done:div.querySelector('.equip-toggle')?.checked||false,active:div.querySelector('.equip-active-toggle')?.checked!==false,inspector:sel?sel.value:'',otherInspector:freeInp?freeInp.value:(div.querySelector('.equip-inspector-other')?.value||'')});
     });
     d.equipment=JSON.stringify(equip);
     const mtgs=[];
@@ -1385,7 +1425,7 @@ function generateReport() {
     document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{const at=item.querySelector('.permit-active-toggle');if(at&&!at.checked)return;const s=item.querySelector('input[name^="permSite-"]:checked');const site=s?s.value:'1475';const sel=item.querySelector('.permit-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.permit-type-other')?.value;if(o)type=`Other: ${o}`;}const c=item.querySelector('.permit-contractor').value;if(!c)return;if(!permitsBySite[site])permitsBySite[site]=[];permitsBySite[site].push({type,contractor:c});});
     document.getElementById('orientations-container').querySelectorAll('.orientation-item').forEach(item=>{const s=item.querySelector('input[name^="oriSite-"]:checked');const site=s?s.value:'1475';const sel=item.querySelector('.orientation-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.orientation-type-other')?.value;if(o)type=`Other: ${o}`;}if(!orisBySite[site])orisBySite[site]=[];orisBySite[site].push({type,worker:item.querySelector('.orientation-worker').value});});
     document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{const id=cb.id;allSites.forEach(s=>{const sSlug=s.toLowerCase().replace(/[^a-z0-9]/g,'');if(id.includes(sSlug)){let label='';if(id.startsWith('safetywalk'))label=`Safety Walk ${s}`;else if(id.startsWith('weeklysafety'))label=`Weekly Safety Site Inspection ${s}`;else label=id.replace('-completed','');if(!walksBySite[s])walksBySite[s]=[];walksBySite[s].push(label);}});});
-    document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{const tog=div.querySelector('.equip-toggle');if(!tog||!tog.checked)return;const site=div.querySelector('.equip-site-val').value||'1475';const name=div.querySelector('.equip-name').value;const sel=div.querySelector('.equip-inspector-sel');let insp=sel?sel.value:(div.querySelector('.equip-inspector-free')?.value||'');if(insp==='Other')insp=div.querySelector('.equip-inspector-other')?.value||'Other';if(!equipBySite[site])equipBySite[site]=[];equipBySite[site].push({name,inspector:insp});});
+    document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{const act=div.querySelector('.equip-active-toggle');if(act&&!act.checked)return;const tog=div.querySelector('.equip-toggle');if(!tog||!tog.checked)return;const site=div.querySelector('.equip-site-val').value||'1475';const name=div.querySelector('.equip-name').value;const sel=div.querySelector('.equip-inspector-sel');let insp=sel?sel.value:(div.querySelector('.equip-inspector-free')?.value||'');if(insp==='Other')insp=div.querySelector('.equip-inspector-other')?.value||'Other';if(!equipBySite[site])equipBySite[site]=[];equipBySite[site].push({name,inspector:insp});});
     document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(div=>{const site=div.querySelector('.crane-site-val')?.value||'1600';const craneName=div.querySelector('.crane-name')?.value||'Crane';if(!craneBySite[site])craneBySite[site]=[];const entry={craneName,tasks:[]};const dailyTog=div.querySelector('.crane-daily-toggle');if(dailyTog&&dailyTog.checked){let insp=div.querySelector('.crane-insp-sel')?.value||'';if(insp==='Other')insp=div.querySelector('.crane-insp-other')?.value||'Other';entry.tasks.push({task:'Crane Daily Inspection',inspector:insp});}const riggTog=div.querySelector('.crane-rigging-toggle');if(riggTog&&riggTog.checked){let insp=div.querySelector('.crane-rigging-sel')?.value||'';if(insp==='Other')insp=div.querySelector('.crane-rigging-other')?.value||'Other';entry.tasks.push({task:'Rigging Daily Inspection',inspector:insp});}const cold=div.querySelector('.crane-cold-check');if(cold&&cold.checked)entry.tasks.push({task:'Cold Weather Crane Inspection',inspector:''});const companies=[];div.querySelectorAll('.overlap-check:checked').forEach(cb=>companies.push(cb.value));const o1c=div.querySelector('.overlap-other1-check');if(o1c&&o1c.checked){const t=div.querySelector('.overlap-other1-text')?.value;if(t)companies.push(t);}const o2c=div.querySelector('.overlap-other2-check');if(o2c&&o2c.checked){const t=div.querySelector('.overlap-other2-text')?.value;if(t)companies.push(t);}if(companies.length)entry.tasks.push({task:'Overlapping Procedure',companies});if(entry.tasks.length)craneBySite[site].push(entry);});
     document.getElementById('safety-meetings-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="mtgSite-"]:checked');const site=s?s.value:'1475';if(!mtgsBySite[site])mtgsBySite[site]=[];mtgsBySite[site].push({status:div.querySelector('.mtg-status').value,comment:div.querySelector('.mtg-comment').value});});
     document.getElementById('site-incidents-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="incSite-"]:checked');const site=s?s.value:'1475';const sel=div.querySelector('.inc-type');let type=sel.value;if(type==='Other'){const o=div.querySelector('.inc-type-other')?.value;if(o)type=`Other: ${o}`;}if(!incsBySite[site])incsBySite[site]=[];incsBySite[site].push({type,comment:div.querySelector('.inc-comment').value});});
