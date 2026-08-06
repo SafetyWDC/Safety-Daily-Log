@@ -187,6 +187,7 @@
     <div class="card">
         <h2 class="text-base font-semibold mb-1" style="color:#003D52">Mobile Equipment</h2>
         <div id="mobile-equipment-container" class="space-y-2"></div>
+        <button id="show-inactive-equip-btn" type="button" class="hidden w-full text-left text-xs font-semibold mt-2 py-1 px-2 rounded" style="color:#A5A5A5;background:#f3f4f6"></button>
         <button id="add-equipment-btn" class="btn btn-green mt-3 w-full md:w-auto">+ Add Equipment</button>
     </div>
 </div>
@@ -1058,6 +1059,7 @@ function addEquipmentItem(data) {
         doneWrap.classList.toggle('hidden',!on);
         det.classList.toggle('hidden',!on||!tog.checked);
         saveData();
+        updateInactiveEquipVisibility();
     });
     const sel=div.querySelector('.equip-inspector-sel');
     if(sel){const oth=div.querySelector('.equip-inspector-other');sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});}
@@ -1085,7 +1087,21 @@ function addEquipmentItem(data) {
     });
     buildOperatorManager(div, equipName);
     document.getElementById('mobile-equipment-container').appendChild(div);
+    updateInactiveEquipVisibility();
 }
+let showInactiveEquip=false;
+function updateInactiveEquipVisibility(){
+    const items=[...document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item')];
+    const inactive=items.filter(d=>{const t=d.querySelector('.equip-active-toggle');return t&&!t.checked;});
+    items.forEach(d=>{d.style.display=(inactive.includes(d)&&!showInactiveEquip)?'none':'';});
+    const btn=document.getElementById('show-inactive-equip-btn');
+    if(inactive.length===0){btn.classList.add('hidden');}
+    else{
+        btn.classList.remove('hidden');
+        btn.textContent=(showInactiveEquip?'▾ Hide inactive equipment (':'▸ Show inactive equipment (')+inactive.length+')';
+    }
+}
+document.getElementById('show-inactive-equip-btn').addEventListener('click',()=>{showInactiveEquip=!showInactiveEquip;updateInactiveEquipVisibility();});
 document.getElementById('add-equipment-btn').addEventListener('click',()=>{addEquipmentItem({name:'',site:'1475',done:false,inspector:'',otherInspector:'',inspectors:[]});saveData();});
 const ORIENTATION_TYPES_FULL = [...ORIENTATION_TYPES, 'Other'];
 function addOrientationItem(data={type:'New Worker Orientation',site:'1475',typeOther:'',worker:''}) {
@@ -1404,8 +1420,9 @@ function loadData() {
     }
     // ✅ FIX: siempre cargar crane/equipo guardado sin importar la fecha, para no perder serial/color
     const isSameDay = data && data.checklistDate === today;
-    if(data&&data.craneData){const cd=JSON.parse(data.craneData);if(Array.isArray(cd)&&cd.length){document.getElementById('crane-container').innerHTML='';cd.forEach(c=>addCraneCard(isSameDay?c:{...c,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''}));}}
-    if(data&&data.equipment){const eq=JSON.parse(data.equipment);if(eq.length){document.getElementById('mobile-equipment-container').innerHTML='';eq.forEach(e=>{const trimmedName=(e.name||'').trim();const canonName=EQUIP_NAME_MAP[trimmedName]||trimmedName;const base=EQUIPMENT_LIST.find(b=>b.name===canonName);addEquipmentItem({...e,name:canonName,done:isSameDay?e.done:false,inspector:isSameDay?e.inspector:'',otherInspector:isSameDay?e.otherInspector:'',inspectors:base?base.inspectors:[]});});}}
+    // ✅ FIX: si la lista guardada existe (aunque esté vacía), respetarla — lo que el usuario borró no debe reaparecer
+    if(data&&data.craneData){const cd=JSON.parse(data.craneData);if(Array.isArray(cd)){document.getElementById('crane-container').innerHTML='';cd.forEach(c=>addCraneCard(isSameDay?c:{...c,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''}));}}
+    if(data&&data.equipment){const eq=JSON.parse(data.equipment);if(Array.isArray(eq)){document.getElementById('mobile-equipment-container').innerHTML='';eq.forEach(e=>{const trimmedName=(e.name||'').trim();const canonName=EQUIP_NAME_MAP[trimmedName]||trimmedName;const base=EQUIPMENT_LIST.find(b=>b.name===canonName);addEquipmentItem({...e,name:canonName,done:isSameDay?e.done:false,inspector:isSameDay?e.inspector:'',otherInspector:isSameDay?e.otherInspector:'',inspectors:base?base.inspectors:[]});});updateInactiveEquipVisibility();}}
     if(!isSameDay){rebuildHeadcount();rebuildInspections();return;}
     document.getElementById('waterUse').value=data.waterUse||'L1';
     document.getElementById('fireDanger').value=data.fireDanger||'Low';
@@ -1559,7 +1576,7 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     });
     var savedEquip=[];
     document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(function(div){
-        savedEquip.push({name:div.querySelector('.equip-name')?div.querySelector('.equip-name').value:'Equipment',site:div.querySelector('.equip-site-val')?div.querySelector('.equip-site-val').value:getAllSites()[0]});
+        savedEquip.push({name:div.querySelector('.equip-name')?div.querySelector('.equip-name').value:'Equipment',site:div.querySelector('.equip-site-val')?div.querySelector('.equip-site-val').value:getAllSites()[0],active:div.querySelector('.equip-active-toggle')?div.querySelector('.equip-active-toggle').checked:true});
     });
     document.getElementById('waterUse').selectedIndex=0;
     document.getElementById('fireDanger').selectedIndex=0;
@@ -1572,9 +1589,9 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     document.getElementById('site-incidents-container').innerHTML='';
     document.getElementById('weekend-work-container').innerHTML='';
     document.getElementById('crane-container').innerHTML='';
-    if(savedCranes.length>0){savedCranes.forEach(function(c){addCraneCard({name:c.name,site:c.site,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''});});}else{buildCrane();}
+    savedCranes.forEach(function(c){addCraneCard({name:c.name,site:c.site,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''});});
     document.getElementById('mobile-equipment-container').innerHTML='';
-    if(savedEquip.length>0){savedEquip.forEach(function(e){addEquipmentItem({name:e.name,site:e.site,done:false,inspector:'',otherInspector:''});});}else{buildMobileEquipment();}
+    savedEquip.forEach(function(e){addEquipmentItem({name:e.name,site:e.site,active:e.active,done:false,inspector:'',otherInspector:''});});
     document.getElementById('work-permits-container').innerHTML='';
     savedPermits.forEach(function(p){addWorkPermitItem(p);});
     document.getElementById('additional-observations-container').innerHTML='';
