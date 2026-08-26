@@ -1449,8 +1449,12 @@ function generateReport() {
     document.getElementById('weekend-work-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="wkndSite-"]:checked');const site=s?s.value:'1475';if(!wkndsBySite[site])wkndsBySite[site]=[];wkndsBySite[site].push({status:div.querySelector('.wknd-status').value,comment:div.querySelector('.wknd-comment').value});});
     const allSitesObs=[];
     document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(item=>{const sel=item.querySelector('.obs-site-sel');let site=sel?sel.value:'1475';if(site==='Other'){const o=item.querySelector('.obs-site-other')?.value;if(o)site=o;}const text=item.querySelector('.obs-text')?.value.trim()||'';if(!text)return;const foremanInformed=item.querySelector('.obs-foreman-check')?.checked||false;const isPending=item.querySelector('.obs-pending-check')?.checked||false;const isResolved=item.querySelector('.obs-resolved-check')?.checked||false;const resolvedDate=item.querySelector('.obs-resolved-date')?.value||'';let obsStatus='new';if(isResolved)obsStatus='resolved';else if(isPending)obsStatus='pending';const obsObj={text,foremanInformed,obsStatus,resolvedDate};if(site==='All Sites'){allSitesObs.push(obsObj);}else{if(!obsBySite[site])obsBySite[site]=[];obsBySite[site].push(obsObj);}});
+    // ✅ FIX: incluir también sitios inactivos que tengan datos de hoy — un sitio "closed out"
+    // no debe hacer desaparecer orientaciones/headcount/etc. ya registrados bajo ese sitio.
+    const dataSites=[...new Set([].concat(Object.keys(hcBySite),Object.keys(permitsBySite),Object.keys(orisBySite),Object.keys(walksBySite),Object.keys(equipBySite),Object.keys(craneBySite),Object.keys(mtgsBySite),Object.keys(incsBySite),Object.keys(wkndsBySite),Object.keys(obsBySite)))];
+    const reportSites=[...allSites,...dataSites.filter(s=>!allSites.includes(s))];
     const blocks=[];let isFirstSite=true;
-    allSites.forEach(site=>{
+    reportSites.forEach(site=>{
         const hasAny=hcBySite[site]||permitsBySite[site]||orisBySite[site]||walksBySite[site]||equipBySite[site]||craneBySite[site]||mtgsBySite[site]||incsBySite[site]||wkndsBySite[site]||obsBySite[site];
         if(!hasAny)return;
         const pageBreakClass=isFirstSite?'report-site-block report-first-site':'report-site-block';
