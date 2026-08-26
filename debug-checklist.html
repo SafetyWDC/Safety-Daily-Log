@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Debug Checklist</title>
+<style>body{font-family:monospace;padding:20px;background:#f0f2f5;}
+h2{color:#003D52;}h3{color:#7c3aed;margin-top:24px;}pre{background:white;border:1px solid #ccc;padding:15px;border-radius:8px;white-space:pre-wrap;word-break:break-all;font-size:13px;}</style>
+</head>
+<body>
+<h2>Debug — Orientations de hoy</h2>
+
+<h3>1. Fecha guardada vs fecha de hoy</h3>
+<pre id="out-date"></pre>
+
+<h3>2. Orientations guardadas (csoChecklist_v5)</h3>
+<pre id="out-oris"></pre>
+
+<h3>3. Sitios inactivos</h3>
+<pre id="out-inactive"></pre>
+
+<h3>4. Sitios activos (getAllSites equivalente)</h3>
+<pre id="out-active"></pre>
+
+<script>
+const raw = localStorage.getItem('csoChecklist_v5');
+const today = new Date().toISOString().slice(0,10);
+let data = null;
+try { data = raw ? JSON.parse(raw) : null; } catch(e) {}
+
+document.getElementById('out-date').textContent =
+    'Hoy: ' + today + '\nGuardado (checklistDate): ' + (data ? data.checklistDate : '(sin datos)') +
+    '\n¿Coinciden? ' + (data && data.checklistDate === today ? 'SI' : 'NO — esto puede causar que se ignoren datos de hoy');
+
+let oris = [];
+if (data && data.orientations) {
+    try { oris = JSON.parse(data.orientations); } catch(e) {}
+}
+if (oris.length === 0) {
+    document.getElementById('out-oris').textContent = '(vacío — no hay orientaciones guardadas en csoChecklist_v5)';
+} else {
+    let txt = 'Total guardadas: ' + oris.length + '\n\n';
+    oris.forEach((o,i) => { txt += (i+1) + '. site="' + o.site + '" type="' + o.type + '" worker="' + o.worker + '"\n'; });
+    document.getElementById('out-oris').textContent = txt;
+}
+
+const BASE_SITES = ['1475','1600','1825'];
+const inactive = JSON.parse(localStorage.getItem('inactiveBaseSites_v5')||'[]');
+document.getElementById('out-inactive').textContent = JSON.stringify(inactive);
+
+const customSites = JSON.parse(localStorage.getItem('customSites_v5')||'[]');
+const activeSites = [...BASE_SITES.filter(s=>!inactive.includes(s)), ...customSites];
+document.getElementById('out-active').textContent = JSON.stringify(activeSites);
+</script>
+</body>
+</html>
