@@ -333,6 +333,22 @@ function removeOperatorFor(equipName, operatorName) {
     setOperatorsFor(equipName, arr);
     if (getPrincipalFor(equipName) === operatorName) setPrincipalFor(equipName, '');
 }
+function migrateEquipOperatorKey(oldName, newName) {
+    if (!newName || oldName === newName) return;
+    const all = getAllOperators();
+    if (all[oldName] && all[oldName].length > 0) {
+        const merged = [...(all[newName]||[])];
+        all[oldName].forEach(op => { if (!merged.includes(op)) merged.push(op); });
+        all[newName] = merged;
+        delete all[oldName];
+        saveAllOperators(all);
+    }
+    const principal = getPrincipalFor(oldName);
+    if (principal) {
+        setPrincipalFor(oldName, '');
+        if (!getPrincipalFor(newName)) setPrincipalFor(newName, principal);
+    }
+}
 function getPrincipalOperators() { return JSON.parse(localStorage.getItem('principalOperators_v5')||'{}'); }
 function getPrincipalFor(equipName) { return getPrincipalOperators()[equipName] || ''; }
 function setPrincipalFor(equipName, op) {
@@ -1064,7 +1080,7 @@ function addEquipmentItem(data) {
     const sel=div.querySelector('.equip-inspector-sel');
     if(sel){const oth=div.querySelector('.equip-inspector-other');sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});}
     div.querySelector('.remove-equip-btn').addEventListener('click',()=>{div.remove();saveData();});
-    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    div.querySelectorAll('input:not(.equip-name),select').forEach(el=>el.addEventListener('input',saveData));
     // Operator manager toggle
     div.querySelector('.toggle-ops-btn').addEventListener('click', () => {
         div.querySelector('.ops-add-row').classList.toggle('hidden');
@@ -1081,8 +1097,16 @@ function addEquipmentItem(data) {
         rebuildEquipInspectorSelect(div, currentEquipName);
         saveData();
     });
-    // Name change: update operator key
-    div.querySelector('.equip-name').addEventListener('change', () => {
+    // Name change: migrate operators/principal to the new name so they don't get orphaned
+    let trackedName = equipName;
+    div.querySelector('.equip-name').addEventListener('input', () => {
+        const newName = div.querySelector('.equip-name').value.trim();
+        if (newName && newName !== trackedName) {
+            migrateEquipOperatorKey(trackedName, newName);
+            trackedName = newName;
+            buildOperatorManager(div, trackedName);
+            rebuildEquipInspectorSelect(div, trackedName);
+        }
         saveData();
     });
     buildOperatorManager(div, equipName);
