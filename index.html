@@ -581,21 +581,28 @@ function rebuildHeadcount(savedHC) {
         totalsRow.innerHTML += `<div class="rounded-lg p-2 text-center" style="background:${siteColor(s)}18;min-width:60px">
             <div class="text-xs font-semibold" style="color:${siteColor(s)}">${s}</div>
             <div id="total-${s}" class="text-lg font-bold" style="color:${siteColor(s)}">0</div>
+            <div id="trades-${s}" class="text-xs" style="color:${siteColor(s)}">0 trades</div>
         </div>`;
     });
     updateHeadcounts();
 }
 function updateHeadcounts() {
     const sums = {};
-    getAllSites().forEach(s=>sums[s]=0);
+    const tradesBySite = {};
+    getAllSites().forEach(s=>{sums[s]=0;tradesBySite[s]=new Set();});
     document.querySelectorAll('.headcount-input').forEach(inp=>{
         const v=parseInt(inp.value)||0;
         const site=inp.dataset.site;
-        if(sums[site]!=null) sums[site]+=v;
+        if(sums[site]!=null){
+            sums[site]+=v;
+            if(v>0) tradesBySite[site].add(inp.dataset.trade);
+        }
     });
     let grand = 0;
     getAllSites().forEach(s=>{
         const el=document.getElementById('total-'+s); if(el) el.textContent=sums[s];
+        const tEl=document.getElementById('trades-'+s);
+        if(tEl){const n=tradesBySite[s].size;tEl.textContent=n+(n===1?' trade':' trades');}
         grand+=sums[s];
     });
     document.getElementById('grand-total').textContent = grand;
@@ -1485,7 +1492,7 @@ function generateReport() {
         isFirstSite=false;
         let b=`<div class="${pageBreakClass}">`;
         b+=`<div class="report-site-header" style="margin:0 0 6pt;padding:5pt 8pt;background:#003D52;border-radius:3pt"><span style="font-size:12pt;font-weight:800;color:#96C61C;letter-spacing:0.06em">SITE ${site}</span></div>`;
-        if(hcBySite[site]){const t=hcBySite[site].reduce((s,x)=>s+x.count,0);b+=sectionHtml('Headcount');b+=`<div style="margin-left:10pt;margin-bottom:3pt"><span style="font-weight:700;font-size:9pt;color:#003D52">${t} workers on site</span><br>`;hcBySite[site].forEach(x=>{b+=`<span style="color:#374151;font-size:8.5pt">&nbsp;&nbsp;${x.trade}: <b>${x.count}</b></span><br>`;});b+=`</div>`;}
+        if(hcBySite[site]){const t=hcBySite[site].reduce((s,x)=>s+x.count,0);const nTrades=hcBySite[site].length;b+=sectionHtml('Headcount');b+=`<div style="margin-left:10pt;margin-bottom:3pt"><span style="font-weight:700;font-size:9pt;color:#003D52">${t} workers on site — ${nTrades} ${nTrades===1?'trade':'trades'}</span><br>`;hcBySite[site].forEach(x=>{b+=`<span style="color:#374151;font-size:8.5pt">&nbsp;&nbsp;${x.trade}: <b>${x.count}</b></span><br>`;});b+=`</div>`;}
         if(orisBySite[site]){b+=sectionHtml('Orientations');orisBySite[site].forEach(o=>{let txt=o.type;if(o.worker)txt+=` <span style="color:#374151">— ${o.worker}</span>`;b+=rowHtml(txt);});}
         if(walksBySite[site]){
             b+=sectionHtml('Inspections Completed');
