@@ -453,10 +453,13 @@ document.getElementById('add-site-btn').addEventListener('click', () => {
     saveData();
 });
 function uid() { return Date.now()+'-'+Math.floor(Math.random()*9999); }
+function defaultSite() { return getAllSites()[0] || ''; }
 function buildSiteRadiosHtml(nameAttr, selected) {
-    return getAllSites().map(s =>
+    const sites = getAllSites();
+    const sel = sites.includes(selected) ? selected : sites[0];
+    return sites.map(s =>
         `<label class="inline-flex items-center mr-3 mb-1 text-sm">
-            <input type="radio" name="${nameAttr}" value="${s}" class="h-4 w-4 mr-1" ${s===selected?'checked':''}>
+            <input type="radio" name="${nameAttr}" value="${s}" class="h-4 w-4 mr-1" ${s===sel?'checked':''}>
             <span style="color:${siteColor(s)};font-weight:600">${s}</span>
         </label>`
     ).join('');
@@ -1022,6 +1025,7 @@ function rebuildEquipInspectorSelect(div, equipName) {
 function addEquipmentItem(data) {
     const equipName = data.name || '';
     const isActive = data.active !== false;
+    const eqSite = getAllSites().includes(data.site) ? data.site : defaultSite();
     // Merge default inspectors into persistent storage (only first time)
     if (data.inspectors && data.inspectors.length > 0) {
         const stored = getOperatorsFor(equipName);
@@ -1047,7 +1051,7 @@ function addEquipmentItem(data) {
             <div class="mb-2">
                 <label class="text-xs font-semibold text-gray-500">SITE</label>
                 <div class="flex flex-wrap gap-1 mt-1 equip-site-pills"></div>
-                <input type="hidden" class="equip-site-val" value="${data.site||'1475'}">
+                <input type="hidden" class="equip-site-val" value="${eqSite}">
             </div>
             <div class="pl-2 border-l-2 border-orange-200">
                 <label class="text-xs font-semibold text-gray-500">Inspected by</label>
@@ -1072,7 +1076,7 @@ function addEquipmentItem(data) {
             </div>
             <button type="button" class="btn btn-danger btn-sm mt-2 remove-equip-btn">Remove</button>
         </div>`;
-    buildSitePillsInto(div.querySelector('.equip-site-pills'), data.site||'1475');
+    buildSitePillsInto(div.querySelector('.equip-site-pills'), eqSite);
     const tog=div.querySelector('.equip-toggle'), det=div.querySelector('.equip-details');
     tog.addEventListener('change',()=>{
         det.classList.toggle('hidden',!tog.checked);
@@ -1145,9 +1149,9 @@ function updateInactiveEquipVisibility(){
     }
 }
 document.getElementById('show-inactive-equip-btn').addEventListener('click',()=>{showInactiveEquip=!showInactiveEquip;updateInactiveEquipVisibility();});
-document.getElementById('add-equipment-btn').addEventListener('click',()=>{addEquipmentItem({name:'',site:'1475',done:false,inspector:'',otherInspector:'',inspectors:[]});saveData();});
+document.getElementById('add-equipment-btn').addEventListener('click',()=>{addEquipmentItem({name:'',site:defaultSite(),done:false,inspector:'',otherInspector:'',inspectors:[]});saveData();});
 const ORIENTATION_TYPES_FULL = [...ORIENTATION_TYPES, 'Other'];
-function addOrientationItem(data={type:'New Worker Orientation',site:'1475',typeOther:'',worker:''}) {
+function addOrientationItem(data={type:'New Worker Orientation',site:defaultSite(),typeOther:'',worker:''}) {
     const id=uid();
     const typeOpts=ORIENTATION_TYPES_FULL.map(t=>`<option ${t===data.type?'selected':''}>${t}</option>`).join('');
     const div=document.createElement('div');
@@ -1175,7 +1179,7 @@ function addOrientationItem(data={type:'New Worker Orientation',site:'1475',type
 }
 document.getElementById('add-orientation-btn').addEventListener('click',()=>{addOrientationItem();saveData();});
 const PERMIT_TYPES_FULL = [...PERMIT_TYPES, 'Other'];
-function addWorkPermitItem(data={type:'Fall Protection Plan',site:'1475',typeOther:'',contractor:''}) {
+function addWorkPermitItem(data={type:'Fall Protection Plan',site:defaultSite(),typeOther:'',contractor:''}) {
     const id=uid();
     const isActive = data.active !== false;
     const typeOpts=PERMIT_TYPES_FULL.map(t=>`<option ${t===data.type?'selected':''}>${t}</option>`).join('');
@@ -1220,7 +1224,7 @@ function addWorkPermitItem(data={type:'Fall Protection Plan',site:'1475',typeOth
     document.getElementById('work-permits-container').appendChild(div);
 }
 document.getElementById('add-permit-btn').addEventListener('click',()=>{addWorkPermitItem();saveData();});
-function addMeetingItem(data={site:'1475',status:'Yes',comment:''}) {
+function addMeetingItem(data={site:defaultSite(),status:'Yes',comment:''}) {
     const id=uid();
     const div=document.createElement('div');
     div.className='relative bg-white border border-yellow-200 rounded-lg p-2 space-y-1';
@@ -1244,7 +1248,7 @@ function getIncStatus(div){
     if(div.querySelector('.inc-pending-check')?.checked) return 'pending';
     return 'new';
 }
-function addIncidentItem(data={site:'1475',type:'First Aid',typeOther:'',comment:''}) {
+function addIncidentItem(data={site:defaultSite(),type:'First Aid',typeOther:'',comment:''}) {
     const id=uid();
     const incStatus=data.incStatus||'new';
     const typeOpts=INCIDENT_TYPES_FULL.map(t=>`<option ${t===data.type?'selected':''}>${t}</option>`).join('');
@@ -1305,7 +1309,7 @@ function addIncidentItem(data={site:'1475',type:'First Aid',typeOther:'',comment
     document.getElementById('site-incidents-container').appendChild(div);
 }
 document.getElementById('add-incident-btn').addEventListener('click',()=>{addIncidentItem();saveData();});
-function addWeekendItem(data={site:'1475',status:'Yes',comment:''}) {
+function addWeekendItem(data={site:defaultSite(),status:'Yes',comment:''}) {
     const id=uid();
     const div=document.createElement('div');
     div.className='relative bg-white border border-purple-200 rounded-lg p-2 space-y-1';
@@ -1328,7 +1332,7 @@ function buildObsSiteOptions(selected) {
 }
 function addObservationItem(data) {
     data = data || {};
-    const siteVal    = data.site || '1475';
+    const siteVal    = data.site || defaultSite();
     const obsStatus  = data.obsStatus  || 'new';
     const foremanInf = data.foremanInformed || false;
     const resolvedDate = data.resolvedDate || '';
@@ -1460,13 +1464,13 @@ function saveData() {
     const oris=[];
     document.getElementById('orientations-container').querySelectorAll('.orientation-item').forEach(item=>{
         const s=item.querySelector('input[name^="oriSite-"]:checked'), sel=item.querySelector('.orientation-type');
-        oris.push({type:sel.value,typeOther:item.querySelector('.orientation-type-other')?.value||'',site:s?s.value:'1475',worker:item.querySelector('.orientation-worker').value});
+        oris.push({type:sel.value,typeOther:item.querySelector('.orientation-type-other')?.value||'',site:s?s.value:defaultSite(),worker:item.querySelector('.orientation-worker').value});
     });
     d.orientations=JSON.stringify(oris);
     const permits=[];
     document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{
         const s=item.querySelector('input[name^="permSite-"]:checked'), sel=item.querySelector('.permit-type');
-        permits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?.value||'',site:s?s.value:'1475',contractor:item.querySelector('.permit-contractor').value,active:item.querySelector('.permit-active-toggle')?.checked!==false});
+        permits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?.value||'',site:s?s.value:defaultSite(),contractor:item.querySelector('.permit-contractor').value,active:item.querySelector('.permit-active-toggle')?.checked!==false});
     });
     d.permits=JSON.stringify(permits);
     const cranes=[];
@@ -1485,24 +1489,24 @@ function saveData() {
     const mtgs=[];
     document.getElementById('safety-meetings-container').querySelectorAll('.relative').forEach(div=>{
         const s=div.querySelector('input[name^="mtgSite-"]:checked');
-        mtgs.push({site:s?s.value:'1475',status:div.querySelector('.mtg-status').value,comment:div.querySelector('.mtg-comment').value});
+        mtgs.push({site:s?s.value:defaultSite(),status:div.querySelector('.mtg-status').value,comment:div.querySelector('.mtg-comment').value});
     });
     d.meetings=JSON.stringify(mtgs);
     const incs=[];
     document.getElementById('site-incidents-container').querySelectorAll('.incident-item').forEach(div=>{
         const s=div.querySelector('input[name^="incSite-"]:checked'), sel=div.querySelector('.inc-type');
-        incs.push({site:s?s.value:'1475',type:sel.value,typeOther:div.querySelector('.inc-type-other')?.value||'',comment:div.querySelector('.inc-comment').value,incStatus:getIncStatus(div),resolvedDate:div.querySelector('.inc-resolved-date')?.value||''});
+        incs.push({site:s?s.value:defaultSite(),type:sel.value,typeOther:div.querySelector('.inc-type-other')?.value||'',comment:div.querySelector('.inc-comment').value,incStatus:getIncStatus(div),resolvedDate:div.querySelector('.inc-resolved-date')?.value||''});
     });
     d.incidents=JSON.stringify(incs);
     const wknds=[];
     document.getElementById('weekend-work-container').querySelectorAll('.relative').forEach(div=>{
         const s=div.querySelector('input[name^="wkndSite-"]:checked');
-        wknds.push({site:s?s.value:'1475',status:div.querySelector('.wknd-status').value,comment:div.querySelector('.wknd-comment').value});
+        wknds.push({site:s?s.value:defaultSite(),status:div.querySelector('.wknd-status').value,comment:div.querySelector('.wknd-comment').value});
     });
     d.weekends=JSON.stringify(wknds);
     const obs=[];
     document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(item=>{
-        const sel=item.querySelector('.obs-site-sel'), siteVal=sel?sel.value:'1475';
+        const sel=item.querySelector('.obs-site-sel'), siteVal=sel?sel.value:defaultSite();
         const text=item.querySelector('.obs-text')?.value.trim()||'';
         const foremanInformed=item.querySelector('.obs-foreman-check')?.checked||false;
         const isPending=item.querySelector('.obs-pending-check')?.checked||false;
@@ -1582,16 +1586,16 @@ function generateReport() {
     const allSites=getAllSites();
     const hcBySite={},permitsBySite={},orisBySite={},walksBySite={},equipBySite={},craneBySite={},mtgsBySite={},incsBySite={},wkndsBySite={},obsBySite={};
     document.querySelectorAll('.headcount-input').forEach(inp=>{const v=parseInt(inp.value)||0;if(!v)return;const site=inp.dataset.site;if(!hcBySite[site])hcBySite[site]=[];hcBySite[site].push({trade:inp.dataset.trade,count:v});});
-    document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{const at=item.querySelector('.permit-active-toggle');if(at&&!at.checked)return;const s=item.querySelector('input[name^="permSite-"]:checked');const site=s?s.value:'1475';const sel=item.querySelector('.permit-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.permit-type-other')?.value;if(o)type=`Other: ${o}`;}const c=item.querySelector('.permit-contractor').value;if(!c)return;if(!permitsBySite[site])permitsBySite[site]=[];permitsBySite[site].push({type,contractor:c});});
-    document.getElementById('orientations-container').querySelectorAll('.orientation-item').forEach(item=>{const s=item.querySelector('input[name^="oriSite-"]:checked');const site=s?s.value:'1475';const sel=item.querySelector('.orientation-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.orientation-type-other')?.value;if(o)type=`Other: ${o}`;}if(!orisBySite[site])orisBySite[site]=[];orisBySite[site].push({type,worker:item.querySelector('.orientation-worker').value});});
+    document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{const at=item.querySelector('.permit-active-toggle');if(at&&!at.checked)return;const s=item.querySelector('input[name^="permSite-"]:checked');const site=s?s.value:defaultSite();const sel=item.querySelector('.permit-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.permit-type-other')?.value;if(o)type=`Other: ${o}`;}const c=item.querySelector('.permit-contractor').value;if(!c)return;if(!permitsBySite[site])permitsBySite[site]=[];permitsBySite[site].push({type,contractor:c});});
+    document.getElementById('orientations-container').querySelectorAll('.orientation-item').forEach(item=>{const s=item.querySelector('input[name^="oriSite-"]:checked');const site=s?s.value:defaultSite();const sel=item.querySelector('.orientation-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.orientation-type-other')?.value;if(o)type=`Other: ${o}`;}if(!orisBySite[site])orisBySite[site]=[];orisBySite[site].push({type,worker:item.querySelector('.orientation-worker').value});});
     document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{const id=cb.id;allSites.forEach(s=>{const sSlug=s.toLowerCase().replace(/[^a-z0-9]/g,'');if(id.includes(sSlug)){let label='';if(id.startsWith('safetywalk'))label=`Safety Walk ${s}`;else if(id.startsWith('weeklysafety'))label=`Weekly Safety Site Inspection ${s}`;else label=id.replace('-completed','');if(!walksBySite[s])walksBySite[s]=[];walksBySite[s].push(label);}});});
-    document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{const act=div.querySelector('.equip-active-toggle');if(act&&!act.checked)return;const tog=div.querySelector('.equip-toggle');if(!tog||!tog.checked)return;const site=div.querySelector('.equip-site-val').value||'1475';const name=div.querySelector('.equip-name').value;const sel=div.querySelector('.equip-inspector-sel');let insp=sel?sel.value:(div.querySelector('.equip-inspector-free')?.value||'');if(insp==='Other')insp=div.querySelector('.equip-inspector-other')?.value||'Other';if(!equipBySite[site])equipBySite[site]=[];equipBySite[site].push({name,inspector:insp});});
+    document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{const act=div.querySelector('.equip-active-toggle');if(act&&!act.checked)return;const tog=div.querySelector('.equip-toggle');if(!tog||!tog.checked)return;const site=div.querySelector('.equip-site-val').value||defaultSite();const name=div.querySelector('.equip-name').value;const sel=div.querySelector('.equip-inspector-sel');let insp=sel?sel.value:(div.querySelector('.equip-inspector-free')?.value||'');if(insp==='Other')insp=div.querySelector('.equip-inspector-other')?.value||'Other';if(!equipBySite[site])equipBySite[site]=[];equipBySite[site].push({name,inspector:insp});});
     document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(div=>{const site=div.querySelector('.crane-site-val')?.value||'1600';const craneName=div.querySelector('.crane-name')?.value||'Crane';if(!craneBySite[site])craneBySite[site]=[];const entry={craneName,tasks:[]};const dailyTog=div.querySelector('.crane-daily-toggle');if(dailyTog&&dailyTog.checked){let insp=div.querySelector('.crane-insp-sel')?.value||'';if(insp==='Other')insp=div.querySelector('.crane-insp-other')?.value||'Other';entry.tasks.push({task:'Crane Daily Inspection',inspector:insp});}const riggTog=div.querySelector('.crane-rigging-toggle');if(riggTog&&riggTog.checked){let insp=div.querySelector('.crane-rigging-sel')?.value||'';if(insp==='Other')insp=div.querySelector('.crane-rigging-other')?.value||'Other';entry.tasks.push({task:'Rigging Daily Inspection',inspector:insp});}const cold=div.querySelector('.crane-cold-check');if(cold&&cold.checked)entry.tasks.push({task:'Cold Weather Crane Inspection',inspector:''});const companies=[];div.querySelectorAll('.overlap-check:checked').forEach(cb=>companies.push(cb.value));const o1c=div.querySelector('.overlap-other1-check');if(o1c&&o1c.checked){const t=div.querySelector('.overlap-other1-text')?.value;if(t)companies.push(t);}const o2c=div.querySelector('.overlap-other2-check');if(o2c&&o2c.checked){const t=div.querySelector('.overlap-other2-text')?.value;if(t)companies.push(t);}if(companies.length)entry.tasks.push({task:'Overlapping Procedure',companies});if(entry.tasks.length)craneBySite[site].push(entry);});
-    document.getElementById('safety-meetings-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="mtgSite-"]:checked');const site=s?s.value:'1475';if(!mtgsBySite[site])mtgsBySite[site]=[];mtgsBySite[site].push({status:div.querySelector('.mtg-status').value,comment:div.querySelector('.mtg-comment').value});});
-    document.getElementById('site-incidents-container').querySelectorAll('.incident-item').forEach(div=>{const s=div.querySelector('input[name^="incSite-"]:checked');const site=s?s.value:'1475';const sel=div.querySelector('.inc-type');let type=sel.value;if(type==='Other'){const o=div.querySelector('.inc-type-other')?.value;if(o)type=`Other: ${o}`;}if(!incsBySite[site])incsBySite[site]=[];incsBySite[site].push({type,comment:div.querySelector('.inc-comment').value,incStatus:getIncStatus(div),resolvedDate:div.querySelector('.inc-resolved-date')?.value||''});});
-    document.getElementById('weekend-work-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="wkndSite-"]:checked');const site=s?s.value:'1475';if(!wkndsBySite[site])wkndsBySite[site]=[];wkndsBySite[site].push({status:div.querySelector('.wknd-status').value,comment:div.querySelector('.wknd-comment').value});});
+    document.getElementById('safety-meetings-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="mtgSite-"]:checked');const site=s?s.value:defaultSite();if(!mtgsBySite[site])mtgsBySite[site]=[];mtgsBySite[site].push({status:div.querySelector('.mtg-status').value,comment:div.querySelector('.mtg-comment').value});});
+    document.getElementById('site-incidents-container').querySelectorAll('.incident-item').forEach(div=>{const s=div.querySelector('input[name^="incSite-"]:checked');const site=s?s.value:defaultSite();const sel=div.querySelector('.inc-type');let type=sel.value;if(type==='Other'){const o=div.querySelector('.inc-type-other')?.value;if(o)type=`Other: ${o}`;}if(!incsBySite[site])incsBySite[site]=[];incsBySite[site].push({type,comment:div.querySelector('.inc-comment').value,incStatus:getIncStatus(div),resolvedDate:div.querySelector('.inc-resolved-date')?.value||''});});
+    document.getElementById('weekend-work-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="wkndSite-"]:checked');const site=s?s.value:defaultSite();if(!wkndsBySite[site])wkndsBySite[site]=[];wkndsBySite[site].push({status:div.querySelector('.wknd-status').value,comment:div.querySelector('.wknd-comment').value});});
     const allSitesObs=[];
-    document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(item=>{const sel=item.querySelector('.obs-site-sel');let site=sel?sel.value:'1475';if(site==='Other'){const o=item.querySelector('.obs-site-other')?.value;if(o)site=o;}const text=item.querySelector('.obs-text')?.value.trim()||'';if(!text)return;const foremanInformed=item.querySelector('.obs-foreman-check')?.checked||false;const isPending=item.querySelector('.obs-pending-check')?.checked||false;const isResolved=item.querySelector('.obs-resolved-check')?.checked||false;const resolvedDate=item.querySelector('.obs-resolved-date')?.value||'';let obsStatus='new';if(isResolved)obsStatus='resolved';else if(isPending)obsStatus='pending';const obsObj={text,foremanInformed,obsStatus,resolvedDate};if(site==='All Sites'){allSitesObs.push(obsObj);}else{if(!obsBySite[site])obsBySite[site]=[];obsBySite[site].push(obsObj);}});
+    document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(item=>{const sel=item.querySelector('.obs-site-sel');let site=sel?sel.value:defaultSite();if(site==='Other'){const o=item.querySelector('.obs-site-other')?.value;if(o)site=o;}const text=item.querySelector('.obs-text')?.value.trim()||'';if(!text)return;const foremanInformed=item.querySelector('.obs-foreman-check')?.checked||false;const isPending=item.querySelector('.obs-pending-check')?.checked||false;const isResolved=item.querySelector('.obs-resolved-check')?.checked||false;const resolvedDate=item.querySelector('.obs-resolved-date')?.value||'';let obsStatus='new';if(isResolved)obsStatus='resolved';else if(isPending)obsStatus='pending';const obsObj={text,foremanInformed,obsStatus,resolvedDate};if(site==='All Sites'){allSitesObs.push(obsObj);}else{if(!obsBySite[site])obsBySite[site]=[];obsBySite[site].push(obsObj);}});
     // ✅ FIX: incluir también sitios inactivos que tengan datos de hoy — un sitio "closed out"
     // no debe hacer desaparecer orientaciones/headcount/etc. ya registrados bajo ese sitio.
     const dataSites=[...new Set([].concat(Object.keys(hcBySite),Object.keys(permitsBySite),Object.keys(orisBySite),Object.keys(walksBySite),Object.keys(equipBySite),Object.keys(craneBySite),Object.keys(mtgsBySite),Object.keys(incsBySite),Object.keys(wkndsBySite),Object.keys(obsBySite)))];
@@ -1697,7 +1701,7 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     var savedPermits=[];
     document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(function(item){
         var s=item.querySelector('input[name^="permSite-"]:checked'), sel=item.querySelector('.permit-type');
-        savedPermits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?item.querySelector('.permit-type-other').value:'',site:s?s.value:'1475',contractor:item.querySelector('.permit-contractor').value,active:item.querySelector('.permit-active-toggle')?item.querySelector('.permit-active-toggle').checked:true});
+        savedPermits.push({type:sel.value,typeOther:item.querySelector('.permit-type-other')?item.querySelector('.permit-type-other').value:'',site:s?s.value:defaultSite(),contractor:item.querySelector('.permit-contractor').value,active:item.querySelector('.permit-active-toggle')?item.querySelector('.permit-active-toggle').checked:true});
     });
     // ✅ FIX: solo preservar observaciones PENDING — las resolved y new se borran en el reset
     var savedObs=[];
@@ -1708,7 +1712,7 @@ document.getElementById('reset-yes').addEventListener('click',function(){
         if(obsStatus==='pending'){  // SOLO pending — resolved y new se descartan
             var selEl=item.querySelector('.obs-site-sel');
             savedObs.push({
-                site:selEl?selEl.value:'1475',
+                site:selEl?selEl.value:defaultSite(),
                 siteOther:item.querySelector('.obs-site-other')?item.querySelector('.obs-site-other').value:'',
                 text:item.querySelector('.obs-text')?item.querySelector('.obs-text').value.trim():'',
                 foremanInformed:item.querySelector('.obs-foreman-check')&&item.querySelector('.obs-foreman-check').checked||false,
@@ -1721,7 +1725,7 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     document.getElementById('site-incidents-container').querySelectorAll('.incident-item').forEach(function(div){
         if(getIncStatus(div)!=='pending') return;
         var s=div.querySelector('input[name^="incSite-"]:checked');
-        savedIncs.push({site:s?s.value:'1475',type:div.querySelector('.inc-type').value,typeOther:div.querySelector('.inc-type-other')?div.querySelector('.inc-type-other').value:'',comment:div.querySelector('.inc-comment').value,incStatus:'pending',resolvedDate:''});
+        savedIncs.push({site:s?s.value:defaultSite(),type:div.querySelector('.inc-type').value,typeOther:div.querySelector('.inc-type-other')?div.querySelector('.inc-type-other').value:'',comment:div.querySelector('.inc-comment').value,incStatus:'pending',resolvedDate:''});
     });
     var savedCranes=[];
     document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(function(div){
