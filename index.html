@@ -128,7 +128,7 @@
 </div>
 <div id="pending-obs-summary" class="card mb-3 p-3 hidden" style="border-left:4px solid #d97706">
     <div class="flex items-center justify-between mb-1">
-        <span class="text-sm font-semibold" style="color:#003D52">Pending Observations <span id="pending-obs-count" class="obs-status-chip chip-pending ml-1">0</span></span>
+        <span class="text-sm font-semibold" style="color:#003D52">Pending Follow-up <span id="pending-obs-count" class="obs-status-chip chip-pending ml-1">0</span></span>
     </div>
     <div id="pending-obs-list" class="space-y-1"></div>
 </div>
@@ -233,13 +233,13 @@
     <button id="generateFullReport" class="btn btn-primary w-full">Generate Full Report (by Site)</button>
     <button id="resetForm" class="btn btn-danger w-full">Reset Form</button>
     <div id="reset-confirm-bar" class="hidden mt-2 p-3 bg-red-50 border border-red-200 rounded-lg text-center">
-        <p class="text-sm font-semibold text-red-700 mb-2">Are you sure? This clears all data except Work Permits and Pending Observations.</p>
+        <p class="text-sm font-semibold text-red-700 mb-2">Are you sure? This clears all data except Work Permits, Pending Observations and Pending Incidents.</p>
         <div class="flex gap-2 justify-center">
             <button id="reset-yes" class="btn btn-danger btn-sm px-4">Yes, Reset</button>
             <button id="reset-no" class="btn btn-gray btn-sm px-4">Cancel</button>
         </div>
     </div>
-    <p class="text-xs text-center text-gray-400 italic">*Reset clears all data EXCEPT Work Permits and Pending Observations.</p>
+    <p class="text-xs text-center text-gray-400 italic">*Reset clears all data EXCEPT Work Permits, Pending Observations and Pending Incidents.</p>
 </div>
 <div id="report-output" class="card mt-5 hidden" style="border-top:4px solid #96C61C">
     <div class="flex items-center gap-3 mb-3">
@@ -1239,11 +1239,17 @@ function addMeetingItem(data={site:'1475',status:'Yes',comment:''}) {
 }
 document.getElementById('add-meeting-btn').addEventListener('click',()=>{addMeetingItem();saveData();});
 const INCIDENT_TYPES_FULL = [...INCIDENT_TYPES,'Other'];
+function getIncStatus(div){
+    if(div.querySelector('.inc-resolved-check')?.checked) return 'resolved';
+    if(div.querySelector('.inc-pending-check')?.checked) return 'pending';
+    return 'new';
+}
 function addIncidentItem(data={site:'1475',type:'First Aid',typeOther:'',comment:''}) {
     const id=uid();
+    const incStatus=data.incStatus||'new';
     const typeOpts=INCIDENT_TYPES_FULL.map(t=>`<option ${t===data.type?'selected':''}>${t}</option>`).join('');
     const div=document.createElement('div');
-    div.className='relative bg-white border border-red-200 rounded-lg p-2 space-y-1';
+    div.className='incident-item relative bg-white border border-red-200 rounded-lg p-2 space-y-1';
     div.innerHTML=`
         <div class="flex flex-wrap items-center gap-2">
             <select class="form-select w-auto text-sm inc-type" autocomplete="off">${typeOpts}</select>
@@ -1251,10 +1257,49 @@ function addIncidentItem(data={site:'1475',type:'First Aid',typeOther:'',comment
         </div>
         <div class="flex flex-wrap items-center gap-1"><span class="text-xs font-semibold text-gray-600">Site:</span>${buildSiteRadiosHtml('incSite-'+id,data.site)}</div>
         <input type="text" class="form-input text-sm inc-comment" placeholder="Details / Comments…" value="${data.comment||''}">
+        <div class="obs-status-bar inc-status-bar mt-2">
+            <div class="flex flex-wrap items-center gap-3 mb-1">
+                <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Follow-up Status</span>
+                <span class="obs-status-chip inc-status-badge"></span>
+            </div>
+            <div class="flex flex-wrap gap-4 items-start">
+                <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" class="h-4 w-4 inc-pending-check" style="accent-color:#d97706" ${incStatus!=='new'?'checked':''}>
+                    <span class="text-xs font-semibold text-gray-700">Pending Follow-up</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" class="h-4 w-4 inc-resolved-check" style="accent-color:#059669" ${incStatus==='resolved'?'checked':''}>
+                    <span class="text-xs font-semibold text-gray-700">Resolved</span>
+                </label>
+            </div>
+            <div class="inc-resolved-date-row flex items-center gap-2 mt-2 ${incStatus==='resolved'?'':'hidden'}">
+                <span class="text-xs text-gray-500 font-semibold">Date Resolved:</span>
+                <input type="date" class="form-input text-xs inc-resolved-date" style="max-width:170px" value="${data.resolvedDate||''}">
+            </div>
+        </div>
         <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-inc-btn">Remove</button>`;
     const sel=div.querySelector('.inc-type'),oth=div.querySelector('.inc-type-other');
     sel.value = data.type || 'First Aid'; // ✅ FIX: forzar valor por código (ver nota en addWorkPermitItem)
     sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});
+    const pendChk=div.querySelector('.inc-pending-check'), resChk=div.querySelector('.inc-resolved-check');
+    const dateRow=div.querySelector('.inc-resolved-date-row'), dateInp=div.querySelector('.inc-resolved-date');
+    const bar=div.querySelector('.inc-status-bar'), badge=div.querySelector('.inc-status-badge');
+    function paintIncStatus(){
+        const st=resChk.checked?'resolved':pendChk.checked?'pending':'new';
+        badge.className=`obs-status-chip inc-status-badge ${st==='resolved'?'chip-resolved':st==='pending'?'chip-pending':'chip-new'}`;
+        badge.textContent=st==='resolved'?'✓ Resolved':st==='pending'?'⏳ Pending':'◦ New';
+        bar.classList.toggle('obs-status-resolved',st==='resolved');
+        bar.classList.toggle('obs-status-pending',st==='pending');
+        dateRow.classList.toggle('hidden',st!=='resolved');
+    }
+    function onIncStatusChange(){
+        if(resChk.checked && !dateInp.value) dateInp.value=new Date().toISOString().slice(0,10);
+        paintIncStatus();
+        saveData();
+    }
+    pendChk.addEventListener('change',onIncStatusChange);
+    resChk.addEventListener('change',onIncStatusChange);
+    paintIncStatus();
     div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
     div.querySelector('.remove-inc-btn').addEventListener('click',()=>{div.remove();saveData();});
     document.getElementById('site-incidents-container').appendChild(div);
@@ -1357,31 +1402,48 @@ document.getElementById('add-observation-btn').addEventListener('click',()=>{add
 function renderPendingObsSummary() {
     const box = document.getElementById('pending-obs-summary');
     const list = document.getElementById('pending-obs-list');
-    const pending = [...document.querySelectorAll('#additional-observations-container .observation-item')].filter(item =>
-        item.querySelector('.obs-pending-check')?.checked && !item.querySelector('.obs-resolved-check')?.checked &&
-        (item.querySelector('.obs-text')?.value.trim() || ''));
-    list.innerHTML = '';
-    box.classList.toggle('hidden', pending.length === 0);
-    document.getElementById('pending-obs-count').textContent = pending.length;
-    pending.forEach(item => {
+    const entries = [];
+    document.querySelectorAll('#site-incidents-container .incident-item').forEach(item => {
+        if (getIncStatus(item) !== 'pending') return;
+        const s = item.querySelector('input[name^="incSite-"]:checked');
+        let type = item.querySelector('.inc-type').value;
+        if (type === 'Other') type = item.querySelector('.inc-type-other')?.value || 'Other';
+        const comment = item.querySelector('.inc-comment').value.trim();
+        entries.push({item, tab:'incidents', site: s ? s.value : '', tag: type, text: comment});
+    });
+    document.querySelectorAll('#additional-observations-container .observation-item').forEach(item => {
+        const text = item.querySelector('.obs-text')?.value.trim() || '';
+        if (!text || !item.querySelector('.obs-pending-check')?.checked || item.querySelector('.obs-resolved-check')?.checked) return;
         const sel = item.querySelector('.obs-site-sel');
         let site = sel ? sel.value : '';
         if (site === 'Other') site = item.querySelector('.obs-site-other')?.value || 'Other';
+        entries.push({item, tab:'observations', site, tag:'', text});
+    });
+    list.innerHTML = '';
+    box.classList.toggle('hidden', entries.length === 0);
+    document.getElementById('pending-obs-count').textContent = entries.length;
+    entries.forEach(e => {
         const row = document.createElement('button');
         row.type = 'button';
         row.className = 'w-full text-left text-xs flex items-start gap-2 py-1 px-2 rounded hover:bg-amber-50';
         const badge = document.createElement('span');
         badge.className = 'font-bold shrink-0';
-        badge.style.color = siteColor(site);
-        badge.textContent = site;
+        badge.style.color = siteColor(e.site);
+        badge.textContent = e.site;
         const txt = document.createElement('span');
         txt.className = 'text-gray-700';
         txt.style.cssText = 'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden';
-        txt.textContent = item.querySelector('.obs-text').value.trim();
+        if (e.tag) {
+            const tag = document.createElement('b');
+            tag.style.color = '#dc2626';
+            tag.textContent = e.tag + (e.text ? ' — ' : '');
+            txt.appendChild(tag);
+        }
+        txt.appendChild(document.createTextNode(e.text));
         row.append(badge, txt);
         row.addEventListener('click', () => {
-            document.querySelector('.tab-btn[data-tab="observations"]').click();
-            item.scrollIntoView({behavior:'smooth', block:'center'});
+            document.querySelector(`.tab-btn[data-tab="${e.tab}"]`).click();
+            e.item.scrollIntoView({behavior:'smooth', block:'center'});
         });
         list.appendChild(row);
     });
@@ -1427,9 +1489,9 @@ function saveData() {
     });
     d.meetings=JSON.stringify(mtgs);
     const incs=[];
-    document.getElementById('site-incidents-container').querySelectorAll('.relative').forEach(div=>{
+    document.getElementById('site-incidents-container').querySelectorAll('.incident-item').forEach(div=>{
         const s=div.querySelector('input[name^="incSite-"]:checked'), sel=div.querySelector('.inc-type');
-        incs.push({site:s?s.value:'1475',type:sel.value,typeOther:div.querySelector('.inc-type-other')?.value||'',comment:div.querySelector('.inc-comment').value});
+        incs.push({site:s?s.value:'1475',type:sel.value,typeOther:div.querySelector('.inc-type-other')?.value||'',comment:div.querySelector('.inc-comment').value,incStatus:getIncStatus(div),resolvedDate:div.querySelector('.inc-resolved-date')?.value||''});
     });
     d.incidents=JSON.stringify(incs);
     const wknds=[];
@@ -1503,6 +1565,8 @@ function loadData() {
     // ✅ FIX: si la lista guardada existe (aunque esté vacía), respetarla — lo que el usuario borró no debe reaparecer
     if(data&&data.craneData){const cd=JSON.parse(data.craneData);if(Array.isArray(cd)){document.getElementById('crane-container').innerHTML='';cd.forEach(c=>addCraneCard(isSameDay?c:{...c,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''}));}}
     if(data&&data.equipment){const eq=JSON.parse(data.equipment);if(Array.isArray(eq)){document.getElementById('mobile-equipment-container').innerHTML='';eq.forEach(e=>{const trimmedName=(e.name||'').trim();const canonName=EQUIP_NAME_MAP[trimmedName]||trimmedName;const base=EQUIPMENT_LIST.find(b=>b.name===canonName);addEquipmentItem({...e,name:canonName,done:isSameDay?e.done:false,inspector:isSameDay?e.inspector:'',otherInspector:isSameDay?e.otherInspector:'',inspectors:base?base.inspectors:[]});});updateInactiveEquipVisibility();}}
+    // Incidentes: mismo día → todos; día nuevo → solo los pendientes de seguimiento
+    if(data&&data.incidents){const incs=JSON.parse(data.incidents);document.getElementById('site-incidents-container').innerHTML='';incs.filter(i=>isSameDay||i.incStatus==='pending').forEach(i=>addIncidentItem(i));}
     if(!isSameDay){rebuildHeadcount();rebuildInspections();return;}
     document.getElementById('waterUse').value=data.waterUse||'L1';
     document.getElementById('fireDanger').value=data.fireDanger||'Low';
@@ -1511,7 +1575,6 @@ function loadData() {
     if(data.orientations){document.getElementById('orientations-container').innerHTML='';JSON.parse(data.orientations).forEach(o=>addOrientationItem(o));}
     // crane y equipo ya se cargaron arriba
     if(data.meetings){document.getElementById('safety-meetings-container').innerHTML='';JSON.parse(data.meetings).forEach(m=>addMeetingItem(m));}
-    if(data.incidents){document.getElementById('site-incidents-container').innerHTML='';JSON.parse(data.incidents).forEach(i=>addIncidentItem(i));}
     if(data.weekends){document.getElementById('weekend-work-container').innerHTML='';JSON.parse(data.weekends).forEach(w=>addWeekendItem(w));}
     updateHeadcounts();checkHotwork();
 }
@@ -1525,7 +1588,7 @@ function generateReport() {
     document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{const act=div.querySelector('.equip-active-toggle');if(act&&!act.checked)return;const tog=div.querySelector('.equip-toggle');if(!tog||!tog.checked)return;const site=div.querySelector('.equip-site-val').value||'1475';const name=div.querySelector('.equip-name').value;const sel=div.querySelector('.equip-inspector-sel');let insp=sel?sel.value:(div.querySelector('.equip-inspector-free')?.value||'');if(insp==='Other')insp=div.querySelector('.equip-inspector-other')?.value||'Other';if(!equipBySite[site])equipBySite[site]=[];equipBySite[site].push({name,inspector:insp});});
     document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(div=>{const site=div.querySelector('.crane-site-val')?.value||'1600';const craneName=div.querySelector('.crane-name')?.value||'Crane';if(!craneBySite[site])craneBySite[site]=[];const entry={craneName,tasks:[]};const dailyTog=div.querySelector('.crane-daily-toggle');if(dailyTog&&dailyTog.checked){let insp=div.querySelector('.crane-insp-sel')?.value||'';if(insp==='Other')insp=div.querySelector('.crane-insp-other')?.value||'Other';entry.tasks.push({task:'Crane Daily Inspection',inspector:insp});}const riggTog=div.querySelector('.crane-rigging-toggle');if(riggTog&&riggTog.checked){let insp=div.querySelector('.crane-rigging-sel')?.value||'';if(insp==='Other')insp=div.querySelector('.crane-rigging-other')?.value||'Other';entry.tasks.push({task:'Rigging Daily Inspection',inspector:insp});}const cold=div.querySelector('.crane-cold-check');if(cold&&cold.checked)entry.tasks.push({task:'Cold Weather Crane Inspection',inspector:''});const companies=[];div.querySelectorAll('.overlap-check:checked').forEach(cb=>companies.push(cb.value));const o1c=div.querySelector('.overlap-other1-check');if(o1c&&o1c.checked){const t=div.querySelector('.overlap-other1-text')?.value;if(t)companies.push(t);}const o2c=div.querySelector('.overlap-other2-check');if(o2c&&o2c.checked){const t=div.querySelector('.overlap-other2-text')?.value;if(t)companies.push(t);}if(companies.length)entry.tasks.push({task:'Overlapping Procedure',companies});if(entry.tasks.length)craneBySite[site].push(entry);});
     document.getElementById('safety-meetings-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="mtgSite-"]:checked');const site=s?s.value:'1475';if(!mtgsBySite[site])mtgsBySite[site]=[];mtgsBySite[site].push({status:div.querySelector('.mtg-status').value,comment:div.querySelector('.mtg-comment').value});});
-    document.getElementById('site-incidents-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="incSite-"]:checked');const site=s?s.value:'1475';const sel=div.querySelector('.inc-type');let type=sel.value;if(type==='Other'){const o=div.querySelector('.inc-type-other')?.value;if(o)type=`Other: ${o}`;}if(!incsBySite[site])incsBySite[site]=[];incsBySite[site].push({type,comment:div.querySelector('.inc-comment').value});});
+    document.getElementById('site-incidents-container').querySelectorAll('.incident-item').forEach(div=>{const s=div.querySelector('input[name^="incSite-"]:checked');const site=s?s.value:'1475';const sel=div.querySelector('.inc-type');let type=sel.value;if(type==='Other'){const o=div.querySelector('.inc-type-other')?.value;if(o)type=`Other: ${o}`;}if(!incsBySite[site])incsBySite[site]=[];incsBySite[site].push({type,comment:div.querySelector('.inc-comment').value,incStatus:getIncStatus(div),resolvedDate:div.querySelector('.inc-resolved-date')?.value||''});});
     document.getElementById('weekend-work-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="wkndSite-"]:checked');const site=s?s.value:'1475';if(!wkndsBySite[site])wkndsBySite[site]=[];wkndsBySite[site].push({status:div.querySelector('.wknd-status').value,comment:div.querySelector('.wknd-comment').value});});
     const allSitesObs=[];
     document.getElementById('additional-observations-container').querySelectorAll('.observation-item').forEach(item=>{const sel=item.querySelector('.obs-site-sel');let site=sel?sel.value:'1475';if(site==='Other'){const o=item.querySelector('.obs-site-other')?.value;if(o)site=o;}const text=item.querySelector('.obs-text')?.value.trim()||'';if(!text)return;const foremanInformed=item.querySelector('.obs-foreman-check')?.checked||false;const isPending=item.querySelector('.obs-pending-check')?.checked||false;const isResolved=item.querySelector('.obs-resolved-check')?.checked||false;const resolvedDate=item.querySelector('.obs-resolved-date')?.value||'';let obsStatus='new';if(isResolved)obsStatus='resolved';else if(isPending)obsStatus='pending';const obsObj={text,foremanInformed,obsStatus,resolvedDate};if(site==='All Sites'){allSitesObs.push(obsObj);}else{if(!obsBySite[site])obsBySite[site]=[];obsBySite[site].push(obsObj);}});
@@ -1574,7 +1637,7 @@ function generateReport() {
         if(permitsBySite[site]){b+=sectionHtml('Active Work Permits');permitsBySite[site].forEach(p=>{b+=rowHtml(`<b>${p.type}</b>: ${p.contractor}`);});}
         if(mtgsBySite[site]){b+=sectionHtml('Safety Meetings');mtgsBySite[site].forEach(m=>{let txt=`Weekly Safety Meeting: <b>${m.status}</b>`;if(m.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${m.comment}</span>`;b+=rowHtml(txt);});}
         b+=sectionHtml('Site Incidents');
-        if(incsBySite[site]&&incsBySite[site].length){incsBySite[site].forEach(i=>{let txt=`<span style="color:#dc2626;font-weight:700">${i.type}</span>`;if(i.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${i.comment}</span>`;b+=rowHtml(txt);});}
+        if(incsBySite[site]&&incsBySite[site].length){incsBySite[site].forEach(i=>{let txt=`<span style="color:#dc2626;font-weight:700">${i.type}</span>`;if(i.incStatus==='pending')txt+=` <span style="font-size:8pt;font-weight:700;color:#d97706">[Pending]</span>`;else if(i.incStatus==='resolved')txt+=` <span style="font-size:8pt;font-weight:700;color:#059669">[Resolved${i.resolvedDate?': '+i.resolvedDate:''}]</span>`;if(i.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${i.comment}</span>`;b+=rowHtml(txt);});}
         else{b+=rowHtml(`<span style="color:#059669;font-weight:600">No incidents reported.</span>`);}
         if(wkndsBySite[site]){b+=sectionHtml('Weekend Work');wkndsBySite[site].forEach(w=>{let txt=`Weekend: <b>${w.status}</b>`;if(w.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${w.comment}</span>`;b+=rowHtml(txt);});}
         if(obsBySite[site]){b+=sectionHtml('Observations');obsBySite[site].forEach(o=>{const statusColor=o.obsStatus==='resolved'?'#059669':o.obsStatus==='pending'?'#d97706':'#6b7280';const statusLabel=o.obsStatus==='resolved'?'Resolved':o.obsStatus==='pending'?'Pending':'New';let statusLine=`<span style="font-size:8pt;font-weight:700;color:${statusColor}">[${statusLabel}]</span>`;if(o.foremanInformed)statusLine+=` <span style="font-size:8pt;color:#003D52;font-weight:600">Foreman Informed</span>`;if(o.obsStatus==='resolved'&&o.resolvedDate)statusLine+=` <span style="font-size:8pt;color:#059669"> — Resolved: ${o.resolvedDate}</span>`;b+=rowHtml(`${statusLine}<br><span style="white-space:pre-wrap">${obsHtml(o.text)}</span>`);});}
@@ -1654,6 +1717,12 @@ document.getElementById('reset-yes').addEventListener('click',function(){
             });
         }
     });
+    var savedIncs=[];
+    document.getElementById('site-incidents-container').querySelectorAll('.incident-item').forEach(function(div){
+        if(getIncStatus(div)!=='pending') return;
+        var s=div.querySelector('input[name^="incSite-"]:checked');
+        savedIncs.push({site:s?s.value:'1475',type:div.querySelector('.inc-type').value,typeOther:div.querySelector('.inc-type-other')?div.querySelector('.inc-type-other').value:'',comment:div.querySelector('.inc-comment').value,incStatus:'pending',resolvedDate:''});
+    });
     var savedCranes=[];
     document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(function(div){
         savedCranes.push({name:div.querySelector('.crane-name')?div.querySelector('.crane-name').value:'Crane',site:div.querySelector('.crane-site-val')?div.querySelector('.crane-site-val').value:getAllSites()[0]});
@@ -1671,6 +1740,7 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     document.getElementById('orientations-container').innerHTML='';
     document.getElementById('safety-meetings-container').innerHTML='';
     document.getElementById('site-incidents-container').innerHTML='';
+    savedIncs.forEach(function(i){addIncidentItem(i);});
     document.getElementById('weekend-work-container').innerHTML='';
     document.getElementById('crane-container').innerHTML='';
     savedCranes.forEach(function(c){addCraneCard({name:c.name,site:c.site,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''});});
