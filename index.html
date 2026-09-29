@@ -454,6 +454,8 @@ document.getElementById('add-site-btn').addEventListener('click', () => {
 });
 function uid() { return Date.now()+'-'+Math.floor(Math.random()*9999); }
 function defaultSite() { return getAllSites()[0] || ''; }
+// Escapa texto del usuario antes de meterlo en HTML — sin esto, un " (ej. 10'4") corta el campo al reconstruirlo
+function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function buildSiteRadiosHtml(nameAttr, selected) {
     const sites = getAllSites();
     const sel = sites.includes(selected) ? selected : sites[0];
@@ -866,7 +868,7 @@ function addCraneCard(data) {
     div.className = 'equipment-card crane-card border-2 border-sky-100';
     div.innerHTML = `
         <div class="flex items-center gap-2 mb-2">
-            <input type="text" class="form-input text-sm font-bold crane-name flex-1" value="${data.name||'Crane'}" placeholder="Crane name…" style="color:#003D52">
+            <input type="text" class="form-input text-sm font-bold crane-name flex-1" value="${esc(data.name||'Crane')}" placeholder="Crane name…" style="color:#003D52">
             <button type="button" class="btn btn-danger btn-sm remove-crane-btn">Remove</button>
         </div>
         <div class="mb-2">
@@ -885,7 +887,7 @@ function addCraneCard(data) {
                 <label class="text-xs font-semibold text-gray-500">Inspected by</label>
                 <div class="flex gap-1 mt-1 flex-wrap crane-insp-container">
                     <select class="form-select text-xs crane-insp-sel" style="max-width:180px">${inspOpts}</select>
-                    <input type="text" class="form-input text-xs crane-insp-other ${(data.inspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${data.otherInspector||''}">
+                    <input type="text" class="form-input text-xs crane-insp-other ${(data.inspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${esc(data.otherInspector)}">
                 </div>
             </div>
         </div>
@@ -900,7 +902,7 @@ function addCraneCard(data) {
                 <label class="text-xs font-semibold text-gray-500">Inspected by</label>
                 <div class="flex gap-1 mt-1 flex-wrap crane-rigging-insp-container">
                     <select class="form-select text-xs crane-rigging-sel" style="max-width:180px">${rinspOpts}</select>
-                    <input type="text" class="form-input text-xs crane-rigging-other ${(data.riggingInspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${data.riggingOtherInspector||''}">
+                    <input type="text" class="form-input text-xs crane-rigging-other ${(data.riggingInspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${esc(data.riggingOtherInspector)}">
                 </div>
             </div>
         </div>
@@ -917,13 +919,13 @@ function addCraneCard(data) {
                 <label class="flex items-center gap-1 text-xs p-1 bg-gray-50 rounded border border-gray-200 cursor-pointer">
                     <input type="checkbox" class="h-3 w-3 overlap-other1-check" ${data.overlapOtherChecked?'checked':''}><span>Other:</span>
                 </label>
-                <input type="text" class="form-input text-xs mt-1 overlap-other1-text ${data.overlapOtherChecked?'':'hidden'}" placeholder="Company name…" value="${data.overlapOtherText||''}">
+                <input type="text" class="form-input text-xs mt-1 overlap-other1-text ${data.overlapOtherChecked?'':'hidden'}" placeholder="Company name…" value="${esc(data.overlapOtherText)}">
             </div>
             <div class="mt-1">
                 <label class="flex items-center gap-1 text-xs p-1 bg-gray-50 rounded border border-gray-200 cursor-pointer">
                     <input type="checkbox" class="h-3 w-3 overlap-other2-check" ${data.overlapOther2Checked?'checked':''}><span>Other 2:</span>
                 </label>
-                <input type="text" class="form-input text-xs mt-1 overlap-other2-text ${data.overlapOther2Checked?'':'hidden'}" placeholder="Company name…" value="${data.overlapOther2Text||''}">
+                <input type="text" class="form-input text-xs mt-1 overlap-other2-text ${data.overlapOther2Checked?'':'hidden'}" placeholder="Company name…" value="${esc(data.overlapOther2Text)}">
             </div>
         </div>
         <div class="crane-operator-manager operator-manager mt-2">
@@ -1018,7 +1020,7 @@ function rebuildEquipInspectorSelect(div, equipName) {
         sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});
         inspContainer.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
     } else {
-        inspContainer.innerHTML = `<input type="text" class="form-input text-xs equip-inspector-free" style="max-width:220px" placeholder="Inspector name…" value="${currentVal}">`;
+        inspContainer.innerHTML = `<input type="text" class="form-input text-xs equip-inspector-free" style="max-width:220px" placeholder="Inspector name…" value="${esc(currentVal)}">`;
         inspContainer.querySelector('input').addEventListener('input', saveData);
     }
 }
@@ -1039,7 +1041,7 @@ function addEquipmentItem(data) {
     if (!isActive) div.style.opacity = '0.55';
     div.innerHTML = `
         <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
-            <input type="text" class="form-input text-sm font-semibold equip-name flex-1" style="min-width:150px" value="${equipName}" placeholder="Equipment name…">
+            <input type="text" class="form-input text-sm font-semibold equip-name flex-1" style="min-width:150px" value="${esc(equipName)}" placeholder="Equipment name…">
             <label class="flex items-center cursor-pointer ml-1 gap-1"><span class="text-xs text-gray-500">Active</span>
                 <div class="relative"><input type="checkbox" class="sr-only equip-active-toggle" ${isActive?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
             </label>
@@ -1058,8 +1060,8 @@ function addEquipmentItem(data) {
                 <div class="flex gap-1 mt-1 flex-wrap equip-insp-container">
                     ${hasNamed
                         ? `<select class="form-select text-xs equip-inspector-sel" style="max-width:180px">${inspOpts}</select>
-                           <input type="text" class="form-input text-xs equip-inspector-other ${(data.inspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${data.otherInspector||''}">`
-                        : `<input type="text" class="form-input text-xs equip-inspector-free" style="max-width:220px" placeholder="Inspector name…" value="${data.otherInspector||data.inspector||''}">`
+                           <input type="text" class="form-input text-xs equip-inspector-other ${(data.inspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${esc(data.otherInspector)}">`
+                        : `<input type="text" class="form-input text-xs equip-inspector-free" style="max-width:220px" placeholder="Inspector name…" value="${esc(data.otherInspector||data.inspector)}">`
                     }
                 </div>
             </div>
@@ -1160,13 +1162,13 @@ function addOrientationItem(data={type:'New Worker Orientation',site:defaultSite
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Type</label>
                 <select class="form-select text-sm orientation-type" autocomplete="off">${typeOpts}</select>
-                <input type="text" class="form-input text-xs mt-1 orientation-type-other ${data.type==='Other'?'':'hidden'}" placeholder="Specify type…" value="${data.typeOther||''}">
+                <input type="text" class="form-input text-xs mt-1 orientation-type-other ${data.type==='Other'?'':'hidden'}" placeholder="Specify type…" value="${esc(data.typeOther)}">
             </div>
             <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Site</label>
                 <div class="flex flex-wrap mt-1">${buildSiteRadiosHtml('oriSite-'+id,data.site)}</div>
             </div>
             <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Worker / Notes</label>
-                <input type="text" class="form-input text-sm orientation-worker" placeholder="Worker name…" value="${data.worker||''}">
+                <input type="text" class="form-input text-sm orientation-worker" placeholder="Worker name…" value="${esc(data.worker)}">
             </div>
         </div>
         <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-orientation-btn">Remove</button>`;
@@ -1196,13 +1198,13 @@ function addWorkPermitItem(data={type:'Fall Protection Plan',site:defaultSite(),
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div><label class="block text-xs font-semibold text-gray-500 uppercase">Permit Type</label>
                 <select class="form-select text-sm mt-1 permit-type" autocomplete="off">${typeOpts}</select>
-                <input type="text" class="form-input text-xs mt-1 permit-type-other ${data.type==='Other'?'':'hidden'}" placeholder="Specify type…" value="${data.typeOther||''}">
+                <input type="text" class="form-input text-xs mt-1 permit-type-other ${data.type==='Other'?'':'hidden'}" placeholder="Specify type…" value="${esc(data.typeOther)}">
             </div>
             <div><label class="block text-xs font-semibold text-gray-500 uppercase">Site</label>
                 <div class="flex flex-col mt-1 space-y-0.5">${buildSiteRadiosHtml('permSite-'+id,data.site)}</div>
             </div>
             <div><label class="block text-xs font-semibold text-gray-500 uppercase">Contractor & Task</label>
-                <input type="text" class="form-input text-sm mt-1 permit-contractor" placeholder="e.g. WDC (task)…" value="${data.contractor||''}">
+                <input type="text" class="form-input text-sm mt-1 permit-contractor" placeholder="e.g. WDC (task)…" value="${esc(data.contractor)}">
             </div>
         </div>
         <button type="button" class="btn btn-danger btn-sm mt-2 remove-permit-btn">Remove</button>
@@ -1234,7 +1236,7 @@ function addMeetingItem(data={site:defaultSite(),status:'Yes',comment:''}) {
             <select class="form-select w-auto text-sm mtg-status" autocomplete="off">${['Yes','No','N/A'].map(v=>`<option ${v===data.status?'selected':''}>${v}</option>`).join('')}</select>
         </div>
         <div class="flex flex-wrap items-center gap-1"><span class="text-xs font-semibold text-gray-600">Site:</span>${buildSiteRadiosHtml('mtgSite-'+id,data.site)}</div>
-        <input type="text" class="form-input text-sm mtg-comment" placeholder="Comments…" value="${data.comment||''}">
+        <input type="text" class="form-input text-sm mtg-comment" placeholder="Comments…" value="${esc(data.comment)}">
         <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-mtg-btn">Remove</button>`;
     div.querySelector('.mtg-status').value = data.status || 'Yes'; // ✅ FIX: forzar valor por código (ver nota en addWorkPermitItem)
     div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
@@ -1257,10 +1259,10 @@ function addIncidentItem(data={site:defaultSite(),type:'First Aid',typeOther:'',
     div.innerHTML=`
         <div class="flex flex-wrap items-center gap-2">
             <select class="form-select w-auto text-sm inc-type" autocomplete="off">${typeOpts}</select>
-            <input type="text" class="form-input text-xs inc-type-other ${data.type==='Other'?'':'hidden'}" style="max-width:200px" placeholder="Specify type…" value="${data.typeOther||''}">
+            <input type="text" class="form-input text-xs inc-type-other ${data.type==='Other'?'':'hidden'}" style="max-width:200px" placeholder="Specify type…" value="${esc(data.typeOther)}">
         </div>
         <div class="flex flex-wrap items-center gap-1"><span class="text-xs font-semibold text-gray-600">Site:</span>${buildSiteRadiosHtml('incSite-'+id,data.site)}</div>
-        <input type="text" class="form-input text-sm inc-comment" placeholder="Details / Comments…" value="${data.comment||''}">
+        <input type="text" class="form-input text-sm inc-comment" placeholder="Details / Comments…" value="${esc(data.comment)}">
         <div class="obs-status-bar inc-status-bar mt-2">
             <div class="flex flex-wrap items-center gap-3 mb-1">
                 <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Follow-up Status</span>
@@ -1319,7 +1321,7 @@ function addWeekendItem(data={site:defaultSite(),status:'Yes',comment:''}) {
             <select class="form-select w-auto text-sm wknd-status">${['Yes','No','N/A'].map(v=>`<option ${v===data.status?'selected':''}>${v}</option>`).join('')}</select>
         </div>
         <div class="flex flex-wrap items-center gap-1"><span class="text-xs font-semibold text-gray-600">Site:</span>${buildSiteRadiosHtml('wkndSite-'+id,data.site)}</div>
-        <input type="text" class="form-input text-sm wknd-comment" placeholder="Details…" value="${data.comment||''}">
+        <input type="text" class="form-input text-sm wknd-comment" placeholder="Details…" value="${esc(data.comment)}">
         <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-wknd-btn">Remove</button>`;
     div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
     div.querySelector('.remove-wknd-btn').addEventListener('click',()=>{div.remove();saveData();});
@@ -1343,10 +1345,10 @@ function addObservationItem(data) {
         <div class="flex flex-wrap items-center gap-2 mb-2">
             <span class="text-xs font-semibold text-gray-600">Site:</span>
             <select class="form-select text-sm obs-site-sel" style="max-width:160px">${buildObsSiteOptions(siteVal)}</select>
-            <input type="text" class="form-input text-xs obs-site-other ${siteVal==='Other'?'':'hidden'}" style="max-width:150px" placeholder="Specify site…" value="${data.siteOther||''}">
+            <input type="text" class="form-input text-xs obs-site-other ${siteVal==='Other'?'':'hidden'}" style="max-width:150px" placeholder="Specify site…" value="${esc(data.siteOther)}">
             <span class="obs-allsites-badge ${siteVal==='All Sites'?'':'hidden'}" style="font-size:0.7rem;background:#003D5218;color:#003D52;font-weight:700;padding:0.15rem 0.5rem;border-radius:9999px">All Sites</span>
         </div>
-        <textarea class="form-textarea obs-text" rows="3" placeholder="Enter observation…">${data.text||''}</textarea>
+        <textarea class="form-textarea obs-text" rows="3" placeholder="Enter observation…">${esc(data.text)}</textarea>
         <div class="obs-status-bar ${barClass} mt-2">
             <div class="flex flex-wrap items-center gap-3 mb-1">
                 <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Follow-up Status</span>
