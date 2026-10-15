@@ -48,6 +48,7 @@
         .totals-row td{ font-weight:700; font-size:0.82rem; border-top:2px solid #e5e7eb; background:#f9fafb!important; }
         .observation-item,.permit-item,.orientation-item{ background:#f9fafb; border:1px solid #e5e7eb; border-radius:0.5rem; padding:0.85rem; margin-top:0.65rem; }
         .orientation-item{ background:#f0fdf4; border-color:#bbf7d0; }
+        textarea.auto-grow{ resize:none; overflow-y:hidden; display:block; width:100%; }
         .obs-status-bar{ background:#f0f4f8; border:1px solid #e2e8f0; border-radius:0.4rem; padding:0.6rem 0.75rem; margin-top:0.5rem; }
         .obs-status-resolved{ border-color:#bbf7d0; background:#f0fdf4; }
         .obs-status-pending{ border-color:#fde68a; background:#fffbeb; }
@@ -454,6 +455,14 @@ document.getElementById('add-site-btn').addEventListener('click', () => {
 });
 function uid() { return Date.now()+'-'+Math.floor(Math.random()*9999); }
 function defaultSite() { return getAllSites()[0] || ''; }
+function autoGrow(el) {
+    if (!el.offsetParent) return; // oculto (otra pestaña): se ajusta al mostrarse
+    el.style.height = 'auto';
+    el.style.height = (el.scrollHeight + 2) + 'px';
+}
+function autoGrowAll() { document.querySelectorAll('textarea.auto-grow').forEach(autoGrow); }
+document.addEventListener('input', e => { if (e.target.matches && e.target.matches('textarea.auto-grow')) autoGrow(e.target); });
+window.addEventListener('resize', autoGrowAll);
 // Escapa texto del usuario antes de meterlo en HTML — sin esto, un " (ej. 10'4") corta el campo al reconstruirlo
 function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function buildSiteRadiosHtml(nameAttr, selected) {
@@ -510,6 +519,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         document.querySelectorAll('.tab-content').forEach(c=>c.classList.add('hidden'));
         btn.classList.add('tab-active');
         document.getElementById('tab-'+btn.dataset.tab).classList.remove('hidden');
+        autoGrowAll();
     });
 });
 const hcTbody = document.getElementById('hc-tbody');
@@ -677,6 +687,7 @@ function createWeeklyObs(catLabel, site) {
         const obsBtn = document.querySelector('[data-tab="observations"]');
         if (obsBtn) obsBtn.classList.add('tab-active');
         document.getElementById('tab-observations').classList.remove('hidden');
+        autoGrowAll();
         document.getElementById('tab-observations').scrollIntoView({behavior:'smooth'});
         return;
     }
@@ -695,6 +706,7 @@ function createWeeklyObs(catLabel, site) {
     const obsBtn = document.querySelector('[data-tab="observations"]');
     if (obsBtn) obsBtn.classList.add('tab-active');
     document.getElementById('tab-observations').classList.remove('hidden');
+    autoGrowAll();
     document.getElementById('tab-observations').scrollIntoView({behavior:'smooth'});
 }
 function buildWeeklyDetailPanel(site, savedWalks) {
@@ -951,7 +963,7 @@ function addCraneCard(data) {
     div.querySelector('.overlap-other1-check').addEventListener('change',e=>{div.querySelector('.overlap-other1-text').classList.toggle('hidden',!e.target.checked);saveData();});
     div.querySelector('.overlap-other2-check').addEventListener('change',e=>{div.querySelector('.overlap-other2-text').classList.toggle('hidden',!e.target.checked);saveData();});
     div.querySelector('.remove-crane-btn').addEventListener('click',()=>{div.remove();saveData();});
-    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    div.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',saveData));
     // Crane operator manager
     div.querySelector('.toggle-crane-ops-btn').addEventListener('click', () => {
         div.querySelector('.crane-ops-add-row').classList.toggle('hidden');
@@ -1168,14 +1180,14 @@ function addOrientationItem(data={type:'New Worker Orientation',site:defaultSite
                 <div class="flex flex-wrap mt-1">${buildSiteRadiosHtml('oriSite-'+id,data.site)}</div>
             </div>
             <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Worker / Notes</label>
-                <input type="text" class="form-input text-sm orientation-worker" placeholder="Worker name…" value="${esc(data.worker)}">
+                <textarea rows="1" class="form-input text-sm orientation-worker auto-grow" placeholder="Worker name…">${esc(data.worker)}</textarea>
             </div>
         </div>
         <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-orientation-btn">Remove</button>`;
     const sel=div.querySelector('.orientation-type'), oth=div.querySelector('.orientation-type-other');
     sel.value = data.type || 'New Worker Orientation'; // ✅ FIX: forzar valor por código (ver nota en addWorkPermitItem)
     sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});
-    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    div.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',saveData));
     div.querySelector('.remove-orientation-btn').addEventListener('click',()=>{div.remove();saveData();});
     document.getElementById('orientations-container').appendChild(div);
 }
@@ -1204,7 +1216,7 @@ function addWorkPermitItem(data={type:'Fall Protection Plan',site:defaultSite(),
                 <div class="flex flex-col mt-1 space-y-0.5">${buildSiteRadiosHtml('permSite-'+id,data.site)}</div>
             </div>
             <div><label class="block text-xs font-semibold text-gray-500 uppercase">Contractor & Task</label>
-                <input type="text" class="form-input text-sm mt-1 permit-contractor" placeholder="e.g. WDC (task)…" value="${esc(data.contractor)}">
+                <textarea rows="1" class="form-input text-sm mt-1 permit-contractor auto-grow" placeholder="e.g. WDC (task)…">${esc(data.contractor)}</textarea>
             </div>
         </div>
         <button type="button" class="btn btn-danger btn-sm mt-2 remove-permit-btn">Remove</button>
@@ -1216,12 +1228,13 @@ function addWorkPermitItem(data={type:'Fall Protection Plan',site:defaultSite(),
     actTog.addEventListener('change',()=>{
         details.classList.toggle('hidden',!actTog.checked);
         colLabel.classList.toggle('hidden',actTog.checked);
+        autoGrowAll();
         const t=sel.value==='Other'?(oth.value||'Other'):sel.value;
         const c=div.querySelector('.permit-contractor').value;
         colLabel.textContent=t+(c?' — '+c:'');
         saveData();
     });
-    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    div.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',saveData));
     div.querySelector('.remove-permit-btn').addEventListener('click',()=>{div.remove();saveData();});
     document.getElementById('work-permits-container').appendChild(div);
 }
@@ -1236,10 +1249,10 @@ function addMeetingItem(data={site:defaultSite(),status:'Yes',comment:''}) {
             <select class="form-select w-auto text-sm mtg-status" autocomplete="off">${['Yes','No','N/A'].map(v=>`<option ${v===data.status?'selected':''}>${v}</option>`).join('')}</select>
         </div>
         <div class="flex flex-wrap items-center gap-1"><span class="text-xs font-semibold text-gray-600">Site:</span>${buildSiteRadiosHtml('mtgSite-'+id,data.site)}</div>
-        <input type="text" class="form-input text-sm mtg-comment" placeholder="Comments…" value="${esc(data.comment)}">
+        <textarea rows="1" class="form-input text-sm mtg-comment auto-grow" placeholder="Comments…">${esc(data.comment)}</textarea>
         <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-mtg-btn">Remove</button>`;
     div.querySelector('.mtg-status').value = data.status || 'Yes'; // ✅ FIX: forzar valor por código (ver nota en addWorkPermitItem)
-    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    div.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',saveData));
     div.querySelector('.remove-mtg-btn').addEventListener('click',()=>{div.remove();saveData();});
     document.getElementById('safety-meetings-container').appendChild(div);
 }
@@ -1262,7 +1275,7 @@ function addIncidentItem(data={site:defaultSite(),type:'First Aid',typeOther:'',
             <input type="text" class="form-input text-xs inc-type-other ${data.type==='Other'?'':'hidden'}" style="max-width:200px" placeholder="Specify type…" value="${esc(data.typeOther)}">
         </div>
         <div class="flex flex-wrap items-center gap-1"><span class="text-xs font-semibold text-gray-600">Site:</span>${buildSiteRadiosHtml('incSite-'+id,data.site)}</div>
-        <input type="text" class="form-input text-sm inc-comment" placeholder="Details / Comments…" value="${esc(data.comment)}">
+        <textarea rows="1" class="form-input text-sm inc-comment auto-grow" placeholder="Details / Comments…">${esc(data.comment)}</textarea>
         <div class="obs-status-bar inc-status-bar mt-2">
             <div class="flex flex-wrap items-center gap-3 mb-1">
                 <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Follow-up Status</span>
@@ -1306,7 +1319,7 @@ function addIncidentItem(data={site:defaultSite(),type:'First Aid',typeOther:'',
     pendChk.addEventListener('change',onIncStatusChange);
     resChk.addEventListener('change',onIncStatusChange);
     paintIncStatus();
-    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    div.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',saveData));
     div.querySelector('.remove-inc-btn').addEventListener('click',()=>{div.remove();saveData();});
     document.getElementById('site-incidents-container').appendChild(div);
 }
@@ -1321,9 +1334,9 @@ function addWeekendItem(data={site:defaultSite(),status:'Yes',comment:''}) {
             <select class="form-select w-auto text-sm wknd-status">${['Yes','No','N/A'].map(v=>`<option ${v===data.status?'selected':''}>${v}</option>`).join('')}</select>
         </div>
         <div class="flex flex-wrap items-center gap-1"><span class="text-xs font-semibold text-gray-600">Site:</span>${buildSiteRadiosHtml('wkndSite-'+id,data.site)}</div>
-        <input type="text" class="form-input text-sm wknd-comment" placeholder="Details…" value="${esc(data.comment)}">
+        <textarea rows="1" class="form-input text-sm wknd-comment auto-grow" placeholder="Details…">${esc(data.comment)}</textarea>
         <button type="button" class="btn btn-danger btn-sm absolute top-2 right-2 remove-wknd-btn">Remove</button>`;
-    div.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',saveData));
+    div.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',saveData));
     div.querySelector('.remove-wknd-btn').addEventListener('click',()=>{div.remove();saveData();});
     document.getElementById('weekend-work-container').appendChild(div);
 }
@@ -1348,7 +1361,7 @@ function addObservationItem(data) {
             <input type="text" class="form-input text-xs obs-site-other ${siteVal==='Other'?'':'hidden'}" style="max-width:150px" placeholder="Specify site…" value="${esc(data.siteOther)}">
             <span class="obs-allsites-badge ${siteVal==='All Sites'?'':'hidden'}" style="font-size:0.7rem;background:#003D5218;color:#003D52;font-weight:700;padding:0.15rem 0.5rem;border-radius:9999px">All Sites</span>
         </div>
-        <textarea class="form-textarea obs-text" rows="3" placeholder="Enter observation…">${esc(data.text)}</textarea>
+        <textarea class="form-textarea obs-text auto-grow" rows="3" placeholder="Enter observation…">${esc(data.text)}</textarea>
         <div class="obs-status-bar ${barClass} mt-2">
             <div class="flex flex-wrap items-center gap-3 mb-1">
                 <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Follow-up Status</span>
@@ -1611,7 +1624,7 @@ function generateReport() {
         let b=`<div class="${pageBreakClass}">`;
         b+=`<div class="report-site-header" style="margin:0 0 6pt;padding:5pt 8pt;background:#003D52;border-radius:3pt"><span style="font-size:12pt;font-weight:800;color:#96C61C;letter-spacing:0.06em">SITE ${site}</span></div>`;
         if(hcBySite[site]){const t=hcBySite[site].reduce((s,x)=>s+x.count,0);const nTrades=hcBySite[site].length;b+=sectionHtml('Headcount');b+=`<div style="margin-left:10pt;margin-bottom:3pt"><span style="font-weight:700;font-size:9pt;color:#003D52">${t} workers on site — ${nTrades} ${nTrades===1?'trade':'trades'}</span><br>`;hcBySite[site].forEach(x=>{b+=`<span style="color:#374151;font-size:8.5pt">&nbsp;&nbsp;${x.trade}: <b>${x.count}</b></span><br>`;});b+=`</div>`;}
-        if(orisBySite[site]){b+=sectionHtml('Orientations');orisBySite[site].forEach(o=>{let txt=o.type;if(o.worker)txt+=` <span style="color:#374151">— ${o.worker}</span>`;b+=rowHtml(txt);});}
+        if(orisBySite[site]){b+=sectionHtml('Orientations');orisBySite[site].forEach(o=>{let txt=o.type;if(o.worker)txt+=` <span style="color:#374151">— ${obsHtml(o.worker)}</span>`;b+=rowHtml(txt);});}
         if(walksBySite[site]){
             b+=sectionHtml('Inspections Completed');
             walksBySite[site].forEach(w=>{b+=rowHtml(`<span style="color:#059669;font-weight:600">Completed</span> — ${w}`);});
@@ -1640,12 +1653,12 @@ function generateReport() {
         }
         if(craneBySite[site]){b+=sectionHtml('Crane');craneBySite[site].forEach(e=>{b+=`<div style="margin-left:0.75rem;font-weight:700;color:#003D52;margin-top:0.2rem">${e.craneName}</div>`;e.tasks.forEach(t=>{let txt=t.task;if(t.inspector)txt+=` <span style="color:#374151">— ${t.inspector}</span>`;if(t.companies&&t.companies.length)txt+=` <span style="color:#374151">| With: ${t.companies.join(', ')}</span>`;b+=rowHtml(txt,1.5);});});}
         if(equipBySite[site]){b+=sectionHtml('Mobile Equipment');equipBySite[site].forEach(e=>{let txt=e.name;if(e.inspector)txt+=` <span style="color:#374151">— ${e.inspector}</span>`;b+=rowHtml(txt);});}
-        if(permitsBySite[site]){b+=sectionHtml('Active Work Permits');permitsBySite[site].forEach(p=>{b+=rowHtml(`<b>${p.type}</b>: ${p.contractor}`);});}
-        if(mtgsBySite[site]){b+=sectionHtml('Safety Meetings');mtgsBySite[site].forEach(m=>{let txt=`Weekly Safety Meeting: <b>${m.status}</b>`;if(m.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${m.comment}</span>`;b+=rowHtml(txt);});}
+        if(permitsBySite[site]){b+=sectionHtml('Active Work Permits');permitsBySite[site].forEach(p=>{b+=rowHtml(`<b>${p.type}</b>: ${obsHtml(p.contractor)}`);});}
+        if(mtgsBySite[site]){b+=sectionHtml('Safety Meetings');mtgsBySite[site].forEach(m=>{let txt=`Weekly Safety Meeting: <b>${m.status}</b>`;if(m.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${obsHtml(m.comment)}</span>`;b+=rowHtml(txt);});}
         b+=sectionHtml('Site Incidents');
-        if(incsBySite[site]&&incsBySite[site].length){incsBySite[site].forEach(i=>{let txt=`<span style="color:#dc2626;font-weight:700">${i.type}</span>`;if(i.incStatus==='pending')txt+=` <span style="font-size:8pt;font-weight:700;color:#d97706">[Pending]</span>`;else if(i.incStatus==='resolved')txt+=` <span style="font-size:8pt;font-weight:700;color:#059669">[Resolved${i.resolvedDate?': '+i.resolvedDate:''}]</span>`;if(i.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${i.comment}</span>`;b+=rowHtml(txt);});}
+        if(incsBySite[site]&&incsBySite[site].length){incsBySite[site].forEach(i=>{let txt=`<span style="color:#dc2626;font-weight:700">${i.type}</span>`;if(i.incStatus==='pending')txt+=` <span style="font-size:8pt;font-weight:700;color:#d97706">[Pending]</span>`;else if(i.incStatus==='resolved')txt+=` <span style="font-size:8pt;font-weight:700;color:#059669">[Resolved${i.resolvedDate?': '+i.resolvedDate:''}]</span>`;if(i.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${obsHtml(i.comment)}</span>`;b+=rowHtml(txt);});}
         else{b+=rowHtml(`<span style="color:#059669;font-weight:600">No incidents reported.</span>`);}
-        if(wkndsBySite[site]){b+=sectionHtml('Weekend Work');wkndsBySite[site].forEach(w=>{let txt=`Weekend: <b>${w.status}</b>`;if(w.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${w.comment}</span>`;b+=rowHtml(txt);});}
+        if(wkndsBySite[site]){b+=sectionHtml('Weekend Work');wkndsBySite[site].forEach(w=>{let txt=`Weekend: <b>${w.status}</b>`;if(w.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${obsHtml(w.comment)}</span>`;b+=rowHtml(txt);});}
         if(obsBySite[site]){b+=sectionHtml('Observations');obsBySite[site].forEach(o=>{const statusColor=o.obsStatus==='resolved'?'#059669':o.obsStatus==='pending'?'#d97706':'#6b7280';const statusLabel=o.obsStatus==='resolved'?'Resolved':o.obsStatus==='pending'?'Pending':'New';let statusLine=`<span style="font-size:8pt;font-weight:700;color:${statusColor}">[${statusLabel}]</span>`;if(o.foremanInformed)statusLine+=` <span style="font-size:8pt;color:#003D52;font-weight:600">Foreman Informed</span>`;if(o.obsStatus==='resolved'&&o.resolvedDate)statusLine+=` <span style="font-size:8pt;color:#059669"> — Resolved: ${o.resolvedDate}</span>`;b+=rowHtml(`${statusLine}<br><span style="white-space:pre-wrap">${obsHtml(o.text)}</span>`);});}
         b+=`</div>`;blocks.push(b);
     });
@@ -1759,6 +1772,7 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     document.getElementById('report-output').classList.add('hidden');
     checkHotwork();
     saveData();
+    autoGrowAll();
     }catch(e){alert('Reset error: '+e.message);}
 });
 document.getElementById('copyReport').addEventListener('click',()=>{
@@ -1785,7 +1799,7 @@ document.getElementById('csoName').addEventListener('input',saveData);
     const customSites=getCustomSites().filter(s=>s!=='2050');saveCustomSites(customSites);
     const customTrades=getCustomTrades().filter(t=>t.toLowerCase()!=='cursing');saveCustomTrades(customTrades);
 })();
-renderSiteDisplay();rebuildHeadcount();rebuildInspections();buildCrane();buildMobileEquipment();loadData();checkHotwork();renderPendingObsSummary();
+renderSiteDisplay();rebuildHeadcount();rebuildInspections();buildCrane();buildMobileEquipment();loadData();checkHotwork();renderPendingObsSummary();autoGrowAll();
 }); // end DOMContentLoaded
 </script>
 </body>
