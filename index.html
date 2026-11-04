@@ -1061,6 +1061,35 @@ function addEquipmentItem(data) {
                 <div class="relative"><input type="checkbox" class="sr-only equip-toggle" ${data.done?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
             </label>
         </div>
+        <div class="flex items-center gap-2 mt-1">
+            <span class="text-xs font-semibold text-gray-500 shrink-0">Owner / Rental</span>
+            <input type="text" class="form-input text-xs equip-owner" style="max-width:220px" placeholder="e.g. Bjordal" value="${esc(data.owner)}">
+            <label class="flex items-center cursor-pointer ml-auto gap-1"><span class="text-xs font-semibold" style="color:#dc2626">Defect</span>
+                <div class="relative"><input type="checkbox" class="sr-only equip-defect-toggle" ${data.defect?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
+            </label>
+        </div>
+        <div class="equip-defect-box ${data.defect?'':'hidden'} mt-2 p-2 rounded border border-red-200 bg-white space-y-1">
+            <select class="form-select text-xs w-auto equip-defect-sev" autocomplete="off">
+                <option value="critical">Critical — Out of Service</option>
+                <option value="noncritical">Non-critical — Can operate</option>
+            </select>
+            <textarea rows="1" class="form-input text-sm equip-defect-text auto-grow" placeholder="Describe the defect…">${esc(data.defectText)}</textarea>
+            <div class="flex flex-wrap items-center gap-2">
+                <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" class="h-4 w-4 equip-owner-reported" style="accent-color:#003D52" ${data.ownerReported?'checked':''}>
+                    <span class="text-xs font-semibold text-gray-700">Reported to owner</span>
+                </label>
+                <input type="date" class="form-input text-xs equip-owner-reported-date ${data.ownerReported?'':'hidden'}" style="max-width:150px" value="${esc(data.ownerReportedDate)}">
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <span class="obs-status-chip equip-defect-badge"></span>
+                <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" class="h-4 w-4 equip-released-check" style="accent-color:#059669" ${data.defectReleased?'checked':''}>
+                    <span class="text-xs font-semibold text-gray-700 equip-released-label">Released</span>
+                </label>
+                <input type="date" class="form-input text-xs equip-released-date ${data.defectReleased?'':'hidden'}" style="max-width:150px" value="${esc(data.releasedDate)}">
+            </div>
+        </div>
         <div class="equip-details ${(isActive&&data.done)?'':'hidden'} mt-2">
             <div class="mb-2">
                 <label class="text-xs font-semibold text-gray-500">SITE</label>
@@ -1117,7 +1146,28 @@ function addEquipmentItem(data) {
     const sel=div.querySelector('.equip-inspector-sel');
     if(sel){const oth=div.querySelector('.equip-inspector-other');sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});}
     div.querySelector('.remove-equip-btn').addEventListener('click',()=>{div.remove();saveData();});
-    div.querySelectorAll('input:not(.equip-name),select').forEach(el=>el.addEventListener('input',saveData));
+    // Defect: Out of Service until marked Released (with date)
+    const defTog=div.querySelector('.equip-defect-toggle'), defBox=div.querySelector('.equip-defect-box');
+    const relChk=div.querySelector('.equip-released-check'), relDate=div.querySelector('.equip-released-date');
+    const defBadge=div.querySelector('.equip-defect-badge'), sevSel=div.querySelector('.equip-defect-sev');
+    const repChk=div.querySelector('.equip-owner-reported'), repDate=div.querySelector('.equip-owner-reported-date');
+    sevSel.value=data.defectCritical===false?'noncritical':'critical';
+    const paintDefect=()=>{
+        const crit=sevSel.value==='critical';
+        defBox.classList.toggle('hidden',!defTog.checked);
+        relDate.classList.toggle('hidden',!relChk.checked);
+        repDate.classList.toggle('hidden',!repChk.checked);
+        div.querySelector('.equip-released-label').textContent=crit?'Released':'Repaired';
+        if(relChk.checked){defBadge.textContent=crit?'Released':'Repaired';defBadge.style.cssText='background:#d1fae5;color:#065f46';}
+        else if(crit){defBadge.textContent='Out of Service';defBadge.style.cssText='background:#fee2e2;color:#b91c1c';}
+        else{defBadge.textContent='In Operation — Monitor';defBadge.style.cssText='background:#fef3c7;color:#92400e';}
+    };
+    defTog.addEventListener('change',()=>{paintDefect();if(defTog.checked)autoGrow(div.querySelector('.equip-defect-text'));saveData();});
+    sevSel.addEventListener('change',()=>{paintDefect();saveData();});
+    repChk.addEventListener('change',()=>{if(repChk.checked&&!repDate.value)repDate.valueAsDate=new Date();paintDefect();saveData();});
+    relChk.addEventListener('change',()=>{if(relChk.checked&&!relDate.value)relDate.valueAsDate=new Date();paintDefect();saveData();});
+    paintDefect();
+    div.querySelectorAll('input:not(.equip-name),select,textarea').forEach(el=>el.addEventListener('input',saveData));
     // Operator manager toggle
     div.querySelector('.toggle-ops-btn').addEventListener('click', () => {
         div.querySelector('.ops-add-row').classList.toggle('hidden');
@@ -1149,6 +1199,14 @@ function addEquipmentItem(data) {
     buildOperatorManager(div, equipName);
     document.getElementById('mobile-equipment-container').appendChild(div);
     updateInactiveEquipVisibility();
+}
+function equipExtraData(div){
+    return {owner:div.querySelector('.equip-owner')?.value||'',defect:div.querySelector('.equip-defect-toggle')?.checked||false,defectCritical:div.querySelector('.equip-defect-sev')?.value!=='noncritical',defectText:div.querySelector('.equip-defect-text')?.value||'',ownerReported:div.querySelector('.equip-owner-reported')?.checked||false,ownerReportedDate:div.querySelector('.equip-owner-reported-date')?.value||'',defectReleased:div.querySelector('.equip-released-check')?.checked||false,releasedDate:div.querySelector('.equip-released-date')?.value||''};
+}
+// A released/repaired defect is cleared on the next day / reset; an open one carries over
+function carryEquipDefect(e){
+    if(e.defect&&e.defectReleased) return {...e,defect:false,defectCritical:true,defectText:'',ownerReported:false,ownerReportedDate:'',defectReleased:false,releasedDate:''};
+    return e;
 }
 let showInactiveEquip=false;
 function updateInactiveEquipVisibility(){
@@ -1430,6 +1488,13 @@ function renderPendingObsSummary() {
         const comment = item.querySelector('.inc-comment').value.trim();
         entries.push({item, tab:'incidents', site: s ? s.value : '', tag: type, text: comment});
     });
+    document.querySelectorAll('#mobile-equipment-container .equipment-item').forEach(item => {
+        const x = equipExtraData(item);
+        if (!x.defect || x.defectReleased) return;
+        const name = item.querySelector('.equip-name').value.trim();
+        const text = name + (x.defectText.trim() ? ' — ' + x.defectText.trim() : '') + (x.ownerReported ? '' : ' — Not reported to owner');
+        entries.push({item, tab:'equipment', site: item.querySelector('.equip-site-val').value, tag: x.defectCritical ? 'Out of Service' : 'Defect — In Operation', text});
+    });
     document.querySelectorAll('#additional-observations-container .observation-item').forEach(item => {
         const text = item.querySelector('.obs-text')?.value.trim() || '';
         if (!text || !item.querySelector('.obs-pending-check')?.checked || item.querySelector('.obs-resolved-check')?.checked) return;
@@ -1462,6 +1527,7 @@ function renderPendingObsSummary() {
         row.append(badge, txt);
         row.addEventListener('click', () => {
             document.querySelector(`.tab-btn[data-tab="${e.tab}"]`).click();
+            if (e.tab === 'equipment' && e.item.style.display === 'none') { showInactiveEquip = true; updateInactiveEquipVisibility(); }
             e.item.scrollIntoView({behavior:'smooth', block:'center'});
         });
         list.appendChild(row);
@@ -1498,7 +1564,7 @@ function saveData() {
     const equip=[];
     document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{
         const sel=div.querySelector('.equip-inspector-sel'), freeInp=div.querySelector('.equip-inspector-free');
-        equip.push({name:div.querySelector('.equip-name').value,site:div.querySelector('.equip-site-val').value,done:div.querySelector('.equip-toggle')?.checked||false,active:div.querySelector('.equip-active-toggle')?.checked!==false,inspector:sel?sel.value:'',otherInspector:freeInp?freeInp.value:(div.querySelector('.equip-inspector-other')?.value||'')});
+        equip.push({name:div.querySelector('.equip-name').value,site:div.querySelector('.equip-site-val').value,done:div.querySelector('.equip-toggle')?.checked||false,active:div.querySelector('.equip-active-toggle')?.checked!==false,inspector:sel?sel.value:'',otherInspector:freeInp?freeInp.value:(div.querySelector('.equip-inspector-other')?.value||''),...equipExtraData(div)});
     });
     d.equipment=JSON.stringify(equip);
     const mtgs=[];
@@ -1583,7 +1649,7 @@ function loadData() {
     const isSameDay = data && data.checklistDate === today;
     // ✅ FIX: si la lista guardada existe (aunque esté vacía), respetarla — lo que el usuario borró no debe reaparecer
     if(data&&data.craneData){const cd=JSON.parse(data.craneData);if(Array.isArray(cd)){document.getElementById('crane-container').innerHTML='';cd.forEach(c=>addCraneCard(isSameDay?c:{...c,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''}));}}
-    if(data&&data.equipment){const eq=JSON.parse(data.equipment);if(Array.isArray(eq)){document.getElementById('mobile-equipment-container').innerHTML='';eq.forEach(e=>{const trimmedName=(e.name||'').trim();const canonName=EQUIP_NAME_MAP[trimmedName]||trimmedName;const base=EQUIPMENT_LIST.find(b=>b.name===canonName);addEquipmentItem({...e,name:canonName,done:isSameDay?e.done:false,inspector:isSameDay?e.inspector:'',otherInspector:isSameDay?e.otherInspector:'',inspectors:base?base.inspectors:[]});});updateInactiveEquipVisibility();}}
+    if(data&&data.equipment){const eq=JSON.parse(data.equipment);if(Array.isArray(eq)){document.getElementById('mobile-equipment-container').innerHTML='';eq.forEach(e=>{const trimmedName=(e.name||'').trim();const canonName=EQUIP_NAME_MAP[trimmedName]||trimmedName;const base=EQUIPMENT_LIST.find(b=>b.name===canonName);addEquipmentItem({...(isSameDay?e:carryEquipDefect(e)),name:canonName,done:isSameDay?e.done:false,inspector:isSameDay?e.inspector:'',otherInspector:isSameDay?e.otherInspector:'',inspectors:base?base.inspectors:[]});});updateInactiveEquipVisibility();}}
     // Incidentes: mismo día → todos; día nuevo → solo los pendientes de seguimiento
     if(data&&data.incidents){const incs=JSON.parse(data.incidents);document.getElementById('site-incidents-container').innerHTML='';incs.filter(i=>isSameDay||i.incStatus==='pending').forEach(i=>addIncidentItem(i));}
     if(!isSameDay){rebuildHeadcount();rebuildInspections();return;}
@@ -1604,7 +1670,7 @@ function generateReport() {
     document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{const at=item.querySelector('.permit-active-toggle');if(at&&!at.checked)return;const s=item.querySelector('input[name^="permSite-"]:checked');const site=s?s.value:defaultSite();const sel=item.querySelector('.permit-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.permit-type-other')?.value;if(o)type=`Other: ${o}`;}const c=item.querySelector('.permit-contractor').value;if(!c)return;if(!permitsBySite[site])permitsBySite[site]=[];permitsBySite[site].push({type,contractor:c});});
     document.getElementById('orientations-container').querySelectorAll('.orientation-item').forEach(item=>{const s=item.querySelector('input[name^="oriSite-"]:checked');const site=s?s.value:defaultSite();const sel=item.querySelector('.orientation-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.orientation-type-other')?.value;if(o)type=`Other: ${o}`;}if(!orisBySite[site])orisBySite[site]=[];orisBySite[site].push({type,worker:item.querySelector('.orientation-worker').value});});
     document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{const id=cb.id;allSites.forEach(s=>{const sSlug=s.toLowerCase().replace(/[^a-z0-9]/g,'');if(id.includes(sSlug)){let label='';if(id.startsWith('safetywalk'))label=`Safety Walk ${s}`;else if(id.startsWith('weeklysafety'))label=`Weekly Safety Site Inspection ${s}`;else label=id.replace('-completed','');if(!walksBySite[s])walksBySite[s]=[];walksBySite[s].push(label);}});});
-    document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{const act=div.querySelector('.equip-active-toggle');if(act&&!act.checked)return;const tog=div.querySelector('.equip-toggle');if(!tog||!tog.checked)return;const site=div.querySelector('.equip-site-val').value||defaultSite();const name=div.querySelector('.equip-name').value;const sel=div.querySelector('.equip-inspector-sel');let insp=sel?sel.value:(div.querySelector('.equip-inspector-free')?.value||'');if(insp==='Other')insp=div.querySelector('.equip-inspector-other')?.value||'Other';if(!equipBySite[site])equipBySite[site]=[];equipBySite[site].push({name,inspector:insp});});
+    document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(div=>{const x=equipExtraData(div);const act=div.querySelector('.equip-active-toggle');const tog=div.querySelector('.equip-toggle');const done=(!act||act.checked)&&tog&&tog.checked;if(!done&&!x.defect)return;const site=div.querySelector('.equip-site-val').value||defaultSite();const name=div.querySelector('.equip-name').value;let insp='';if(done){const sel=div.querySelector('.equip-inspector-sel');insp=sel?sel.value:(div.querySelector('.equip-inspector-free')?.value||'');if(insp==='Other')insp=div.querySelector('.equip-inspector-other')?.value||'Other';}if(!equipBySite[site])equipBySite[site]=[];equipBySite[site].push({name,inspector:insp,...x});});
     document.getElementById('crane-container').querySelectorAll('.crane-card').forEach(div=>{const site=div.querySelector('.crane-site-val')?.value||'1600';const craneName=div.querySelector('.crane-name')?.value||'Crane';if(!craneBySite[site])craneBySite[site]=[];const entry={craneName,tasks:[]};const dailyTog=div.querySelector('.crane-daily-toggle');if(dailyTog&&dailyTog.checked){let insp=div.querySelector('.crane-insp-sel')?.value||'';if(insp==='Other')insp=div.querySelector('.crane-insp-other')?.value||'Other';entry.tasks.push({task:'Crane Daily Inspection',inspector:insp});}const riggTog=div.querySelector('.crane-rigging-toggle');if(riggTog&&riggTog.checked){let insp=div.querySelector('.crane-rigging-sel')?.value||'';if(insp==='Other')insp=div.querySelector('.crane-rigging-other')?.value||'Other';entry.tasks.push({task:'Rigging Daily Inspection',inspector:insp});}const cold=div.querySelector('.crane-cold-check');if(cold&&cold.checked)entry.tasks.push({task:'Cold Weather Crane Inspection',inspector:''});const companies=[];div.querySelectorAll('.overlap-check:checked').forEach(cb=>companies.push(cb.value));const o1c=div.querySelector('.overlap-other1-check');if(o1c&&o1c.checked){const t=div.querySelector('.overlap-other1-text')?.value;if(t)companies.push(t);}const o2c=div.querySelector('.overlap-other2-check');if(o2c&&o2c.checked){const t=div.querySelector('.overlap-other2-text')?.value;if(t)companies.push(t);}if(companies.length)entry.tasks.push({task:'Overlapping Procedure',companies});if(entry.tasks.length)craneBySite[site].push(entry);});
     document.getElementById('safety-meetings-container').querySelectorAll('.relative').forEach(div=>{const s=div.querySelector('input[name^="mtgSite-"]:checked');const site=s?s.value:defaultSite();if(!mtgsBySite[site])mtgsBySite[site]=[];mtgsBySite[site].push({status:div.querySelector('.mtg-status').value,comment:div.querySelector('.mtg-comment').value});});
     document.getElementById('site-incidents-container').querySelectorAll('.incident-item').forEach(div=>{const s=div.querySelector('input[name^="incSite-"]:checked');const site=s?s.value:defaultSite();const sel=div.querySelector('.inc-type');let type=sel.value;if(type==='Other'){const o=div.querySelector('.inc-type-other')?.value;if(o)type=`Other: ${o}`;}if(!incsBySite[site])incsBySite[site]=[];incsBySite[site].push({type,comment:div.querySelector('.inc-comment').value,incStatus:getIncStatus(div),resolvedDate:div.querySelector('.inc-resolved-date')?.value||''});});
@@ -1652,7 +1718,7 @@ function generateReport() {
             }
         }
         if(craneBySite[site]){b+=sectionHtml('Crane');craneBySite[site].forEach(e=>{b+=`<div style="margin-left:0.75rem;font-weight:700;color:#003D52;margin-top:0.2rem">${e.craneName}</div>`;e.tasks.forEach(t=>{let txt=t.task;if(t.inspector)txt+=` <span style="color:#374151">— ${t.inspector}</span>`;if(t.companies&&t.companies.length)txt+=` <span style="color:#374151">| With: ${t.companies.join(', ')}</span>`;b+=rowHtml(txt,1.5);});});}
-        if(equipBySite[site]){b+=sectionHtml('Mobile Equipment');equipBySite[site].forEach(e=>{let txt=e.name;if(e.inspector)txt+=` <span style="color:#374151">— ${e.inspector}</span>`;b+=rowHtml(txt);});}
+        if(equipBySite[site]){b+=sectionHtml('Mobile Equipment');equipBySite[site].forEach(e=>{let txt=obsHtml(e.name);if(e.inspector)txt+=` <span style="color:#374151">— ${obsHtml(e.inspector)}</span>`;if(e.defect){const own=e.owner?` — Owner: ${obsHtml(e.owner)}`:'';const desc=e.defectText?` — ${obsHtml(e.defectText)}`:'';const rep=e.ownerReported?` — Reported to owner${e.ownerReportedDate?': '+e.ownerReportedDate:''}`:` — <b style="color:#dc2626">Not reported to owner</b>`;const status=e.defectReleased?`<b style="color:#059669">[${e.defectCritical?'Released':'Repaired'}${e.releasedDate?': '+e.releasedDate:''}]</b>`:e.defectCritical?`<b style="color:#dc2626">⚠ Critical — Out of Service</b>`:`<b style="color:#d97706">⚠ Non-critical — In Operation</b>`;txt+=`<br><span style="font-size:8.5pt;padding-left:1rem;color:#374151">${status}${desc}${own}${rep}</span>`;}b+=rowHtml(txt);});}
         if(permitsBySite[site]){b+=sectionHtml('Active Work Permits');permitsBySite[site].forEach(p=>{b+=rowHtml(`<b>${p.type}</b>: ${obsHtml(p.contractor)}`);});}
         if(mtgsBySite[site]){b+=sectionHtml('Safety Meetings');mtgsBySite[site].forEach(m=>{let txt=`Weekly Safety Meeting: <b>${m.status}</b>`;if(m.comment)txt+=`<br><span style="color:#374151;font-size:0.88em;padding-left:1rem">${obsHtml(m.comment)}</span>`;b+=rowHtml(txt);});}
         b+=sectionHtml('Site Incidents');
@@ -1748,7 +1814,7 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     });
     var savedEquip=[];
     document.getElementById('mobile-equipment-container').querySelectorAll('.equipment-item').forEach(function(div){
-        savedEquip.push({name:div.querySelector('.equip-name')?div.querySelector('.equip-name').value:'Equipment',site:div.querySelector('.equip-site-val')?div.querySelector('.equip-site-val').value:getAllSites()[0],active:div.querySelector('.equip-active-toggle')?div.querySelector('.equip-active-toggle').checked:true});
+        savedEquip.push({name:div.querySelector('.equip-name')?div.querySelector('.equip-name').value:'Equipment',site:div.querySelector('.equip-site-val')?div.querySelector('.equip-site-val').value:getAllSites()[0],active:div.querySelector('.equip-active-toggle')?div.querySelector('.equip-active-toggle').checked:true,...carryEquipDefect(equipExtraData(div))});
     });
     document.getElementById('waterUse').selectedIndex=0;
     document.getElementById('fireDanger').selectedIndex=0;
@@ -1764,7 +1830,7 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     document.getElementById('crane-container').innerHTML='';
     savedCranes.forEach(function(c){addCraneCard({name:c.name,site:c.site,done:false,inspector:'',otherInspector:'',rigging:false,riggingInspector:'',riggingOtherInspector:'',coldWeather:false,overlap:[],overlapOtherChecked:false,overlapOtherText:'',overlapOther2Checked:false,overlapOther2Text:''});});
     document.getElementById('mobile-equipment-container').innerHTML='';
-    savedEquip.forEach(function(e){addEquipmentItem({name:e.name,site:e.site,active:e.active,done:false,inspector:'',otherInspector:''});});
+    savedEquip.forEach(function(e){addEquipmentItem({...e,done:false,inspector:'',otherInspector:''});});
     document.getElementById('work-permits-container').innerHTML='';
     savedPermits.forEach(function(p){addWorkPermitItem(p);});
     document.getElementById('additional-observations-container').innerHTML='';
