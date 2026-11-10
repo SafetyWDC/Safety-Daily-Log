@@ -1690,8 +1690,9 @@ function generateReport() {
         const hasAny=hcBySite[site]||permitsBySite[site]||orisBySite[site]||walksBySite[site]||equipBySite[site]||craneBySite[site]||mtgsBySite[site]||incsBySite[site]||wkndsBySite[site]||obsBySite[site];
         if(!hasAny)return;
         const pageBreakClass=isFirstSite?'report-site-block report-first-site':'report-site-block';
+        // each site starts a new page and is filed separately, so repeat the header (date, CSO)
+        let b=`<div class="${pageBreakClass}">${isFirstSite?'':generateReportHeader()}`;
         isFirstSite=false;
-        let b=`<div class="${pageBreakClass}">`;
         b+=`<div class="report-site-header" style="margin:0 0 6pt;padding:5pt 8pt;background:#003D52;border-radius:3pt"><span style="font-size:12pt;font-weight:800;color:#96C61C;letter-spacing:0.06em">SITE ${site}</span></div>`;
         if(hcBySite[site]){const t=hcBySite[site].reduce((s,x)=>s+x.count,0);const nTrades=hcBySite[site].length;b+=sectionHtml('Headcount');b+=`<div style="margin-left:10pt;margin-bottom:3pt"><span style="font-weight:700;font-size:9pt;color:#003D52">${t} workers on site — ${nTrades} ${nTrades===1?'trade':'trades'}</span><br>`;hcBySite[site].forEach(x=>{b+=`<span style="color:#374151;font-size:8.5pt">&nbsp;&nbsp;${x.trade}: <b>${x.count}</b></span><br>`;});b+=`</div>`;}
         if(orisBySite[site]){b+=sectionHtml('Orientations');orisBySite[site].forEach(o=>{let txt=o.type;if(o.worker)txt+=` <span style="color:#374151">— ${obsHtml(o.worker)}</span>`;b+=rowHtml(txt);});}
