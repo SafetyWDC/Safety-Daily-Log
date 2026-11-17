@@ -1059,19 +1059,18 @@ function addEquipmentItem(data) {
         <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
             <button type="button" class="remove-equip-btn" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:0 0.2rem;color:#9ca3af" title="Remove equipment">🗑️</button>
             <input type="text" class="form-input text-sm font-semibold equip-name flex-1" style="min-width:150px" value="${esc(equipName)}" placeholder="Equipment name…">
-            <label class="flex items-center cursor-pointer ml-1 gap-1"><span class="text-xs text-gray-500">Active</span>
-                <div class="relative"><input type="checkbox" class="sr-only equip-active-toggle" ${isActive?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
+            <label class="flex items-center cursor-pointer ml-1 gap-0.5" title="Active">
+                <div class="relative"><input type="checkbox" class="sr-only equip-active-toggle" ${isActive?'checked':''}><div class="toggle-bg block w-10 h-5 rounded-full" style="background:${isActive?'#96C61C':'#d1d5db'}"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
             </label>
             <label class="equip-done-wrap flex items-center cursor-pointer ml-1 gap-1 ${isActive?'':'hidden'}"><span class="text-xs text-gray-500">Done</span>
                 <div class="relative"><input type="checkbox" class="sr-only equip-toggle" ${data.done?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
             </label>
         </div>
-        <div class="flex items-center gap-2 mt-1">
+        <div class="flex items-center gap-2 mt-1 flex-wrap">
+            <div class="flex flex-wrap gap-1 equip-site-pills"></div>
+            <input type="hidden" class="equip-site-val" value="${eqSite}">
             <span class="text-xs font-semibold text-gray-500 shrink-0">Owner / Rental</span>
-            <input type="text" class="form-input text-xs equip-owner" style="max-width:220px" placeholder="e.g. Bjordal" value="${esc(data.owner)}">
-            <label class="flex items-center cursor-pointer ml-auto gap-1"><span class="text-xs font-semibold" style="color:#dc2626">Defect</span>
-                <div class="relative"><input type="checkbox" class="sr-only equip-defect-toggle" ${data.defect?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
-            </label>
+            <input type="text" class="form-input text-xs equip-owner" style="max-width:180px" placeholder="e.g. Bjordal" value="${esc(data.owner)}">
         </div>
         <div class="equip-defect-box ${data.defect?'':'hidden'} mt-2 p-2 rounded border border-red-200 bg-white space-y-1">
             <select class="form-select text-xs w-auto equip-defect-sev" autocomplete="off">
@@ -1096,30 +1095,32 @@ function addEquipmentItem(data) {
             </div>
         </div>
         <div class="equip-details ${(isActive&&data.done)?'':'hidden'} mt-2">
-            <div class="mb-2">
-                <label class="text-xs font-semibold text-gray-500">SITE</label>
-                <div class="flex flex-wrap gap-1 mt-1 equip-site-pills"></div>
-                <input type="hidden" class="equip-site-val" value="${eqSite}">
-            </div>
-            <div class="pl-2 border-l-2 border-orange-200">
-                <label class="text-xs font-semibold text-gray-500">Inspected by</label>
-                <div class="flex gap-1 mt-1 flex-wrap equip-insp-container">
-                    ${hasNamed
-                        ? `<select class="form-select text-xs equip-inspector-sel" style="max-width:180px">${inspOpts}</select>
-                           <input type="text" class="form-input text-xs equip-inspector-other ${(data.inspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${esc(data.otherInspector)}">`
-                        : `<input type="text" class="form-input text-xs equip-inspector-free" style="max-width:220px" placeholder="Inspector name…" value="${esc(data.otherInspector||data.inspector)}">`
-                    }
+            <div class="flex items-center gap-2 flex-wrap">
+                <div class="pl-2 border-l-2 border-orange-200 flex-1" style="min-width:160px">
+                    <label class="text-xs font-semibold text-gray-500">Inspected by</label>
+                    <div class="flex gap-1 mt-1 flex-wrap equip-insp-container">
+                        ${hasNamed
+                            ? `<select class="form-select text-xs equip-inspector-sel" style="max-width:180px">${inspOpts}</select>
+                               <input type="text" class="form-input text-xs equip-inspector-other ${(data.inspector==='Other')?'':'hidden'}" style="max-width:160px" placeholder="Name…" value="${esc(data.otherInspector)}">`
+                            : `<input type="text" class="form-input text-xs equip-inspector-free" style="max-width:220px" placeholder="Inspector name…" value="${esc(data.otherInspector||data.inspector)}">`
+                        }
+                    </div>
                 </div>
+                <label class="flex items-center cursor-pointer gap-1"><span class="text-xs font-semibold" style="color:#dc2626">Defect</span>
+                    <div class="relative"><input type="checkbox" class="sr-only equip-defect-toggle" ${data.defect?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
+                </label>
             </div>
             <div class="operator-manager mt-2">
                 <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-bold" style="color:#003D52">Operators</span>
-                    <button type="button" class="btn btn-sm btn-primary toggle-ops-btn" style="font-size:0.65rem;padding:0.15rem 0.5rem">Manage</button>
+                    <button type="button" class="toggle-ops-btn" style="background:none;border:none;cursor:pointer;font-size:0.7rem;font-weight:700;color:#003D52;padding:0;display:flex;align-items:center;gap:4px"><span class="ops-arrow">▶</span> Operators</button>
+                    <button type="button" class="btn btn-sm btn-primary manage-ops-btn hidden" style="font-size:0.65rem;padding:0.15rem 0.5rem">Manage</button>
                 </div>
-                <div class="ops-chips flex flex-wrap gap-1 mb-1"></div>
-                <div class="ops-add-row hidden flex gap-1 mt-1">
-                    <input type="text" class="form-input text-xs ops-new-input" style="max-width:180px" placeholder="Operator name…">
-                    <button type="button" class="btn btn-green btn-sm ops-add-btn">+ Add</button>
+                <div class="ops-panel hidden">
+                    <div class="ops-chips flex flex-wrap gap-1 mb-1"></div>
+                    <div class="ops-add-row hidden flex gap-1 mt-1">
+                        <input type="text" class="form-input text-xs ops-new-input" style="max-width:180px" placeholder="Operator name…">
+                        <button type="button" class="btn btn-green btn-sm ops-add-btn">+ Add</button>
+                    </div>
                 </div>
             </div>
         </div>`;
@@ -1139,14 +1140,18 @@ function addEquipmentItem(data) {
         saveData();
     });
     const actTog=div.querySelector('.equip-active-toggle'), doneWrap=div.querySelector('.equip-done-wrap');
+    const actBg=actTog.closest('label').querySelector('.toggle-bg');
+    const paintActive=()=>{actBg.style.background=actTog.checked?'#96C61C':'#d1d5db';};
     actTog.addEventListener('change',()=>{
         const on=actTog.checked;
         div.style.opacity=on?'':'0.55';
         doneWrap.classList.toggle('hidden',!on);
         det.classList.toggle('hidden',!on||!tog.checked);
+        paintActive();
         saveData();
         updateInactiveEquipVisibility();
     });
+    paintActive();
     const sel=div.querySelector('.equip-inspector-sel');
     if(sel){const oth=div.querySelector('.equip-inspector-other');sel.addEventListener('change',()=>{oth.classList.toggle('hidden',sel.value!=='Other');saveData();});}
     div.querySelector('.remove-equip-btn').addEventListener('click',()=>{div.remove();saveData();});
@@ -1172,8 +1177,15 @@ function addEquipmentItem(data) {
     relChk.addEventListener('change',()=>{if(relChk.checked&&!relDate.value)relDate.valueAsDate=new Date();paintDefect();saveData();});
     paintDefect();
     div.querySelectorAll('input:not(.equip-name),select,textarea').forEach(el=>el.addEventListener('input',saveData));
-    // Operator manager toggle
+    // Operator panel collapse/expand
+    const opsPanel=div.querySelector('.ops-panel'), opsArrow=div.querySelector('.ops-arrow'), manageBtn=div.querySelector('.manage-ops-btn');
     div.querySelector('.toggle-ops-btn').addEventListener('click', () => {
+        const show=opsPanel.classList.toggle('hidden');
+        opsArrow.textContent=show?'▶':'▼';
+        manageBtn.classList.toggle('hidden',show);
+    });
+    // Manage button toggles add row
+    manageBtn.addEventListener('click', () => {
         div.querySelector('.ops-add-row').classList.toggle('hidden');
     });
     // Add operator
