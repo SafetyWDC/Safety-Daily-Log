@@ -107,15 +107,9 @@
                 <select id="fireDanger" class="form-select"><option>Low</option><option>Moderate</option><option>High</option><option>Extreme</option></select>
             </div>
         </div>
-        <div class="grid grid-cols-2 gap-3 mt-3">
-            <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">Weather</label>
-                <select id="weather" class="form-select"><option>Sunny</option><option>Cloudy</option><option>Rain</option><option>Snow</option><option>Fog</option><option>Wind</option></select>
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">Temp (°C, optional)</label>
-                <input id="temperature" type="number" class="form-input" placeholder="e.g. 8">
-            </div>
+        <div class="mt-3">
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Weather</label>
+            <select id="weather" class="form-select"><option>Sunny</option><option>Cloudy</option><option>Rain</option><option>Snow</option><option>Fog</option><option>Wind</option></select>
         </div>
         <div class="mt-2 p-2 rounded-lg bg-gray-50">
             <p id="hotwork-status" class="text-sm font-bold text-center"></p>
@@ -1062,19 +1056,22 @@ function addEquipmentItem(data) {
     div.className = 'equipment-card mb-2 equipment-item';
     if (!isActive) div.style.opacity = '0.55';
     div.innerHTML = `
-        <div class="flex items-center justify-between mb-1 flex-wrap gap-1" style="position:relative">
-            <input type="text" class="form-input text-sm font-semibold equip-name" style="min-width:120px;max-width:200px" value="${esc(equipName)}" placeholder="Equipment name…">
-            <input type="text" class="form-input text-xs equip-owner" style="max-width:140px" placeholder="Owner / Rental" value="${esc(data.owner)}">
-            <label class="flex items-center cursor-pointer gap-1"><span class="text-xs text-gray-500">Active</span>
+        <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
+            <button type="button" class="remove-equip-btn" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:0 0.2rem;color:#9ca3af" title="Remove equipment">🗑️</button>
+            <input type="text" class="form-input text-sm font-semibold equip-name flex-1" style="min-width:150px" value="${esc(equipName)}" placeholder="Equipment name…">
+            <label class="flex items-center cursor-pointer ml-1 gap-1"><span class="text-xs text-gray-500">Active</span>
                 <div class="relative"><input type="checkbox" class="sr-only equip-active-toggle" ${isActive?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
             </label>
-            <label class="equip-done-wrap flex items-center cursor-pointer gap-1 ${isActive?'':'hidden'}"><span class="text-xs text-gray-500">Done</span>
+            <label class="equip-done-wrap flex items-center cursor-pointer ml-1 gap-1 ${isActive?'':'hidden'}"><span class="text-xs text-gray-500">Done</span>
                 <div class="relative"><input type="checkbox" class="sr-only equip-toggle" ${data.done?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
             </label>
-            <label class="flex items-center cursor-pointer gap-1"><span class="text-xs font-semibold" style="color:#dc2626">Defect</span>
+        </div>
+        <div class="flex items-center gap-2 mt-1">
+            <span class="text-xs font-semibold text-gray-500 shrink-0">Owner / Rental</span>
+            <input type="text" class="form-input text-xs equip-owner" style="max-width:220px" placeholder="e.g. Bjordal" value="${esc(data.owner)}">
+            <label class="flex items-center cursor-pointer ml-auto gap-1"><span class="text-xs font-semibold" style="color:#dc2626">Defect</span>
                 <div class="relative"><input type="checkbox" class="sr-only equip-defect-toggle" ${data.defect?'checked':''}><div class="toggle-bg block bg-gray-300 w-10 h-5 rounded-full"></div><div class="toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full"></div></div>
             </label>
-            <button type="button" class="btn btn-danger btn-sm remove-equip-btn" style="padding:0.1rem 0.45rem;font-size:0.7rem;line-height:1">X</button>
         </div>
         <div class="equip-defect-box ${data.defect?'':'hidden'} mt-2 p-2 rounded border border-red-200 bg-white space-y-1">
             <select class="form-select text-xs w-auto equip-defect-sev" autocomplete="off">
@@ -1098,10 +1095,10 @@ function addEquipmentItem(data) {
                 <input type="date" class="form-input text-xs equip-released-date ${data.defectReleased?'':'hidden'}" style="max-width:150px" value="${esc(data.releasedDate)}">
             </div>
         </div>
-        <div class="equip-details ${(isActive&&data.done)?'':'hidden'} mt-1">
-            <div class="mb-1">
+        <div class="equip-details ${(isActive&&data.done)?'':'hidden'} mt-2">
+            <div class="mb-2">
                 <label class="text-xs font-semibold text-gray-500">SITE</label>
-                <div class="flex flex-wrap gap-1 mt-0.5 equip-site-pills"></div>
+                <div class="flex flex-wrap gap-1 mt-1 equip-site-pills"></div>
                 <input type="hidden" class="equip-site-val" value="${eqSite}">
             </div>
             <div class="pl-2 border-l-2 border-orange-200">
@@ -1114,8 +1111,8 @@ function addEquipmentItem(data) {
                     }
                 </div>
             </div>
-            <div class="operator-manager mt-1">
-                <div class="flex items-center justify-between mb-0.5">
+            <div class="operator-manager mt-2">
+                <div class="flex items-center justify-between mb-1">
                     <span class="text-xs font-bold" style="color:#003D52">Operators</span>
                     <button type="button" class="btn btn-sm btn-primary toggle-ops-btn" style="font-size:0.65rem;padding:0.15rem 0.5rem">Manage</button>
                 </div>
@@ -1547,7 +1544,7 @@ function renderPendingObsSummary() {
 }
 function saveData() {
     renderPendingObsSummary();
-    const d={checklistDate:document.getElementById('checklistDate').value,csoName:document.getElementById('csoName').value,waterUse:document.getElementById('waterUse').value,fireDanger:document.getElementById('fireDanger').value,weather:document.getElementById('weather').value,temperature:document.getElementById('temperature').value};
+    const d={checklistDate:document.getElementById('checklistDate').value,csoName:document.getElementById('csoName').value,waterUse:document.getElementById('waterUse').value,fireDanger:document.getElementById('fireDanger').value,weather:document.getElementById('weather').value};
     const hc={};
     document.querySelectorAll('.headcount-input').forEach(inp=>{hc[inp.id]=parseInt(inp.value)||0;});
     d.headcounts=JSON.stringify(hc);
@@ -1668,7 +1665,6 @@ function loadData() {
     document.getElementById('waterUse').value=data.waterUse||'L1';
     document.getElementById('fireDanger').value=data.fireDanger||'Low';
     document.getElementById('weather').value=data.weather||'Sunny';
-    document.getElementById('temperature').value=data.temperature||'';
     rebuildHeadcount(data.headcounts?JSON.parse(data.headcounts):{});
     rebuildInspections(data.morningWalks?JSON.parse(data.morningWalks):{});
     if(data.orientations){document.getElementById('orientations-container').innerHTML='';JSON.parse(data.orientations).forEach(o=>addOrientationItem(o));}
@@ -1766,8 +1762,7 @@ function generateReportHeader(){
     const date=document.getElementById('checklistDate').value||'N/A';
     const cso=document.getElementById('csoName').value||'N/A';
     const water=document.getElementById('waterUse').value, fire=document.getElementById('fireDanger').value;
-    const weather=document.getElementById('weather').value, temp=document.getElementById('temperature').value.trim();
-    const weatherTxt=temp?`${weather}, ${temp}°C`:weather;
+    const weather=document.getElementById('weather').value;
     const hotwork=document.getElementById('hotwork-status').textContent;
     const weeklyDone = hasWeeklyInspectionDone();
     let h=`<div style="background:#003D52;border-radius:4pt;padding:10pt 12pt;margin-bottom:10pt">`;
@@ -1775,7 +1770,7 @@ function generateReportHeader(){
     h+=`<div style="color:#ffffff;font-size:9pt;margin-top:3pt;font-weight:500">Whistler 2020 Development Corporation</div>`;
     h+=`<div style="color:#c0cdd4;font-size:8.5pt;margin-top:4pt">Date: <b style="color:#fff">${date}</b> &nbsp;|&nbsp; CSO: <b style="color:#fff">${cso}</b></div></div>`;
     h+=`<div style="background:#f0fdf4;border:1pt solid #bbf7d0;border-radius:3pt;padding:5pt 8pt;margin-bottom:8pt;font-size:8.5pt">`;
-    h+=`<span style="color:#374151">Water Use: <b>${water}</b> &nbsp;|&nbsp; Fire Danger: <b>${fire}</b> &nbsp;|&nbsp; Weather: <b>${obsHtml(weatherTxt)}</b></span><br>`;
+    h+=`<span style="color:#374151">Water Use: <b>${water}</b> &nbsp;|&nbsp; Fire Danger: <b>${fire}</b> &nbsp;|&nbsp; Weather: <b>${weather}</b></span><br>`;
     h+=`<span style="${hotwork.includes('NOT')?'color:#dc2626':'color:#059669'};font-weight:600">${hotwork}</span></div>`;
     return h;
 }
@@ -1836,7 +1831,6 @@ document.getElementById('reset-yes').addEventListener('click',function(){
     document.getElementById('waterUse').selectedIndex=0;
     document.getElementById('fireDanger').selectedIndex=0;
     document.getElementById('weather').selectedIndex=0;
-    document.getElementById('temperature').value='';
     document.getElementById('checklistDate').valueAsDate=new Date();
     document.getElementById('csoName').value='Bethzy';
     rebuildHeadcount({});
@@ -1879,7 +1873,6 @@ document.getElementById('exportPdf').addEventListener('click',()=>{
 document.getElementById('waterUse').addEventListener('change',()=>{checkHotwork();saveData();});
 document.getElementById('fireDanger').addEventListener('change',()=>{checkHotwork();saveData();});
 document.getElementById('weather').addEventListener('change',saveData);
-document.getElementById('temperature').addEventListener('input',saveData);
 document.getElementById('checklistDate').addEventListener('input',saveData);
 document.getElementById('csoName').addEventListener('input',saveData);
 (function(){
