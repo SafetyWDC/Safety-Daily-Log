@@ -267,36 +267,36 @@ const BASE_COMPANIES = [
     { name:'WDC', trades:['Staff'], wdc:true },
     { name:'George War Wagon (GWW)', trades:['Labour'] },
     { name:'CoastRidge Services', trades:['Labour'] },
-    { name:'Bjordal', trades:['Framing'] },
-    { name:'AWSE', trades:['Electrical'] },
-    { name:'Blacktusk', trades:['Fire Protection','Automatic Doors','Video Surveillance'] },
-    { name:'True Air', trades:['HVAC'] },
     { name:'Coastal Mountain', trades:['Plumbing'] },
+    { name:'AWSE', trades:['Electrical'] },
+    { name:'True Air', trades:['HVAC'] },
     { name:'True North Masonry', trades:['Masonry'] },
     { name:'Lemyre', trades:['Siding/Cladding'] },
+    { name:'Raven', trades:['Roofing'] },
     { name:'Blueline', trades:['Drywall'] },
+    { name:'Blacktusk', trades:['Fire Protection','Automatic Doors','Video Surveillance'] },
+    { name:'Euroline Windows', trades:['Windows'] },
     { name:'Linton Painting', trades:['Painting'] },
     { name:'Performance Painting', trades:['Painting'] },
+    { name:'All Mountain Country (AMC)', trades:['Finish Carpentry'] },
+    { name:'Effective Insulation', trades:['Insulation'] },
     { name:'CMO Flooring', trades:['Flooring'] },
     { name:'Tantalus Flooring', trades:['Flooring'] },
-    { name:'Effective Insulation', trades:['Insulation'] },
-    { name:'Raven', trades:['Roofing'] },
-    { name:'All Mountain Country (AMC)', trades:['Finish Carpentry'] },
-    { name:'Corona Excavations', trades:['Excavation'] },
-    { name:'Benson', trades:['Cabinets'] },
-    { name:'Peak Cutting and Coring', trades:['Cutting/Coring'] },
-    { name:'Blacktail Reinforcing', trades:['Reinforcing'] },
-    { name:'Otis', trades:['Elevators'] },
-    { name:'Terracraft', trades:['Landscaping'] },
-    { name:'Euroline Windows', trades:['Windows'] },
-    { name:'Cypress Railing', trades:['Railing'] },
-    { name:'HardRock', trades:['Blasting'] },
-    { name:'Jensen Construction', trades:['Forming'] },
     { name:'Mathieu Lebel Paint', trades:['Exterior Painting'] },
+    { name:'Cypress Railing', trades:['Railing'] },
+    { name:'Terracraft', trades:['Landscaping'] },
+    { name:'Otis', trades:['Elevators'] },
+    { name:'Corona Excavations', trades:['Excavation'] },
+    { name:'Blacktail Reinforcing', trades:['Reinforcing'] },
+    { name:'Jensen Construction', trades:['Forming'] },
+    { name:'Bjordal', trades:['Framing'] },
+    { name:'Tree Removal', trades:['Tree Removal'] },
+    { name:'HardRock', trades:['Blasting'] },
     { name:'Surveying', trades:['Surveying'] },
     { name:'Environmental Monitoring', trades:['Environmental Monitoring'] },
     { name:'Erosion Control', trades:['Erosion Control'] },
-    { name:'Tree Removal', trades:['Tree Removal'] },
+    { name:'Benson', trades:['Cabinets'] },
+    { name:'Peak Cutting and Coring', trades:['Cutting/Coring'] },
 ];
 const CRANE_INSPECTORS   = ['Noah C.','Eric J.','Miguel M.','Mahlon Taylor','Mike Butcher','Dan Hirst','Tim C.'];
 const BJORDAL_INSPECTORS = ['Mike Butcher','Mahlon Taylor','Tim C.','Tyler F.'];
@@ -602,7 +602,7 @@ function rebuildHeadcount(savedHC) {
             parentTr.innerHTML = `
                 <td class="td-trade" style="cursor:pointer${isCustom?';color:#d97706':''}">
                     <span class="toggle-company-btn" style="display:inline-block;width:16px;font-size:0.7rem">▶</span>
-                    ${company.name}
+                    ${company.name} <span style="color:#9ca3af;font-size:0.65rem;font-weight:400">${company.trades.join(', ')}</span>
                 </td>
                 ${getAllSites().map(site => {
                     return `<td class="text-center"><span class="hc-subtotal text-xs font-bold" data-company="${company.name}" data-site="${site}" style="color:#6b7280"></span></td>`;
@@ -638,7 +638,7 @@ function rebuildHeadcount(savedHC) {
             if (company.wdc) tr.className = 'wdc-row';
             tr.innerHTML = `
                 <td class="${company.wdc?'td-wdc':'td-trade'}" style="${isCustom?'color:#d97706':''}">
-                    ${company.name}
+                    ${company.name} <span style="color:#9ca3af;font-size:0.65rem;font-weight:400">${trade}</span>
                 </td>
                 ${getAllSites().map(site => {
                     const id = `hc-${site}-${cSlug}-${tSlug}`;
