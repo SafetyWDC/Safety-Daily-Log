@@ -97,7 +97,7 @@
         </div>
     </div>
     <div class="border-t pt-3">
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-3 gap-3">
             <div>
                 <label class="block text-xs font-semibold text-gray-600 mb-1">Water Use</label>
                 <select id="waterUse" class="form-select"><option>L1</option><option>L2</option><option>L3</option></select>
@@ -106,10 +106,10 @@
                 <label class="block text-xs font-semibold text-gray-600 mb-1">Fire Danger</label>
                 <select id="fireDanger" class="form-select"><option>Low</option><option>Moderate</option><option>High</option><option>Extreme</option></select>
             </div>
-        </div>
-        <div class="mt-3">
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Weather</label>
-            <select id="weather" class="form-select"><option>Sunny</option><option>Cloudy</option><option>Rain</option><option>Snow</option><option>Fog</option><option>Wind</option></select>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Weather</label>
+                <select id="weather" class="form-select"><option>Sunny</option><option>Cloudy</option><option>Rain</option><option>Snow</option><option>Fog</option><option>Wind</option></select>
+            </div>
         </div>
         <div class="mt-2 p-2 rounded-lg bg-gray-50">
             <p id="hotwork-status" class="text-sm font-bold text-center"></p>
@@ -153,8 +153,11 @@
 </div>
 <div id="tab-headcount" class="tab-content">
     <div class="card">
-        <h2 class="text-base font-semibold mb-1" style="color:#003D52">Site Headcount</h2>
-        <p class="text-xs text-gray-500 mb-3">WDC counted once (all sites). All trades show columns per active site.</p>
+        <div class="flex items-center justify-between mb-1">
+            <h2 class="text-base font-semibold" style="color:#003D52">Site Headcount</h2>
+            <button id="manage-companies-btn" class="btn btn-gray btn-sm" style="font-size:0.65rem;padding:0.2rem 0.5rem">⚙ Manage</button>
+        </div>
+        <div id="manage-companies-panel" class="hidden mb-3"></div>
         <div class="overflow-x-auto">
             <table class="hc-table">
                 <thead><tr id="hc-thead-row"></tr></thead>
@@ -260,15 +263,40 @@
 </div><script>
 document.addEventListener('DOMContentLoaded', function () {
 const BASE_SITES = ['1475','1600','1825'];
-const BASE_TRADES = [
-    { name:'WDC', wdc:true },
-    { name:'Labour' },{ name:'Plumbing' },{ name:'Electrical' },{ name:'HVAC' },{ name:'Masonry' },
-    { name:'Siding' },{ name:'Roofing' },{ name:'Drywall' },{ name:'Fire Protection' },{ name:'Windows' },
-    { name:'Painting' },{ name:'Finishing' },{ name:'Insulation' },{ name:'Flooring' },
-    { name:'Exterior Painting' },{ name:'Railing' },{ name:'Landscaping' },{ name:'Elevators' },
-    { name:'Excavation' },{ name:'Reinforcing' },{ name:'Forming' },{ name:'Framing' },
-    { name:'Tree Removal' },{ name:'Blasting' },{ name:'Surveying' },
-    { name:'Environmental Monitoring' },{ name:'Erosion Control' },
+const BASE_COMPANIES = [
+    { name:'WDC', trades:['Staff'], wdc:true },
+    { name:'George War Wagon (GWW)', trades:['Labour'] },
+    { name:'CoastRidge Services', trades:['Labour'] },
+    { name:'Bjordal', trades:['Framing'] },
+    { name:'AWSE', trades:['Electrical'] },
+    { name:'Blacktusk', trades:['Fire Protection','Automatic Doors','Video Surveillance'] },
+    { name:'True Air', trades:['HVAC'] },
+    { name:'Coastal Mountain', trades:['Plumbing'] },
+    { name:'True North Masonry', trades:['Masonry'] },
+    { name:'Lemyre', trades:['Siding/Cladding'] },
+    { name:'Blueline', trades:['Drywall'] },
+    { name:'Linton Painting', trades:['Painting'] },
+    { name:'Performance Painting', trades:['Painting'] },
+    { name:'CMO Flooring', trades:['Flooring'] },
+    { name:'Tantalus Flooring', trades:['Flooring'] },
+    { name:'Effective Insulation', trades:['Insulation'] },
+    { name:'Raven', trades:['Roofing'] },
+    { name:'All Mountain Country (AMC)', trades:['Finish Carpentry'] },
+    { name:'Corona Excavations', trades:['Excavation'] },
+    { name:'Benson', trades:['Cabinets'] },
+    { name:'Peak Cutting and Coring', trades:['Cutting/Coring'] },
+    { name:'Blacktail Reinforcing', trades:['Reinforcing'] },
+    { name:'Otis', trades:['Elevators'] },
+    { name:'Terracraft', trades:['Landscaping'] },
+    { name:'Euroline Windows', trades:['Windows'] },
+    { name:'Cypress Railing', trades:['Railing'] },
+    { name:'HardRock', trades:['Blasting'] },
+    { name:'Jensen Construction', trades:['Forming'] },
+    { name:'Mathieu Lebel Paint', trades:['Exterior Painting'] },
+    { name:'Surveying', trades:['Surveying'] },
+    { name:'Environmental Monitoring', trades:['Environmental Monitoring'] },
+    { name:'Erosion Control', trades:['Erosion Control'] },
+    { name:'Tree Removal', trades:['Tree Removal'] },
 ];
 const CRANE_INSPECTORS   = ['Noah C.','Eric J.','Miguel M.','Mahlon Taylor','Mike Butcher','Dan Hirst','Tim C.'];
 const BJORDAL_INSPECTORS = ['Mike Butcher','Mahlon Taylor','Tim C.','Tyler F.'];
@@ -322,12 +350,24 @@ function saveCustomSites(arr) { localStorage.setItem('customSites_v5', JSON.stri
 function getInactiveBaseSites() { return JSON.parse(localStorage.getItem('inactiveBaseSites_v5')||'[]'); }
 function saveInactiveBaseSites(arr) { localStorage.setItem('inactiveBaseSites_v5', JSON.stringify(arr)); }
 function getAllSites() { return [...BASE_SITES.filter(s=>!getInactiveBaseSites().includes(s)), ...getCustomSites()]; }
-function getAllTrades() {
-    const custom = JSON.parse(localStorage.getItem('customTrades_v5')||'[]');
-    return [...BASE_TRADES, ...custom.map(n=>({name:n}))];
+function getCustomCompanies() { return JSON.parse(localStorage.getItem('customCompanies_v5')||'[]'); }
+function saveCustomCompanies(arr) { localStorage.setItem('customCompanies_v5', JSON.stringify(arr)); }
+function getCompanyEdits() { return JSON.parse(localStorage.getItem('companyEdits_v5')||'{}'); }
+function saveCompanyEdits(obj) { localStorage.setItem('companyEdits_v5', JSON.stringify(obj)); }
+function getHiddenCompanies() { return JSON.parse(localStorage.getItem('hiddenCompanies_v5')||'[]'); }
+function saveHiddenCompanies(arr) { localStorage.setItem('hiddenCompanies_v5', JSON.stringify(arr)); }
+function getAllCompanies() {
+    const edits = getCompanyEdits();
+    const hidden = getHiddenCompanies();
+    const custom = getCustomCompanies();
+    const base = BASE_COMPANIES.filter(c => !hidden.includes(c.name)).map(c => {
+        const e = edits[c.name];
+        if (e) return { ...c, name: e.name||c.name, trades: e.trades||c.trades, _origName: c.name };
+        return { ...c, _origName: c.name };
+    });
+    return [...base, ...custom.map(c => ({ ...c, _custom: true }))];
 }
-function saveCustomTrades(arr) { localStorage.setItem('customTrades_v5', JSON.stringify(arr)); }
-function getCustomTrades() { return JSON.parse(localStorage.getItem('customTrades_v5')||'[]'); }
+function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]/g,'-'); }
 // ── Persistent Operators ──
 // stored as: { "WDC Telehandler": ["Dan M.","Austin W.",...], "Crane #1": [...], ... }
 function getAllOperators() { return JSON.parse(localStorage.getItem('customOperators_v5')||'{}'); }
@@ -532,74 +572,107 @@ function captureCurrentHC() {
     document.querySelectorAll('.headcount-input').forEach(inp=>{hc[inp.id]=parseInt(inp.value)||0;});
     return hc;
 }
+function updateSubtotals(companyName) {
+    getAllSites().forEach(site => {
+        let total = 0;
+        document.querySelectorAll('.headcount-input').forEach(inp => {
+            if (inp.dataset.company === companyName && inp.dataset.site === site) total += parseInt(inp.value) || 0;
+        });
+        document.querySelectorAll('.hc-subtotal').forEach(span => {
+            if (span.dataset.company === companyName && span.dataset.site === site) span.textContent = total || '';
+        });
+    });
+}
 // captureCurrentWalks defined below with weekly checklist support
 function rebuildHeadcount(savedHC) {
     if(!savedHC) savedHC = captureCurrentHC();
     const hcTheadRow = document.getElementById('hc-thead-row');
-    hcTheadRow.innerHTML = `<th class="th-trade hc-table">Trade</th>`;
+    hcTheadRow.innerHTML = `<th class="th-trade hc-table">Company</th>`;
     getAllSites().forEach(s => {
         hcTheadRow.innerHTML += `<th class="th-trade" style="color:${siteColor(s)};background:${siteColor(s)}18">${s}</th>`;
     });
     hcTbody.innerHTML = '';
-    const trades = getAllTrades();
-    trades.forEach(trade => {
-        const tr = document.createElement('tr');
-        if (trade.wdc) {
-            tr.className = 'wdc-row';
-            tr.innerHTML = `
-                <td class="td-wdc">WDC</td>
-                ${getAllSites().map(site => {
-                    const id = `hc-wdc-${site}`;
-                    const val = savedHC && savedHC[id] != null ? savedHC[id] : 0;
-                    return `<td class="text-center"><input type="number" min="0" value="${val}" id="${id}" class="hc-num-input headcount-input" data-site="${site}" data-trade="WDC"></td>`;
-                }).join('')}`;
-        } else {
-            const tId = trade.name.toLowerCase().replace(/[^a-z0-9]/g,'-');
-            const isCustom = getCustomTrades().includes(trade.name);
-            tr.innerHTML = `
-                <td class="td-trade" style="${isCustom?'color:#d97706':''}">
-                    ${trade.name}
-                    ${isCustom?`<button type="button" class="btn btn-danger btn-sm ml-1 del-trade-btn" style="font-size:0.6rem;padding:0.1rem 0.4rem" data-trade="${trade.name}">×</button>`:''}
+    const companies = getAllCompanies();
+    companies.forEach(company => {
+        const cSlug = slugify(company.name);
+        const isCustom = !!company._custom;
+        const multiTrade = company.trades.length > 1;
+        if (multiTrade) {
+            const parentTr = document.createElement('tr');
+            parentTr.innerHTML = `
+                <td class="td-trade" style="cursor:pointer${isCustom?';color:#d97706':''}">
+                    <span class="toggle-company-btn" style="display:inline-block;width:16px;font-size:0.7rem">▶</span>
+                    ${company.name}
                 </td>
                 ${getAllSites().map(site => {
-                    const id = `hc-${site}-${tId}`;
-                    const val = savedHC && savedHC[id] != null ? savedHC[id] : 0;
-                    return `<td class="text-center"><input type="number" min="0" value="${val}" id="${id}" class="hc-num-input headcount-input" data-site="${site}" data-trade="${trade.name}"></td>`;
+                    return `<td class="text-center"><span class="hc-subtotal text-xs font-bold" data-company="${company.name}" data-site="${site}" style="color:#6b7280"></span></td>`;
                 }).join('')}`;
-        }
-        hcTbody.appendChild(tr);
-        tr.querySelectorAll('.headcount-input').forEach(inp=>inp.addEventListener('input',()=>{updateHeadcounts();saveData();}));
-        const delBtn = tr.querySelector('.del-trade-btn');
-        if (delBtn) {
-            delBtn.addEventListener('click', () => {
-                if (!confirm(`Remove trade "${delBtn.dataset.trade}"?`)) return;
-                const custom = getCustomTrades().filter(x=>x!==delBtn.dataset.trade);
-                saveCustomTrades(custom);
-                rebuildHeadcount();
-                saveData();
+            hcTbody.appendChild(parentTr);
+            const toggleBtn = parentTr.querySelector('.toggle-company-btn');
+            const toggleTd = parentTr.querySelector('.td-trade');
+            toggleTd.addEventListener('click', () => {
+                const expanded = toggleBtn.textContent.trim() === '▼';
+                toggleBtn.textContent = expanded ? '▶' : '▼';
+                hcTbody.querySelectorAll(`.sub-row-${cSlug}`).forEach(r => r.classList.toggle('hidden'));
             });
+            company.trades.forEach(trade => {
+                const tSlug = slugify(trade);
+                const subTr = document.createElement('tr');
+                subTr.className = `sub-row-${cSlug} hidden`;
+                subTr.innerHTML = `
+                    <td class="td-trade" style="padding-left:1.5rem;font-size:0.7rem;color:#6b7280">${trade}</td>
+                    ${getAllSites().map(site => {
+                        const id = `hc-${site}-${cSlug}-${tSlug}`;
+                        const val = savedHC && savedHC[id] != null ? savedHC[id] : 0;
+                        return `<td class="text-center"><input type="number" min="0" value="${val}" id="${id}" class="hc-num-input headcount-input" data-site="${site}" data-company="${company.name}" data-trade="${trade}"></td>`;
+                    }).join('')}`;
+                hcTbody.appendChild(subTr);
+                subTr.querySelectorAll('.headcount-input').forEach(inp => {
+                    inp.addEventListener('input', () => { updateSubtotals(company.name); updateHeadcounts(); saveData(); });
+                });
+            });
+        } else {
+            const trade = company.trades[0];
+            const tSlug = slugify(trade);
+            const tr = document.createElement('tr');
+            if (company.wdc) tr.className = 'wdc-row';
+            tr.innerHTML = `
+                <td class="${company.wdc?'td-wdc':'td-trade'}" style="${isCustom?'color:#d97706':''}">
+                    ${company.name}
+                </td>
+                ${getAllSites().map(site => {
+                    const id = `hc-${site}-${cSlug}-${tSlug}`;
+                    const val = savedHC && savedHC[id] != null ? savedHC[id] : 0;
+                    return `<td class="text-center"><input type="number" min="0" value="${val}" id="${id}" class="hc-num-input headcount-input" data-site="${site}" data-company="${company.name}" data-trade="${trade}"></td>`;
+                }).join('')}`;
+            hcTbody.appendChild(tr);
+            tr.querySelectorAll('.headcount-input').forEach(inp => inp.addEventListener('input', () => { updateHeadcounts(); saveData(); }));
         }
     });
     const addTr = document.createElement('tr');
     addTr.className = 'add-trade-row';
     addTr.innerHTML = `
         <td colspan="${getAllSites().length+1}" class="py-2">
-            <div class="flex items-center gap-2">
-                <input type="text" id="new-trade-input" class="form-input text-xs" style="max-width:180px" placeholder="New trade name…">
-                <button type="button" id="add-trade-btn" class="btn btn-green btn-sm">+ Add Trade</button>
+            <div class="flex items-center gap-2 flex-wrap">
+                <input type="text" id="new-company-input" class="form-input text-xs" style="max-width:150px" placeholder="Company name…">
+                <input type="text" id="new-company-trade" class="form-input text-xs" style="max-width:130px" placeholder="Trade…">
+                <button type="button" id="add-company-btn" class="btn btn-green btn-sm">+ Add</button>
             </div>
         </td>`;
     hcTbody.appendChild(addTr);
-    document.getElementById('add-trade-btn').addEventListener('click', () => {
-        const inp = document.getElementById('new-trade-input');
-        const name = inp.value.trim();
-        if (!name) return;
-        const existing = getAllTrades().map(t=>t.name.toLowerCase());
-        if (existing.includes(name.toLowerCase())) { alert('Trade already exists.'); return; }
-        const custom = getCustomTrades();
-        custom.push(name);
-        saveCustomTrades(custom);
-        inp.value = '';
+    document.getElementById('add-company-btn').addEventListener('click', () => {
+        const nameInp = document.getElementById('new-company-input');
+        const tradeInp = document.getElementById('new-company-trade');
+        const name = nameInp.value.trim();
+        const trade = tradeInp.value.trim();
+        if (!name || !trade) { alert('Enter both company name and trade.'); return; }
+        const existing = getAllCompanies().map(c=>c.name.toLowerCase());
+        if (existing.includes(name.toLowerCase())) { alert('Company already exists.'); return; }
+        const custom = getCustomCompanies();
+        custom.push({ name, trades:[trade] });
+        saveCustomCompanies(custom);
+        nameInp.value = '';
+        tradeInp.value = '';
         rebuildHeadcount();
         saveData();
     });
@@ -612,32 +685,115 @@ function rebuildHeadcount(savedHC) {
                 <span id="total-${s}" class="text-lg font-bold">0</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
             </div>
-            <div id="trades-${s}" class="text-xs" style="color:${siteColor(s)}">0 trades</div>
+            <div id="trades-${s}" class="text-xs" style="color:${siteColor(s)}">0 companies</div>
         </div>`;
     });
     updateHeadcounts();
+    companies.filter(c => c.trades.length > 1).forEach(c => updateSubtotals(c.name));
 }
 function updateHeadcounts() {
     const sums = {};
-    const tradesBySite = {};
-    getAllSites().forEach(s=>{sums[s]=0;tradesBySite[s]=new Set();});
+    const companiesBySite = {};
+    getAllSites().forEach(s=>{sums[s]=0;companiesBySite[s]=new Set();});
     document.querySelectorAll('.headcount-input').forEach(inp=>{
         const v=parseInt(inp.value)||0;
         const site=inp.dataset.site;
         if(sums[site]!=null){
             sums[site]+=v;
-            if(v>0) tradesBySite[site].add(inp.dataset.trade);
+            if(v>0) companiesBySite[site].add(inp.dataset.company);
         }
     });
     let grand = 0;
     getAllSites().forEach(s=>{
         const el=document.getElementById('total-'+s); if(el) el.textContent=sums[s];
         const tEl=document.getElementById('trades-'+s);
-        if(tEl){const n=tradesBySite[s].size;tEl.textContent=n+(n===1?' trade':' trades');}
+        if(tEl){const n=companiesBySite[s].size;tEl.textContent=n+(n===1?' company':' companies');}
         grand+=sums[s];
     });
     document.getElementById('grand-total').textContent = grand;
 }
+function renderManagePanel() {
+    const panel = document.getElementById('manage-companies-panel');
+    const companies = getAllCompanies();
+    let html = `<div style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:0.5rem;padding:0.75rem">`;
+    html += `<div class="text-xs font-bold mb-2" style="color:#003D52">Edit Companies & Trades</div>`;
+    html += `<div id="manage-list" style="max-height:300px;overflow-y:auto">`;
+    companies.forEach(c => {
+        const origName = c._origName || c.name;
+        const isBase = !c._custom;
+        html += `<div class="manage-row flex items-center gap-2 py-1" style="border-bottom:1px solid #e2e8f0" data-orig="${origName}" data-is-base="${isBase}">
+            <input type="text" class="manage-name form-input text-xs" style="flex:1;min-width:100px" value="${c.name}">
+            <input type="text" class="manage-trades form-input text-xs" style="flex:1.2;min-width:120px" value="${c.trades.join(', ')}">
+            <button type="button" class="manage-del text-red-500 text-sm font-bold" style="padding:0 4px;line-height:1" title="Remove">×</button>
+        </div>`;
+    });
+    html += `</div>`;
+    html += `<div class="flex items-center gap-2 mt-2">
+        <input type="text" id="manage-new-name" class="form-input text-xs" style="flex:1" placeholder="New company…">
+        <input type="text" id="manage-new-trades" class="form-input text-xs" style="flex:1.2" placeholder="Trade(s), comma-separated">
+        <button type="button" id="manage-add-btn" class="btn btn-green btn-sm text-xs">+</button>
+    </div>`;
+    html += `<div class="flex justify-end gap-2 mt-2">
+        <button type="button" id="manage-cancel-btn" class="btn btn-gray btn-sm text-xs">Cancel</button>
+        <button type="button" id="manage-save-btn" class="btn btn-primary btn-sm text-xs">Save</button>
+    </div></div>`;
+    panel.innerHTML = html;
+    panel.querySelectorAll('.manage-del').forEach(btn => {
+        btn.addEventListener('click', () => { if(confirm('Remove "'+btn.parentElement.querySelector('.manage-name').value+'"?')) btn.parentElement.remove(); });
+    });
+    document.getElementById('manage-add-btn').addEventListener('click', () => {
+        const n = document.getElementById('manage-new-name').value.trim();
+        const t = document.getElementById('manage-new-trades').value.trim();
+        if (!n || !t) return;
+        const row = document.createElement('div');
+        row.className = 'manage-row flex items-center gap-2 py-1';
+        row.style.borderBottom = '1px solid #e2e8f0';
+        row.dataset.orig = n;
+        row.dataset.isBase = 'false';
+        row.innerHTML = `<input type="text" class="manage-name form-input text-xs" style="flex:1;min-width:100px" value="${n}">
+            <input type="text" class="manage-trades form-input text-xs" style="flex:1.2;min-width:120px" value="${t}">
+            <button type="button" class="manage-del text-red-500 text-sm font-bold" style="padding:0 4px;line-height:1" title="Remove">×</button>`;
+        row.querySelector('.manage-del').addEventListener('click', () => row.remove());
+        document.getElementById('manage-list').appendChild(row);
+        document.getElementById('manage-new-name').value = '';
+        document.getElementById('manage-new-trades').value = '';
+    });
+    document.getElementById('manage-cancel-btn').addEventListener('click', () => { panel.classList.add('hidden'); });
+    document.getElementById('manage-save-btn').addEventListener('click', () => {
+        const edits = {};
+        const hidden = [];
+        const custom = [];
+        const remaining = new Set();
+        panel.querySelectorAll('.manage-row').forEach(row => {
+            const orig = row.dataset.orig;
+            const isBase = row.dataset.isBase === 'true';
+            const name = row.querySelector('.manage-name').value.trim();
+            const trades = row.querySelector('.manage-trades').value.split(',').map(t=>t.trim()).filter(t=>t);
+            if (!name || !trades.length) return;
+            if (isBase) {
+                remaining.add(orig);
+                const base = BASE_COMPANIES.find(b => b.name === orig);
+                if (base && (name !== base.name || JSON.stringify(trades) !== JSON.stringify(base.trades))) {
+                    edits[orig] = { name, trades };
+                }
+            } else {
+                custom.push({ name, trades });
+            }
+        });
+        BASE_COMPANIES.forEach(b => { if (!remaining.has(b.name)) hidden.push(b.name); });
+        saveCompanyEdits(edits);
+        saveHiddenCompanies(hidden);
+        saveCustomCompanies(custom);
+        panel.classList.add('hidden');
+        rebuildHeadcount();
+        saveData();
+    });
+}
+document.getElementById('manage-companies-btn').addEventListener('click', () => {
+    const panel = document.getElementById('manage-companies-panel');
+    if (panel.classList.contains('hidden')) { renderManagePanel(); panel.classList.remove('hidden'); }
+    else panel.classList.add('hidden');
+});
 function checkHotwork() {
     const waterUse = document.getElementById('waterUse').value;
     const fireDanger = document.getElementById('fireDanger').value;
@@ -1688,7 +1844,7 @@ function loadData() {
 function generateReport() {
     const allSites=getAllSites();
     const hcBySite={},permitsBySite={},orisBySite={},walksBySite={},equipBySite={},craneBySite={},mtgsBySite={},incsBySite={},wkndsBySite={},obsBySite={};
-    document.querySelectorAll('.headcount-input').forEach(inp=>{const v=parseInt(inp.value)||0;if(!v)return;const site=inp.dataset.site;if(!hcBySite[site])hcBySite[site]=[];hcBySite[site].push({trade:inp.dataset.trade,count:v});});
+    document.querySelectorAll('.headcount-input').forEach(inp=>{const v=parseInt(inp.value)||0;if(!v)return;const site=inp.dataset.site;if(!hcBySite[site])hcBySite[site]=[];hcBySite[site].push({trade:inp.dataset.trade,company:inp.dataset.company,count:v});});
     document.getElementById('work-permits-container').querySelectorAll('.permit-item').forEach(item=>{const at=item.querySelector('.permit-active-toggle');if(at&&!at.checked)return;const s=item.querySelector('input[name^="permSite-"]:checked');const site=s?s.value:defaultSite();const sel=item.querySelector('.permit-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.permit-type-other')?.value;if(o)type=`Other: ${o}`;}const c=item.querySelector('.permit-contractor').value;if(!c)return;if(!permitsBySite[site])permitsBySite[site]=[];permitsBySite[site].push({type,contractor:c});});
     document.getElementById('orientations-container').querySelectorAll('.orientation-item').forEach(item=>{const s=item.querySelector('input[name^="oriSite-"]:checked');const site=s?s.value:defaultSite();const sel=item.querySelector('.orientation-type');let type=sel.value;if(type==='Other'){const o=item.querySelector('.orientation-type-other')?.value;if(o)type=`Other: ${o}`;}if(!orisBySite[site])orisBySite[site]=[];orisBySite[site].push({type,worker:item.querySelector('.orientation-worker').value});});
     document.getElementById('morning-tasks').querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{const id=cb.id;allSites.forEach(s=>{const sSlug=s.toLowerCase().replace(/[^a-z0-9]/g,'');if(id.includes(sSlug)){let label='';if(id.startsWith('safetywalk'))label=`Safety Walk ${s}`;else if(id.startsWith('weeklysafety'))label=`Weekly Safety Site Inspection ${s}`;else label=id.replace('-completed','');if(!walksBySite[s])walksBySite[s]=[];walksBySite[s].push(label);}});});
@@ -1712,7 +1868,7 @@ function generateReport() {
         let b=`<div class="${pageBreakClass}">${isFirstSite?'':generateReportHeader()}`;
         isFirstSite=false;
         b+=`<div class="report-site-header" style="margin:0 0 6pt;padding:5pt 8pt;background:#003D52;border-radius:3pt"><span style="font-size:12pt;font-weight:800;color:#96C61C;letter-spacing:0.06em">SITE ${site}</span></div>`;
-        if(hcBySite[site]){const t=hcBySite[site].reduce((s,x)=>s+x.count,0);const nTrades=hcBySite[site].length;b+=sectionHtml('Headcount');b+=`<div style="margin-left:10pt;margin-bottom:3pt"><span style="font-weight:700;font-size:9pt;color:#003D52">${t} workers on site — ${nTrades} ${nTrades===1?'trade':'trades'}</span><br>`;hcBySite[site].forEach(x=>{b+=`<span style="color:#374151;font-size:8.5pt">&nbsp;&nbsp;${x.trade}: <b>${x.count}</b></span><br>`;});b+=`</div>`;}
+        if(hcBySite[site]){const t=hcBySite[site].reduce((s,x)=>s+x.count,0);const byTrade={};hcBySite[site].forEach(x=>{if(!byTrade[x.trade])byTrade[x.trade]={total:0,companies:[]};byTrade[x.trade].total+=x.count;byTrade[x.trade].companies.push(x);});const nTrades=Object.keys(byTrade).length;b+=sectionHtml('Headcount');b+=`<div style="margin-left:10pt;margin-bottom:3pt"><span style="font-weight:700;font-size:9pt;color:#003D52">${t} workers on site — ${nTrades} ${nTrades===1?'trade':'trades'}</span><br>`;Object.entries(byTrade).forEach(([trade,data])=>{b+=`<span style="color:#003D52;font-size:8.5pt;font-weight:600">&nbsp;&nbsp;${trade} (${data.total})</span><br>`;data.companies.forEach(x=>{b+=`<span style="color:#374151;font-size:8.5pt">&nbsp;&nbsp;&nbsp;&nbsp;${x.company}: <b>${x.count}</b></span><br>`;});});b+=`</div>`;}
         if(orisBySite[site]){b+=sectionHtml('Orientations');orisBySite[site].forEach(o=>{let txt=o.type;if(o.worker)txt+=` <span style="color:#374151">— ${obsHtml(o.worker)}</span>`;b+=rowHtml(txt);});}
         if(walksBySite[site]){
             b+=sectionHtml('Inspections Completed');
@@ -1889,7 +2045,7 @@ document.getElementById('checklistDate').addEventListener('input',saveData);
 document.getElementById('csoName').addEventListener('input',saveData);
 (function(){
     const customSites=getCustomSites().filter(s=>s!=='2050');saveCustomSites(customSites);
-    const customTrades=getCustomTrades().filter(t=>t.toLowerCase()!=='cursing');saveCustomTrades(customTrades);
+    // old customTrades_v5 no longer used; companies use customCompanies_v5
 })();
 renderSiteDisplay();rebuildHeadcount();rebuildInspections();buildCrane();buildMobileEquipment();loadData();checkHotwork();renderPendingObsSummary();autoGrowAll();
 }); // end DOMContentLoaded
